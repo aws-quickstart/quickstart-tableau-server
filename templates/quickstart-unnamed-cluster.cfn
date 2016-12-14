@@ -171,14 +171,53 @@
     }
   },
   "Mappings" : {
-    "AWSRegion2AMI" : {
-      "us-east-1"        : { "Windows2012r2" : "ami-ee7805f9"},
-      "us-west-2"        : { "Windows2012r2" : "ami-2827f548"},
-      "us-west-1"        : { "Windows2012r2" : "ami-c06b24a0"}
+    "AWSAMIRegionMap" : {
+        "AMI": {
+             "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2016.08.11"
+        },
+        "ap-northeast-1": {
+            "WS2012R2": "ami-5b299d3a"
+        },
+        "ap-northeast-2": {
+            "WS2012R2": "ami-69d30407"
+        },
+        "ap-south-1": {
+            "WS2012R2": "ami-79255216"
+        },
+        "ap-southeast-1": {
+            "WS2012R2": "ami-9d7ad8fe"
+        },
+        "ap-southeast-2": {
+           "WS2012R2": "ami-9fe7d9fc"
+        },
+        "ca-central-1": {
+            "WS2012R2": "ami-f57fcd91"
+        },
+        "eu-central-1": {
+            "WS2012R2": "ami-21cb0f4e"
+        },
+        "eu-west-1": {
+            "WS2012R2": "ami-95d984e6"
+        },
+        "sa-east-1": {
+            "WS2012R2": "ami-628e100e"
+        },
+        "us-east-1": {
+            "WS2012R2": "ami-bfeddca8"
+        },
+        "us-east-2": {
+            "WS2012R2": "ami-e999c38c"
+        },
+        "us-west-1": {
+            "WS2012R2": "ami-8b590deb"
+        },
+        "us-west-2": {
+            "WS2012R2": "ami-24e64944"
+        }
     },
     "DefaultConfiguration" : {
         "InstallationConfig" : {
-            "InstallationBucket" : "tableau-server-installer",
+            "InstallationBucket" : "tableau-quickstart",
             "InstallationExecutable" : "Setup-Server-x64.exe",
             "InstallationWorkerExecutable" : "Setup-Worker-x64.exe"
         },
@@ -186,7 +225,7 @@
             "BastionInstanceType" : "t2.micro",
             "InstanceType" : "m4.4xlarge",
             "VolumeSize" : 100,
-            "WindowsVersion" : "Windows2012r2"
+            "WindowsVersion" : "WS2012R2"
         }
     }
   },
@@ -400,56 +439,12 @@
             ]
         }
     },
-    "S3ReadOnlyRole" : {
-        "Type" : "AWS::IAM::Role",
-        "Properties": {
-            "AssumeRolePolicyDocument": {
-               "Version" : "2012-10-17",
-               "Statement": [{
-                  "Effect": "Allow",
-                  "Principal": {
-                     "Service": [ "ec2.amazonaws.com" ]
-                  },
-                  "Action": [ "sts:AssumeRole" ]
-               }]
-            },
-            "Policies" : [
-                {
-                    "PolicyName" : "s3readonlyaccess",
-                    "PolicyDocument" : {
-                        "Statement": [
-                            {
-                              "Effect": "Allow",
-                              "Action": ["s3:GetObject"],
-                              "Resource": {"Fn::Join" : ["", ["arn:aws:s3:::", 
-                                                        { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]}, 
-                                                        "/*" ]]}
-                            },
-                            {
-                              "Effect": "Allow",
-                              "Action": [ "s3:ListBucket"],
-                              "Resource": {"Fn::Join" : ["", ["arn:aws:s3:::", { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]}]]}
-                            }
-                          ]
-                    }
-                }
-            ]
-        }
-    },
-    "TableauWindowsServerInstanceProfile" : {
-        "Type" : "AWS::IAM::InstanceProfile",
-        "DependsOn" : ["S3ReadOnlyRole"],
-        "Properties": {
-            "Path":"/",
-            "Roles": [ { "Ref" : "S3ReadOnlyRole" } ]
-        }
-    },
     "BastionHost" : {
       "Type" : "AWS::EC2::Instance",
       "DependsOn" : ["BastionSecurityGroup"],
       "Properties": {
         "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "BastionInstanceType"]},
-        "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+        "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
         "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
         "SecurityGroupIds" : [ {"Ref" : "BastionSecurityGroup"} ],
         "KeyName" : { "Ref" : "KeyName" },
@@ -558,7 +553,7 @@
                                 "worker2.dataserver.procs" : "INTEGER:1",
                                 "worker2.dataengine.procs" : "INTEGER:1",
                                 "worker2.filestore.enabled" : "true",
-                                "worker2.zookeeper.procs" : "INTEGER:1",
+                                "worker2.zookeeper.procs" : "INTEGER:1"
                             }
                         },
                         "c:\\tabsetup\\tableau-primary-installer.exe" : {
@@ -596,7 +591,6 @@
                                 "c:\\Python27\\python.exe",
                                 "ScriptedInstaller.py", "install",
                                 "--installerLog", "C:\\tabsetup\\tabinstall.txt",
-                                "--installDir C:\\TableauServer",
                                 "--secretsFile c:\\tabsetup\\secrets.json",
                                 "--configFile c:\\tabsetup\\config.yml",
                                 "--registrationFile c:\\tabsetup\\registration.json",
@@ -614,21 +608,13 @@
                         }
                     }
                 }
-            },
-            "AWS::CloudFormation::Authentication": {
-                "S3AccessRole" : {
-                    "type": "S3",
-                    "buckets": [ { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]}],
-                    "roleName": { "Ref": "S3ReadOnlyRole" }
-                }
             }
         },
         "Properties": {
             "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "InstanceType"]},
-            "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+            "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
             "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
             "SecurityGroupIds" : [ {"Ref" : "InternalSecurityGroup"} ],
-            "IamInstanceProfile" : { "Ref" : "TableauWindowsServerInstanceProfile" },
             "KeyName" : { "Ref" : "KeyName" },
             "SubnetId" : { "Ref" : "ClusterPrivateSubnet"},
             "PrivateIpAddress" : "10.0.1.11",
@@ -687,21 +673,13 @@
                       }
                     }
                 }
-            },
-            "AWS::CloudFormation::Authentication": {
-                "S3AccessRole" : {
-                    "type": "S3",
-                    "buckets": [ { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]} ],
-                    "roleName": { "Ref": "S3ReadOnlyRole" }
-                }
             }
         },
         "Properties": {
             "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "InstanceType"]},
-            "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+            "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
             "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
             "SecurityGroupIds" : [ {"Ref" : "InternalSecurityGroup"} ],
-            "IamInstanceProfile" : { "Ref" : "TableauWindowsServerInstanceProfile" },
             "KeyName" : { "Ref" : "KeyName" },
             "SubnetId" : { "Ref" : "ClusterPrivateSubnet"},
             "PrivateIpAddress" : "10.0.1.12",
@@ -760,21 +738,13 @@
                       }
                     }
                 }
-            },
-            "AWS::CloudFormation::Authentication": {
-                "S3AccessRole" : {
-                    "type": "S3",
-                    "buckets": [ { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]} ],
-                    "roleName": { "Ref": "S3ReadOnlyRole" }
-                }
             }
         },
         "Properties": {
             "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "InstanceType"]},
-            "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+            "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
             "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
             "SecurityGroupIds" : [ {"Ref" : "InternalSecurityGroup"} ],
-            "IamInstanceProfile" : { "Ref" : "TableauWindowsServerInstanceProfile" },
             "KeyName" : { "Ref" : "KeyName" },
             "SubnetId" : { "Ref" : "ClusterPrivateSubnet"},
             "PrivateIpAddress" : "10.0.1.13",
