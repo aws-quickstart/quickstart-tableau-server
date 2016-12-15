@@ -1,87 +1,87 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "AWS QuickStart Template for Tableau Server instance running on Windows",
-    "Parameters": {
-        "KeyName": {
-            "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
-            "Type": "AWS::EC2::KeyPair::KeyName",
-            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
-        },
-        "ResourceAvailabilityZone": {
-            "Description": "The availability zone in which our server and storage volume reside",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "SourceCidr": {
-            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
-            "Type": "String",
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x"
-        },
-        "ContentAdminUser": {
-            "Description": "The name of the initial Admin user for Tableau server",
-            "Type": "String",
-            "Default": "admin",
-            "MinLength": "1"
-        },
+        "Parameters": {
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
-            "Type": "String",
             "MinLength": "1",
-            "NoEcho": "true"
-        },
-        "TableauServerLicenseKey": {
-            "Description": "License Key (leave blank for trial)",
+            "NoEcho": "true",
             "Type": "String"
         },
-        "RegFirstName": {
-            "Description": "First Name",
-            "Type": "String",
-            "MinLength": "1"
+        "ContentAdminUser": {
+            "Default": "admin",
+            "Description": "The name of the initial Admin user for Tableau server",
+            "MinLength": "1",
+            "Type": "String"
         },
-        "RegLastName": {
-            "Description": "Last Name",
-            "Type": "String",
-            "MinLength": "1"
+        "KeyName": {
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "RegEmail": {
-            "Description": "Email",
-            "Type": "String",
-            "MinLength": "1"
+        "RegCity": {
+            "Description": "City",
+            "Type": "String"
         },
         "RegCompany": {
             "Description": "Company",
             "Type": "String"
         },
-        "RegTitle": {
-            "Description": "Title",
+        "RegCountry": {
+            "Description": "Country",
             "Type": "String"
         },
         "RegDepartment": {
             "Description": "Department",
             "Type": "String"
         },
+        "RegEmail": {
+            "Description": "Email",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegFirstName": {
+            "Description": "First Name",
+            "MinLength": "1",
+            "Type": "String"
+        },
         "RegIndustry": {
             "Description": "Industry",
+            "Type": "String"
+        },
+        "RegLastName": {
+            "Description": "Last Name",
+            "MinLength": "1",
             "Type": "String"
         },
         "RegPhone": {
             "Description": "Phone",
             "Type": "String"
         },
-        "RegCity": {
-            "Description": "City",
-            "Type": "String"
-        },
         "RegState": {
             "Description": "State",
+            "Type": "String"
+        },
+        "RegTitle": {
+            "Description": "Title",
             "Type": "String"
         },
         "RegZip": {
             "Description": "ZIP/Postal Code",
             "Type": "String"
         },
-        "RegCountry": {
-            "Description": "Country",
+        "ResourceAvailabilityZone": {
+            "Description": "The availability zone in which our server and storage volume reside",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "SourceCidr": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
+            "Type": "String"
+        },
+        "TableauServerLicenseKey": {
+            "Description": "License Key (leave blank for trial)",
             "Type": "String"
         }
     },
