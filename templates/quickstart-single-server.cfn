@@ -18,7 +18,7 @@
       "Type" : "String",
       "MinLength" : "9",
       "MaxLength" : "18",
-      "Default": "0.0.0.0/32",
+      "Default": "0.0.0.0/0",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
     },
@@ -422,10 +422,6 @@
     "PublicDNSName" : {
         "Description" : "Public DNS name of instance running Tableau Server",
         "Value" : { "Fn::GetAtt" : [ "TableauWindowsServer", "PublicDnsName"]}
-    },
-    "PublicGatewayPort" : {
-        "Description" : "The port serving web traffic on the public interface of Tableau Server",
-        "Value" : { "Fn::FindInMap" : [ "DefaultConfiguration", "TableauServerConfig", "GatewayPort"]}
     }
   }    
 }
