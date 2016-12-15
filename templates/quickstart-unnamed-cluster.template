@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Tableau Server cluster with three nodes running on Windows, available via Amazon-based hostname",
-        "Parameters": {
+    "Parameters": {
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
             "MinLength": "1",

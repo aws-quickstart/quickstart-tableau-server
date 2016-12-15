@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname",
-        "Parameters": {
+    "Parameters": {
         "AwsHostedZoneId": {
             "Description": "DNS ZoneID to contain the cluster's DNS entry",
             "Type": "AWS::Route53::HostedZone::Id"
