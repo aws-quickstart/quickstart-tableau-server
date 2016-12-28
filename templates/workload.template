@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname",
+    "Description": "Three node cluster with instances placed as specified in parameters",
     "Parameters": {
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
@@ -15,7 +15,7 @@
             "Type": "String"
         },
         "InstallationBucket" : {
-          "Description" : "The name of the S3 bucket from which to fetch installation files",
+          "Description" : "The name of the S3 bucket from which to fetch installer executables",
           "Type" : "String",
           "MinLength" : "1"
         },
@@ -24,7 +24,7 @@
           "Type" : "String",
           "MinLength" : "1"
         },
-        "KeyName": {
+        "KeyPairName": {
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
             "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -164,7 +164,7 @@
                         "default": "AWS Environment"
                     },
                     "Parameters": [
-                        "KeyName",
+                        "KeyPairName",
                         "InstallationBucket",
                         "WindowsAMIId",
                         "InstanceType"
@@ -233,7 +233,7 @@
                 "InstanceType": {
                     "default": "Instance Type to use for servers"
                 },
-                "KeyName": {
+                "KeyPairName": {
                     "default": "EC2 keypair"
                 },
                 "ContentAdminUser": {
@@ -333,223 +333,11 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "c:\\tabsetup\\json2yml.py": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "\n",
-                                        [
-                                            "import sys",
-                                            "import yaml",
-                                            "import json",
-                                            "config_data = json.load(sys.stdin)",
-                                            "for k,v in config_data.items():",
-                                            "    if v.startswith('INTEGER:'):",
-                                            "        newvalue = v[len('INTEGER:'):]",
-                                            "        config_data[k] = int(newvalue)",
-                                            "    elif v.startswith('FLOAT:'):",
-                                            "        newvalue = v[len('FLOAT:'):]",
-                                            "        config_data[k] = float(newvalue)",
-                                            "yaml.safe_dump(config_data, sys.stdout, default_flow_style=False)",
-                                            ""
-                                        ]
-                                    ]
-                                }
-                            },
-                            "c:\\tabsetup\\python-2.7.12.msi": {
-                                "source": "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
-                            },
-                            "c:\\tabsetup\\ScriptedInstaller.py": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                Ref": "InstallationBucket"
-                                            },
-                                            ".s3.amazonaws.com/ScriptedInstaller.py"
-                                        ]
-                                    ]
-                                }
-                            },
-                            "c:\\tabsetup\\secrets.json": {
-                                "content": {
-                                    "content_admin_user": {
-                                        "Ref": "ContentAdminUser"
-                                    },
-                                    "content_admin_pass": {
-                                        "Ref": "ContentAdminPassword"
-                                    }
-                                }
-                            },
-                            "c:\\tabsetup\\registration.json": {
-                                "content": {
-                                    "first_name": {
-                                        "Ref": "RegFirstName"
-                                    },
-                                    "last_name": {
-                                        "Ref": "RegLastName"
-                                    },
-                                    "email": {
-                                        "Ref": "RegEmail"
-                                    },
-                                    "company": {
-                                        "Fn::Join": [
-                                            ";",
-                                            [
-                                                {
-                                                    "Ref": "RegCompany"
-                                                },
-                                                "AWSQuickStart"
-                                            ]
-                                        ]
-                                    },
-                                    "title": {
-                                        "Ref": "RegTitle"
-                                    },
-                                    "department": {
-                                        "Ref": "RegDepartment"
-                                    },
-                                    "industry": {
-                                        "Ref": "RegIndustry"
-                                    },
-                                    "phone": {
-                                        "Ref": "RegPhone"
-                                    },
-                                    "city": {
-                                        "Ref": "RegCity"
-                                    },
-                                    "state": {
-                                        "Ref": "RegState"
-                                    },
-                                    "zip": {
-                                        "Ref": "RegZip"
-                                    },
-                                    "country": {
-                                        "Ref": "RegCountry"
-                                    }
-                                }
-                            },
-                            "c:\\tabsetup\\config.json": {
-                                "content": {
-                                    "config.version": "16",
-                                    "install.component.samples": "true",
-                                    "wgserver.authenticate": "local",
-                                    "worker.hosts": {
-                                        "Fn::Join": [
-                                            ", ",
-                                            [
-                                                { "Ref": "PrimaryIp"},
-                                                { "Ref": "Worker1Ip"},
-                                                { "Ref": "Worker2Ip"},
-                                            ]
-                                        ]
-                                    },
-                                    "pgsql.host": { "Ref": "Worker1Ip"},
-                                    "pgsql0.host": { "Ref": "Worker1Ip"},
-                                    "pgsql1.host": { "Ref": "Worker2Ip"},
-                                    "worker0.gateway.enabled": "true",
-                                    "worker0.gateway.port": "INTEGER:80",
-                                    "worker0.vizportal.procs": "INTEGER:0",
-                                    "worker0.vizqlserver.procs": "INTEGER:0",
-                                    "worker0.cacheserver.procs": "INTEGER:0",
-                                    "worker0.searchserver.enabled": "true",
-                                    "worker0.backgrounder.procs": "INTEGER:0",
-                                    "worker0.dataserver.procs": "INTEGER:0",
-                                    "worker0.dataengine.procs": "INTEGER:0",
-                                    "worker0.filestore.enabled": "false",
-                                    "worker0.zookeeper.procs": "INTEGER:1",
-                                    "worker1.gateway.enabled": "true",
-                                    "worker1.gateway.port": "INTEGER:80",
-                                    "worker1.vizportal.procs": "INTEGER:2",
-                                    "worker1.vizqlserver.procs": "INTEGER:2",
-                                    "worker1.cacheserver.procs": "INTEGER:2",
-                                    "worker1.searchserver.enabled": "true",
-                                    "worker1.backgrounder.procs": "INTEGER:1",
-                                    "worker1.dataserver.procs": "INTEGER:1",
-                                    "worker1.dataengine.procs": "INTEGER:1",
-                                    "worker1.filestore.enabled": "true",
-                                    "worker1.zookeeper.procs": "INTEGER:1",
-                                    "worker2.gateway.enabled": "true",
-                                    "worker2.gateway.port": "INTEGER:80",
-                                    "worker2.vizportal.procs": "INTEGER:2",
-                                    "worker2.vizqlserver.procs": "INTEGER:2",
-                                    "worker2.cacheserver.procs": "INTEGER:2",
-                                    "worker2.searchserver.enabled": "true",
-                                    "worker2.backgrounder.procs": "INTEGER:1",
-                                    "worker2.dataserver.procs": "INTEGER:1",
-                                    "worker2.dataengine.procs": "INTEGER:1",
-                                    "worker2.filestore.enabled": "true",
-                                    "worker2.zookeeper.procs": "INTEGER:1"
-                                }
-                            },
-                            "c:\\tabsetup\\tableau-primary-installer.exe": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                Ref": "InstallationBucket"
-                                            },
-                                            ".s3.amazonaws.com/",
-                                            {
-                                                Ref": "TableauServerPrimaryInstaller"
-                                            }
-                                        ]
-                                    ]
-                                }
-                            }
                         },
                         "commands": {
                             "1-disable-firewall": {
                                 "cwd": "c:\\Windows\\System32",
                                 "command": "netsh advfirewall set allprofiles state off",
-                                "waitAfterCompletion": "0"
-                            },
-                            "2-install-python": {
-                                "command": "c:\\tabsetup\\python-2.7.12.msi /quiet /qn",
-                                "cwd": "c:\\tabsetup",
-                                "waitAfterCompletion": "0"
-                            },
-                            "3-pip-install-yaml": {
-                                "command": "c:\\Python27\\Scripts\\pip.exe install pyyaml",
-                                "cwd": "c:\\Python27\\Scripts",
-                                "waitAfterCompletion": "0"
-                            },
-                            "4-convert-config": {
-                                "cwd": "c:\\tabsetup",
-                                "command": "type config.json | c:\\Python27\\python json2yml.py > config.yml",
-                                "waitAfterCompletion": "0"
-                            },
-                            "5-run-installer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": {
-                                    "Fn::Join": [
-                                        " ",
-                                        [
-                                            "c:\\Python27\\python.exe",
-                                            "ScriptedInstaller.py",
-                                            "install",
-                                            "--installerLog",
-                                            "C:\\tabsetup\\tabinstall.txt",
-                                            "--secretsFile c:\\tabsetup\\secrets.json",
-                                            "--configFile c:\\tabsetup\\config.yml",
-                                            "--registrationFile c:\\tabsetup\\registration.json",
-                                            "--licenseKey",
-                                            {
-                                                "Ref": "TableauServerLicenseKey"
-                                            },
-                                            "c:\\tabsetup\\tableau-primary-installer.exe",
-                                            " > c:\\tabsetup\\installer-output.txt 2>&1"
-                                        ]
-                                    ]
-                                },
-                                "waitAfterCompletion": "0"
-                            },
-                            "6-cleanup-secrets": {
-                                "cwd": "c:\\tabsetup",
-                                "command": "del c:\\tabsetup\\secrets.json",
                                 "waitAfterCompletion": "0"
                             }
                         }
@@ -572,7 +360,7 @@
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "SubnetId": {
                     "Ref": "PrimarySubnetId"
@@ -630,43 +418,11 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "c:\\tabsetup\\tableau-worker-installer.exe": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                Ref": "InstallationBucket"
-                                            },
-                                            ".s3.amazonaws.com/",
-                                            {
-                                                Ref": "TableauServerWorkerInstaller"
-                                            }
-                                        ]
-                                    ]
-                                }
-                            }
                         },
                         "commands": {
                             "1-disable-firewall": {
                                 "cwd": "c:\\Windows\\System32",
                                 "command": "netsh advfirewall set allprofiles state off",
-                                "waitAfterCompletion": "0"
-                            },
-                            "2-run-installer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": {
-                                    "Fn::Join": [
-                                        " ",
-                                        [
-                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
-                                            { "Ref": "PrimaryIp" },
-                                            "\" /DIR=C:\\TableauServer /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
-                                            " > c:\\tabsetup\\installer-output.txt 2>&1"
-                                        ]
-                                    ]
-                                },
                                 "waitAfterCompletion": "0"
                             }
                         }
@@ -689,7 +445,7 @@
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "SubnetId": {
                     "Ref": "Worker1SubnetId"
@@ -749,43 +505,11 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "c:\\tabsetup\\tableau-worker-installer.exe": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                Ref": "InstallationBucket"
-                                            },
-                                            ".s3.amazonaws.com/",
-                                            {
-                                                Ref": "TableauServerWorkerInstaller"
-                                            }
-                                        ]
-                                    ]
-                                }
-                            }
                         },
                         "commands": {
                             "1-disable-firewall": {
                                 "cwd": "c:\\Windows\\System32",
                                 "command": "netsh advfirewall set allprofiles state off",
-                                "waitAfterCompletion": "0"
-                            },
-                            "2-run-installer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": {
-                                    "Fn::Join": [
-                                        " ",
-                                        [
-                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
-                                            { "Ref": "PrimaryIp" },
-                                            "\" /DIR=C:\\TableauServer /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
-                                            " > c:\\tabsetup\\installer-output.txt 2>&1"
-                                        ]
-                                    ]
-                                },
                                 "waitAfterCompletion": "0"
                             }
                         }
@@ -808,7 +532,7 @@
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "SubnetId": {
                     "Ref": "Worker2SubnetId"
@@ -892,13 +616,25 @@
             "Description": "Instance ID of Primary Server",
             "Value": { "Ref" : "PrimaryHost" }
         },
+        "PrimarySubnetId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "PrimarySubnetId" }
+        },
         "Worker1InstanceId": {
             "Description": "Instance ID of Worker1 Server",
             "Value": { "Ref" : "WorkerHost1" }
+        },
+        "Worker1SubnetId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "Worker1SubnetId" }
         },
         "Worker2InstanceId": {
             "Description": "Instance ID of Worker2 Server",
             "Value": { "Ref" : "WorkerHost2" }
         },
+        "Worker2SubnetId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "Worker2SubnetId" }
+        }
     }
 }
