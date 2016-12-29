@@ -139,13 +139,11 @@
             "Type": "String"
         },
         "TableauServerPrimaryInstaller": {
-            "default": "Primary installer executable"
             "Description": "Name of primary installer",
             "MinLength": "1",
             "Type": "String"
         },
         "TableauServerWorkerInstaller": {
-            "default": "Worker installer executable"
             "Description": "Name of worker installer",
             "MinLength": "1",
             "Type": "String"
@@ -306,7 +304,7 @@
                     "default": "Country"
                 },
                 "SecurityGroupId": {
-                    "Security Group for server instances"
+                    "default": "Security Group for server instances"
                 },
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
@@ -317,8 +315,8 @@
                 "TableauServerWorkerInstaller": {
                     "default": "Tableau Worker Installer Executable"
                 },
-                "WindowsAMIId" {
-                    "default" : "AMI ID for base Windows installation"
+                "WindowsAMIId": {
+                    "default": "AMI ID for base Windows installation"
                 }
             }
         }

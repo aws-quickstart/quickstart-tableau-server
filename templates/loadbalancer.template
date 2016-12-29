@@ -84,8 +84,7 @@
         "ServerLoadBalancer": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": [
-                "LoadBalancerSecurityGroup",
-                "PrimaryHost"
+                "LoadBalancerSecurityGroup"
             ],
             "Properties": {
                 "Scheme": "internet-facing",
