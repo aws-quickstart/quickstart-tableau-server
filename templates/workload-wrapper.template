@@ -1025,7 +1025,7 @@
                             "Outputs.CanonicalHostedZoneNameID"
                         ]
                     },
-                    "AliasTargetDNSName" : {
+                    "CanonicalDNSName" : {
                         "Fn::GetAtt": [
                             "LoadBalancer",
                             "Outputs.DNSName"

@@ -4,18 +4,18 @@
     "Parameters": {
         "AwsHostedZoneId": {
             "Description": "DNS ZoneID to contain the cluster's DNS entry",
-            "Type": "AWS::Route53::HostedZone::Id"
+            "Type": "String"
         },
         "AwsPublicFQDN": {
             "Description": "Tableau Server portal will be reachable at this address",
             "MinLength": "1",
             "Type": "String"
         },
-        "AliasTargetHostedZoneId": {
+        "CanonicalHostedZoneId": {
             "Description": "Route53 hosted zone ID of DNS target",
             "Type" : "AWS::Route53::HostedZone::Id"
         },
-        "AliasTargetDNSName": {
+        "CanonicalDNSName": {
             "Description": "DNS name of DNS target",
             "MinLength": "1",
             "Type": "String"
@@ -31,8 +31,8 @@
                     "Parameters": [
                         "AwsPublicFQDN",
                         "AwsHostedZoneId",
-                        "AliasTargetHostedZoneId",
-                        "AliasTargetDNSName"
+                        "CanonicalHostedZoneId",
+                        "CanonicalDNSName"
                     ]
                 }
             ],
@@ -43,10 +43,10 @@
                 "AwsPublicFQDN": {
                     "default": "FQDN for new alias"
                 },
-                "AliasTargetHostedZoneId": {
+                "CanonicalHostedZoneId": {
                     "default": "ZoneID of alias target"
                 },
-                "AliasTargetDNSName": {
+                "CanonicalDNSName": {
                     "default": "DNS name of alias target"
                 }
             }
@@ -65,10 +65,10 @@
                 "Type": "A",
                 "AliasTarget": {
                     "HostedZoneId": { 
-                        "Ref" : "AliasTargetHostedZoneId"
+                        "Ref" : "CanonicalHostedZoneId"
                     },
                     "DNSName": {
-                        "Ref" : "AliasTargetDNSName"
+                        "Ref" : "CanonicalDNSName"
                     }
                 }
             }
