@@ -1,0 +1,86 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Bastion host, useful to access private instances created inside a VPC",
+    "Parameters": {
+        "AvailabilityZone": {
+          "Description" : "The name of the Availability Zone for bastion host",
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
+        },
+        "InstanceType" : {
+          "Description" : "The AWS Instance Type to use for our bastion host",
+          "Type" : "String",
+          "MinLength" : "1"
+        },
+        "KeyPairName": {
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "SecurityGroupId": {
+            "Description": "SecurityGroupId",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "SourceCidr": {
+            "Default" : "69.25.143.0/24",
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
+            "Type": "String"
+        },
+        "SubnetId": {
+          "Description" : "The Id of the subnet for the bastion host",
+          "Type" : "AWS::EC2::Subnet::Id",
+          "MinLength" : "1"
+        },
+        "WindowsAMIId" : {
+            "Description": "Name of AMI containing Windows OS used for bastion host",
+            "Type": "AWS::EC2::Image::Id"
+        }
+    },
+    "Resources": {
+        "BastionHost": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "InstanceType": { 
+                    "Ref" : "InstanceType"
+                },
+                "ImageId": {
+                    "Ref" : "WindowsAMIId"
+                },
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZone"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "SecurityGroupId"
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "SubnetId": {
+                    "Ref": "SubnetId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-bastion-host"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs" : {
+        "BastionDNSName": {
+            "Description": "Public DNS name of bastion host",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BastionHost",
+                    "PublicDnsName"
+                ]
+            }
+        }
+    }
+}

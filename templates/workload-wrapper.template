@@ -493,14 +493,141 @@
                 }
             }
         },
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "DependsOn" : [
+                "VPCStack"
+            ],
+            "Properties": {
+                "GroupDescription": "Enable RDP traffic to the bastion host",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3389",
+                        "ToPort": "3389",
+                        "CidrIp": {
+                            "Ref": "SourceCidr"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "BastionSecurityGroup"
+                    }
+                ],
+                "VpcId": {
+                    "Fn::GetAtt": [
+                        "VPCStack",
+                        "Outputs.VPCID"
+                    ]
+                }
+            }
+        },
+        "BastionHost": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn" : [
+                "VPCStack",
+                "BastionSecurityGroup"
+            ],
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/windowsbastion.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "AvailabilityZone": {
+                        "Fn::Select": [
+                            "0",
+                            {
+                                "Ref": "AvailabilityZones"
+                            }
+                        ]
+                    },
+                    "InstanceType": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "MachineConfiguration",
+                            "BastionInstanceType"
+                        ]
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "SecurityGroupId": {
+                        "Ref" : "BastionSecurityGroup"
+                    },
+                    "SourceCidr": {
+                        "Ref" : "SourceCidr"
+                    },
+                    "SubnetId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PublicSubnet1AID"
+                        ]
+                    },
+                    "WindowsAMIId": {
+                        "Fn::FindInMap": [
+                            "AWSAMIRegionMap",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "WindowsVersion"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
         "InternalSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "DependsOn" : [ 
-                "VPCStack"
+                "VPCStack",
+                "BastionSecurityGroup"
             ],
             "Properties": {
                 "GroupDescription": "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts: TODO bastion and LB",
                 "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3389",
+                        "ToPort": "3389",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroup"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroup"
+                        }
+                    },
                     {
                         "IpProtocol": "-1",
                         "CidrIp": {
@@ -547,6 +674,7 @@
             "Type": "AWS::CloudFormation::Stack",
             "DependsOn": [
                 "VPCStack",
+                "BastionHost",
                 "InternalSecurityGroup"
             ],
             "Properties": {
@@ -864,6 +992,15 @@
                         "Outputs.DNSName"
                     ]
             }
-        }
+        },
+        "BastionDNSName": {
+            "Description": "Public DNS name of bastion host",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BastionHost",
+                    "BastionDNSName"
+                ]
+            }
+        },
     }
 }

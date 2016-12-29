@@ -31,8 +31,7 @@
         },
         "PrimaryAvailabilityZone": {
           "Description" : "The name of the Availability Zone for Primary server",
-          "Type" : "String",
-          "MinLength" : "1"
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
         },
         "PrimaryIp": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -42,13 +41,11 @@
         },
         "PrimarySubnetId": {
           "Description" : "The Id of the subnet for the Primary server",
-          "Type" : "String",
-          "MinLength" : "1"
+          "Type" : "AWS::EC2::Subnet::Id"
         },
         "Worker1AvailabilityZone": {
           "Description" : "The name of the Availability Zone for Worker1 server",
-          "Type" : "String",
-          "MinLength" : "1"
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
         },
         "Worker1Ip": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -58,13 +55,11 @@
         },
         "Worker1SubnetId": {
           "Description" : "The Id of the subnet for the Worker1 server",
-          "Type" : "String",
-          "MinLength" : "1"
+          "Type" : "AWS::EC2::Subnet::Id"
         },
         "Worker2AvailabilityZone": {
           "Description" : "The name of the Availability Zone for Worker2 server",
-          "Type" : "String",
-          "MinLength" : "1"
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
         },
         "Worker2Ip": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -74,8 +69,7 @@
         },
         "Worker2SubnetId": {
           "Description" : "The Id of the subnet for the Worker2 server",
-          "Type" : "String",
-          "MinLength" : "1"
+          "Type" : "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
             "Description": "City",
@@ -130,8 +124,7 @@
         },
         "SecurityGroupId": {
             "Description": "SecurityGroupId",
-            "MinLength": "1",
-            "Type": "String"
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "TableauServerLicenseKey": {
             "Description": "License Key",
@@ -150,8 +143,7 @@
         },
         "WindowsAMIId" : {
             "Description": "Name of AMI containing Windows OS",
-            "MinLength": "1",
-            "Type": "String"
+            "Type": "AWS::EC2::Image::Id"
         }
     },
     "Metadata": {
@@ -607,7 +599,7 @@
                 "Count": "1",
                 "Timeout": "5400"
             }
-        }
+        },
     },
     "Outputs": {
         "PrimaryHost": {
