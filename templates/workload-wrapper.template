@@ -6,6 +6,15 @@
             "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 3 AZs are used for this deployment.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
+        "AwsHostedZoneId": {
+            "Description": "DNS ZoneID to contain the cluster's DNS entry",
+            "Type": "AWS::Route53::HostedZone::Id"
+        },
+        "AwsPublicFQDN": {
+            "Description": "Tableau Server portal will be reachable at this address",
+            "MinLength": "1",
+            "Type": "String"
+        },
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
             "Default": "passw0rd",
@@ -137,7 +146,9 @@
                         "default": "Server DNS configuration"
                     },
                     "Parameters": [
-                        "SSLCertificateARN"
+                        "SSLCertificateARN",
+                        "AwsPublicFQDN",
+                        "AwsHostedZoneId"
                     ]
                 },
                 {
@@ -190,6 +201,12 @@
             "ParameterLabels": {
                 "AvailabilityZones": {
                     "default": "Availability Zones"
+                },
+                "AwsHostedZoneId": {
+                    "default": "DNS ZoneID"
+                },
+                "AwsPublicFQDN": {
+                    "default": "Full DNS name for cluster"
                 },
                 "ContentAdminUser": {
                     "default": "Portal admin username"
@@ -956,6 +973,95 @@
                 }
             }
         },
+        "DNSEntry": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn" : [
+                "LoadBalancer"
+            ],
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/dns.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "AwsHostedZoneId" : {
+                        "Ref" : "AwsHostedZoneId"
+                    },
+                    "AwsPublicFQDN" : {
+                        "Ref" : "AwsPublicFQDN"
+                    },
+                    "AliasTargetHostedZoneId": {
+                        "Fn::GetAtt": [
+                            "LoadBalancer",
+                            "Outputs.CanonicalHostedZoneNameID"
+                        ]
+                    },
+                    "AliasTargetDNSName" : {
+                        "Fn::GetAtt": [
+                            "LoadBalancer",
+                            "Outputs.DNSName"
+                        ]
+                    }
+                }
+            }
+        },
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         "InternalSecurityGroupLoadBalancerIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn" : [

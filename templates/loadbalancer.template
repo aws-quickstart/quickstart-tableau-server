@@ -26,6 +26,41 @@
             "Type": "AWS::EC2::VPC::Id"
         }
     },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups" : [
+                {
+                    "Label": {
+                        "default": "Load Balancer Information"
+                    },
+                    "Parameters": [
+                        "GatewayInstances",
+                        "LoadBalancerPublicSubnets",
+                        "SourceCidr",
+                        "SSLCertificateARN",
+                        "VPCID"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "GatewayInstances": {
+                    "default" : "The instances to attach to this load balancer"
+                },
+                "LoadBalancerPublicSubnets": {
+                    "default" : "Public subnets on which to place this load balancer"
+                },
+                "SourceCidr": {
+                    "default" : "CIDR describing who can reach this load balancer"
+                },
+                "SSLCertificateARN": {
+                    "default" : "SSL cert (if any) to attach to this load balancer"
+                },
+                "VPCID": {
+                    "default" : "The VPC id in which to create this load balancer"
+                }
+            }
+        }
+    },
     "Conditions": {
         "NoSSLCertficate": {
             "Fn::Equals": [
@@ -149,6 +184,14 @@
         "SecurityGroup": {
             "Description":"Load Balancer SecurityGroup",
             "Value": { "Ref" : "LoadBalancerSecurityGroup" }
+        },
+        "CanonicalHostedZoneNameID" : {
+            "Value" : {
+                "Fn::GetAtt": [
+                    "ServerLoadBalancer",
+                    "CanonicalHostedZoneNameID"
+                ]
+            }
         },
         "DNSName": {
             "Description": "Direct DNS name of load balancer",

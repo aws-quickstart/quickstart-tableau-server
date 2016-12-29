@@ -1,6 +1,78 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname",
+    "Description": "Create DNS Entry for cluster entry point (probably a load balancer)",
     "Parameters": {
+        "AwsHostedZoneId": {
+            "Description": "DNS ZoneID to contain the cluster's DNS entry",
+            "Type": "AWS::Route53::HostedZone::Id"
+        },
+        "AwsPublicFQDN": {
+            "Description": "Tableau Server portal will be reachable at this address",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "AliasTargetHostedZoneId": {
+            "Description": "Route53 hosted zone ID of DNS target",
+            "Type" : "AWS::Route53::HostedZone::Id"
+        },
+        "AliasTargetDNSName": {
+            "Description": "DNS name of DNS target",
+            "MinLength": "1",
+            "Type": "String"
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups" : [
+                {
+                    "Label": {
+                        "default": "Server DNS configuration"
+                    },
+                    "Parameters": [
+                        "AwsPublicFQDN",
+                        "AwsHostedZoneId",
+                        "AliasTargetHostedZoneId",
+                        "AliasTargetDNSName"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "AwsHostedZoneId": {
+                    "default": "DNS ZoneID for new alias"
+                },
+                "AwsPublicFQDN": {
+                    "default": "FQDN for new alias"
+                },
+                "AliasTargetHostedZoneId": {
+                    "default": "ZoneID of alias target"
+                },
+                "AliasTargetDNSName": {
+                    "default": "DNS name of alias target"
+                }
+            }
+        }
+    },
+    "Resources": {
+        "DNSNameEntry": {
+            "Type": "AWS::Route53::RecordSet",
+            "Properties": {
+                "HostedZoneId": {
+                    "Ref": "AwsHostedZoneId"
+                },
+                "Name": {
+                    "Fn::Sub": "${AwsPublicFQDN}."
+                },
+                "Type": "A",
+                "AliasTarget": {
+                    "HostedZoneId": { 
+                        "Ref" : "AliasTargetHostedZoneId"
+                    },
+                    "DNSName": {
+                        "Ref" : "AliasTargetDNSName"
+                    }
+                }
+            }
+        }
+    
     }
 }

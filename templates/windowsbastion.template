@@ -37,6 +37,56 @@
             "Type": "AWS::EC2::Image::Id"
         }
     },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups" : [
+                {
+                    "Label": {
+                        "default": "Bastion Networking Information"
+                    },
+                    "Parameters": [
+                        "AvailabilityZone",
+                        "SecurityGroupId",
+                        "SourceCidr",
+                        "SubnetId"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Bastion Machine Information"
+                    },
+                    "Parameters": [
+                        "InstanceType",
+                        "KeyPairName",
+                        "WindowsAMIId"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "AvailabilityZone": {
+                    "default" : "The AZ in which to place the bastion host"
+                },
+                "InstanceType": {
+                    "default" : "The instance type for the bastion"
+                },
+                "KeyPairName": {
+                    "default" : "The KeyPair used to connect to the bastion"
+                },
+                "SecurityGroupId": {
+                    "default" : "The security group to assign to the bastion"
+                },
+                "SourceCidr": {
+                    "default" : "CIDR describing who can connect to the bastion"
+                },
+                "SubnetId": {
+                    "default" : "The subnet on which to place the bastion"
+                },
+                "WindowsAMIId": {
+                    "default" : "The AMI used to create the bastion"
+                }
+            }
+        }
+    },
     "Resources": {
         "BastionHost": {
             "Type": "AWS::EC2::Instance",
