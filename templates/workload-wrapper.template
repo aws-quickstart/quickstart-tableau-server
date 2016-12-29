@@ -1024,44 +1024,6 @@
                 }
             }
         },
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         "InternalSecurityGroupLoadBalancerIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn" : [
@@ -1104,9 +1066,15 @@
             "Value": {
                 "Fn::GetAtt": [
                     "BastionHost",
-                    "BastionDNSName"
+                    "Outputs.BastionDNSName"
                 ]
             }
         },
+        "ClusterDNSName": {
+            "Description": "Public DNS name to reach cluster",
+            "Value" : {
+                "Ref" : "AwsPublicFQDN"
+            }
+        }
     }
 }
