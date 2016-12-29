@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname",
+    "Description": "A load balancer for number of instances",
     "Parameters": {
         "GatewayInstances": {
             "Description": "The instances to attach to this load balancer",

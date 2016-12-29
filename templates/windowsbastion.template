@@ -150,6 +150,10 @@
         }
     },
     "Outputs" : {
+        "BastionInstance" : {
+            "Description" : "The bastion EC2 instance",
+            "Value" : { "Ref" : "BastionHost" }
+        },
         "BastionDNSName": {
             "Description": "Public DNS name of bastion host",
             "Value": {
@@ -162,6 +166,6 @@
         "SecurityGroup": {
             "Description":"Baston Security Group",
             "Value": { "Ref" : "BastionSecurityGroup" }
-        },
+        }
     }
 }
