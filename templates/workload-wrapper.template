@@ -1019,7 +1019,7 @@
                     "AwsPublicFQDN" : {
                         "Ref" : "AwsPublicFQDN"
                     },
-                    "AliasTargetHostedZoneId": {
+                    "CanonicalHostedZoneId": {
                         "Fn::GetAtt": [
                             "LoadBalancer",
                             "Outputs.CanonicalHostedZoneNameID"
