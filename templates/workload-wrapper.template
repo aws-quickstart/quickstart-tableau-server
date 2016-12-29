@@ -39,51 +39,66 @@
             "Type": "String"
         },
         "RegCity": {
+            "Default": "REMOVEME",
             "Description": "City",
             "Type": "String"
         },
         "RegCompany": {
+            "Default": "REMOVEME",
             "Description": "Company",
             "Type": "String"
         },
         "RegCountry": {
+            "Default": "REMOVEME",
             "Description": "Country",
             "Type": "String"
         },
         "RegDepartment": {
+            "Default": "REMOVEME",
             "Description": "Department",
             "Type": "String"
         },
         "RegEmail": {
+            "Default": "REMOVEME",
             "Description": "Email",
+            "MinLength": "1",
             "Type": "String"
         },
         "RegFirstName": {
+            "Default": "REMOVEME",
             "Description": "First Name",
+            "MinLength": "1",
             "Type": "String"
         },
         "RegIndustry": {
+            "Default": "REMOVEME",
             "Description": "Industry",
             "Type": "String"
         },
         "RegLastName": {
+            "Default": "REMOVEME",
             "Description": "Last Name",
+            "MinLength": "1",
             "Type": "String"
         },
         "RegPhone": {
+            "Default": "REMOVEME",
             "Description": "Phone",
             "Type": "String"
         },
         "RegState": {
+            "Default": "REMOVEME",
             "Description": "State",
             "Type": "String"
         },
         "RegTitle": {
+            "Default": "REMOVEME",
             "Description": "Title",
             "Type": "String"
         },
         "RegZip": {
             "Description": "ZIP/Postal Code",
+            "Default": "REMOVEME",
             "Type": "String"
         },
         "SourceCidr": {
@@ -99,7 +114,9 @@
             "Type": "String"
         },
         "TableauServerLicenseKey": {
+            "Default": "REMOVEME",
             "Description": "License Key",
+            "MinLength": "1",
             "Type": "String"
         }
     },
@@ -748,46 +765,54 @@
                     ]
                 },
                 "Parameters": {
-                    "GatewayInstances": [
-                        {
-                            "Fn::GetAtt": [
-                                "WorkloadStack",
-                                "Outputs.PrimaryHost"
+                    "GatewayInstances":  {
+                        "Fn::Join" : [ ",",
+                            [
+                                {
+                                    "Fn::GetAtt": [
+                                        "WorkloadStack",
+                                        "Outputs.PrimaryHost"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "WorkloadStack",
+                                        "Outputs.WorkerHost1"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "WorkloadStack",
+                                        "Outputs.WorkerHost2"
+                                    ]
+                                }
                             ]
-                        },
-                        {
-                            "Fn::GetAtt": [
-                                "WorkloadStack",
-                                "Outputs.WorkerHost1"
+                        ]
+                    },
+                    "LoadBalancerPublicSubnets": {
+                        "Fn::Join" : [ ",",
+                            [
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PrivateSubnet1AID"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PrivateSubnet2AID"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PrivateSubnet3AID"
+                                    ]
+                                }
                             ]
-                        },
-                        {
-                            "Fn::GetAtt": [
-                                "WorkloadStack",
-                                "Outputs.WorkerHost2"
-                            ]
-                        }
-                    ],
-                    "LoadBalancerPublicSubnets": [
-                        {
-                            "Fn::GetAtt": [
-                                "VPCStack",
-                                "Outputs.PrivateSubnet1AID"
-                            ]
-                        },
-                        {
-                            "Fn::GetAtt": [
-                                "VPCStack",
-                                "Outputs.PrivateSubnet2AID"
-                            ]
-                        },
-                        {
-                            "Fn::GetAtt": [
-                                "VPCStack",
-                                "Outputs.PrivateSubnet3AID"
-                            ]
-                        }
-                    ],
+                        ]
+                    },
                     "SourceCidr": {
                         "Ref" : "SourceCidr"
                     },
@@ -810,7 +835,7 @@
                 "InternalSecurityGroup"
             ],
             "Properties" : {
-                "Groupname" : { "Ref" : "InternalSecurityGroup"},
+                "GroupId" : { "Ref" : "InternalSecurityGroup"},
                 "IpProtocol" : "-1",
                 "SourceSecurityGroupId" : { 
                     "Fn::GetAtt": [

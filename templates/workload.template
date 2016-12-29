@@ -610,6 +610,18 @@
         }
     },
     "Outputs": {
+        "PrimaryHost": {
+            "Description" : "Primary Server Host",
+            "Value" : { "Ref" : "PrimaryHost" }
+        },
+        "WorkerHost1": {
+            "Description" : "Worker1 Server Host",
+            "Value" : { "Ref" : "WorkerHost1" }
+        },
+        "WorkerHost2": {
+            "Description" : "Worker2 Server Host",
+            "Value" : { "Ref" : "WorkerHost2" }
+        },
         "PrimaryInstanceId": {
             "Description": "Instance ID of Primary Server",
             "Value": { "Ref" : "PrimaryHost" }
