@@ -22,7 +22,7 @@
             "Type": "String"
         },
         "VpcId": {
-            "Description": "ID of the VPC (e.g., vpc-0343606e)",
+            "Description": "ID of the VPC",
             "Type": "AWS::EC2::VPC::Id"
         }
     },

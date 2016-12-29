@@ -122,10 +122,6 @@
             "Description": "ZIP/Postal Code",
             "Type": "String"
         },
-        "SecurityGroupId": {
-            "Description": "SecurityGroupId",
-            "Type": "AWS::EC2::SecurityGroup::Id"
-        },
         "TableauServerLicenseKey": {
             "Description": "License Key",
             "MinLength": "1",
@@ -140,6 +136,10 @@
             "Description": "Name of worker installer",
             "MinLength": "1",
             "Type": "String"
+        },
+        "VpcId": {
+            "Description": "ID of the VPC",
+            "Type": "AWS::EC2::VPC::Id"
         },
         "WindowsAMIId" : {
             "Description": "Name of AMI containing Windows OS",
@@ -174,7 +174,7 @@
                         "default": "Server Setup"
                     },
                     "Parameters": [
-                        "SecurityGroupId",
+                        "VpcId",
                         "PrimaryIp",
                         "PrimaryAvailabilityZone",
                         "PrimarySubnetId",
@@ -295,9 +295,6 @@
                 "RegCountry": {
                     "default": "Country"
                 },
-                "SecurityGroupId": {
-                    "default": "Security Group for server instances"
-                },
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
                 },
@@ -307,6 +304,9 @@
                 "TableauServerWorkerInstaller": {
                     "default": "Tableau Worker Installer Executable"
                 },
+                "VpcId": {
+                    "Description": "ID of the VPC",
+                }
                 "WindowsAMIId": {
                     "default": "AMI ID for base Windows installation"
                 }
@@ -314,6 +314,40 @@
         }
     },
     "Resources": {
+        "WorkloadSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "DependsOn" : [ 
+                "VPCStack",
+                "BastionHost"
+            ],
+            "Properties": {
+                "GroupDescription": "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts: TODO bastion and LB",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "InternalSecurityGroup"
+                    }
+                ],
+                "VpcId": {
+                    "Ref" : "VpcId"
+                }
+            }
+        },
+        "WorkloadSecurityGroupMutualIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "DependsOn" : [
+                "WorkloadSecurityGroup"
+            ],
+            "Properties" : {
+                "GroupId" : { 
+                    "Ref" : "InternalSecurityGroup"
+                },
+                "IpProtocol": "-1",
+                "SourceSecurityGroupId" : { 
+                    "Ref" : "WorkloadSecurityGroup"
+                }
+            }
+        },
         "PrimaryHost": {
             "Type": "AWS::EC2::Instance",
             "DependsOn": [
@@ -346,7 +380,7 @@
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "SecurityGroupId"
+                        "Ref": "WorkloadSecurityGroup"
                     }
                 ],
                 "KeyName": {
@@ -431,7 +465,7 @@
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "SecurityGroupId"
+                        "Ref": "WorkloadSecurityGroup"
                     }
                 ],
                 "KeyName": {
@@ -518,7 +552,7 @@
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "SecurityGroupId"
+                        "Ref": "WorkloadSecurityGroup"
                     }
                 ],
                 "KeyName": {
@@ -637,6 +671,10 @@
         "Worker2SubnetId": {
             "Description": "Instance ID of Primary Server",
             "Value": { "Ref" : "Worker2SubnetId" }
+        },
+        "SecurityGroup" : {
+            "Description": "The security group the instances belong to",
+            "Value": { "Ref" : "WorkloadSecurityGroup" }
         }
     }
 }

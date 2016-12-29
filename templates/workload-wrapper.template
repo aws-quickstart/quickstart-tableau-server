@@ -591,63 +591,11 @@
                 }
             }
         },
-        "InternalSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "DependsOn" : [ 
-                "VPCStack",
-                "BastionHost"
-            ],
-            "Properties": {
-                "GroupDescription": "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts: TODO bastion and LB",
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": {
-                            "Fn::GetAtt": [
-                                "VPCStack",
-                                "Outputs.PrivateSubnet1ACIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": {
-                            "Fn::GetAtt": [
-                                "VPCStack",
-                                "Outputs.PrivateSubnet2ACIDR"
-                            ]
-                        }
-                    },
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": {
-                            "Fn::GetAtt": [
-                                "VPCStack",
-                                "Outputs.PrivateSubnet3ACIDR"
-                            ]
-                        }
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "InternalSecurityGroup"
-                    }
-                ],
-                "VpcId": {
-                    "Fn::GetAtt": [
-                        "VPCStack",
-                        "Outputs.VPCID"
-                    ]
-                }
-            }
-        },
         "WorkloadStack": {
             "Type": "AWS::CloudFormation::Stack",
             "DependsOn": [
                 "VPCStack",
-                "BastionHost",
-                "InternalSecurityGroup"
+                "BastionHost"
             ],
             "Properties": {
                 "TemplateURL": {
@@ -696,9 +644,6 @@
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
-                    },
-                    "SecurityGroupId": {
-                        "Ref": "InternalSecurityGroup"
                     },
                     "PrimaryAvailabilityZone": {
                         "Fn::Select": [
@@ -816,6 +761,12 @@
                             "InstallationWorkerExecutable"
                         ]
                     },
+                    "VpcId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
+                        ]
+                    },
                     "WindowsAMIId": {
                         "Fn::FindInMap": [
                             "AWSAMIRegionMap",
@@ -928,14 +879,19 @@
                 }
             }
         },
-        "InternalSecurityGroupLoadBalancerIngress": {
+        "WorkloadSecurityGroupLoadBalancerIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn" : [
                 "LoadBalancer",
-                "InternalSecurityGroup"
+                "WorkloadStack"
             ],
             "Properties" : {
-                "GroupId" : { "Ref" : "InternalSecurityGroup"},
+                "GroupId" : {
+                    "Fn::GetAtt": [
+                        "WorkloadStack",
+                        "Outputs.SecurityGroup"
+                    ]
+                },
                 "IpProtocol" : "-1",
                 "SourceSecurityGroupId" : { 
                     "Fn::GetAtt": [
@@ -945,14 +901,19 @@
                 }
             }
         },
-        "InternalSecurityGroupBastionRDPIngress": {
+        "WorkloadSecurityGroupBastionRDPIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn" : [
                 "BastionHost",
-                "InternalSecurityGroup"
+                "WorkloadStack"
             ],
             "Properties" : {
-                "GroupId" : { "Ref" : "InternalSecurityGroup"},
+                "GroupId" : { 
+                    "Fn::GetAtt": [
+                        "WorkloadStack",
+                        "Outputs.SecurityGroup"
+                    ]
+                },
                 "IpProtocol": "tcp",
                 "FromPort": "3389",
                 "ToPort": "3389",
@@ -964,14 +925,19 @@
                 }
             }
         },
-        "InternalSecurityGroupBastionWebIngress": {
+        "WorkloadSecurityGroupBastionWebIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn" : [
                 "BastionHost",
-                "InternalSecurityGroup"
+                "WorkloadStack"
             ],
             "Properties" : {
-                "GroupId" : { "Ref" : "InternalSecurityGroup"},
+                "GroupId" : { 
+                    "Fn::GetAtt": [
+                        "WorkloadStack",
+                        "Outputs.SecurityGroup"
+                    ]
+                },
                 "IpProtocol": "tcp",
                 "FromPort": "80",
                 "ToPort": "80",
