@@ -32,7 +32,7 @@
             "Description": "Name of AMI containing Windows OS used for bastion host",
             "Type": "AWS::EC2::Image::Id"
         },
-        "VPCID": {
+        "VpcId": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
         }
@@ -48,7 +48,7 @@
                         "AvailabilityZone",
                         "SourceCidr",
                         "SubnetId",
-                        "VPCID"
+                        "VpcId"
                     ]
                 },
                 {
@@ -81,7 +81,7 @@
                 "WindowsAMIId": {
                     "default" : "The AMI used to create the bastion"
                 },
-                "VPCID": {
+                "VpcId": {
                     "default" : "The VPC id in which to create the bastion"
                 }
             }
@@ -111,7 +111,7 @@
                     }
                 ],
                 "VpcId": { 
-                    "Ref" : "VPCID"
+                    "Ref" : "VpcId"
                 }
             }
         },

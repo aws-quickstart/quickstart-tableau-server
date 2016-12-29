@@ -564,7 +564,7 @@
                     "SubnetId": {
                         "Fn::GetAtt": [
                             "VPCStack",
-                            "Outputs.PublicSubnet1AID"
+                            "Outputs.PublicSubnet1ID"
                         ]
                     },
                     "WindowsAMIId": {
@@ -580,6 +580,12 @@
                                     "WindowsVersion"
                                 ]
                             }
+                        ]
+                    },
+                    "VpcId" : {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
                         ]
                     }
                 }
@@ -913,7 +919,7 @@
                     "SSLCertificateARN" : {
                         "Ref" : "SSLCertificateARN"
                     },
-                    "VPCID" : {
+                    "VpcId" : {
                         "Fn::GetAtt": [
                             "VPCStack",
                             "Outputs.VPCID"
@@ -1030,7 +1036,7 @@
         }
     },
     "Outputs": {
-        "VPCID" : {
+        "VpcId" : {
             "Description":"VPC ID",
             "Value": {
                 "Fn::GetAtt": [

@@ -21,7 +21,7 @@
             "Description": "The Amazon Resource Name for the existing SSL cert you wish to use; empty for none",
             "Type": "String"
         },
-        "VPCID": {
+        "VpcId": {
             "Description": "ID of the VPC (e.g., vpc-0343606e)",
             "Type": "AWS::EC2::VPC::Id"
         }
@@ -38,7 +38,7 @@
                         "LoadBalancerPublicSubnets",
                         "SourceCidr",
                         "SSLCertificateARN",
-                        "VPCID"
+                        "VpcId"
                     ]
                 }
             ],
@@ -55,7 +55,7 @@
                 "SSLCertificateARN": {
                     "default" : "SSL cert (if any) to attach to this load balancer"
                 },
-                "VPCID": {
+                "VpcId": {
                     "default" : "The VPC id in which to create this load balancer"
                 }
             }
@@ -112,7 +112,7 @@
                     }
                 ],
                 "VpcId": {
-                    "Ref": "VPCID"
+                    "Ref": "VpcId"
                 }
             }
         },
