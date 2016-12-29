@@ -8,11 +8,10 @@
         },
         "AwsHostedZoneId": {
             "Description": "DNS ZoneID to contain the cluster's DNS entry",
-            "Type": "AWS::Route53::HostedZone::Id"
+            "Type": "String"
         },
         "AwsPublicFQDN": {
             "Description": "Tableau Server portal will be reachable at this address",
-            "MinLength": "1",
             "Type": "String"
         },
         "ContentAdminPassword": {
@@ -203,10 +202,10 @@
                     "default": "Availability Zones"
                 },
                 "AwsHostedZoneId": {
-                    "default": "DNS ZoneID"
+                    "default": "DNS ZoneID (blank = no DNS)"
                 },
                 "AwsPublicFQDN": {
-                    "default": "Full DNS name for cluster"
+                    "default": "Full DNS name for cluster (blank = no DNS)"
                 },
                 "ContentAdminUser": {
                     "default": "Portal admin username"
@@ -266,7 +265,7 @@
                     "default": "Source CIDR for access"
                 },
                 "SSLCertificateARN": {
-                    "default": "SSL certificate ARN"
+                    "default": "SSL certificate ARN (Requires mattching DNS name)"
                 }
             }
         }
@@ -409,6 +408,33 @@
         }
     },
     "Conditions": {
+        "NoDNSEntry": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        "",
+                        {
+                            "Ref": "AwsHostedZoneId"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        "",
+                        {
+                            "Ref": "AwsPublicFQDN"
+                        }
+                    ]
+                }
+            ]
+        },
+        "CreateDNSEntry": {
+            "Fn::Not": [
+                {
+                    "Condition": "NoDNSEntry"
+                }
+            ]
+        }
     },
     "Resources": {
         "VPCStack": {
@@ -535,7 +561,7 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/windowsbastion.template"
+                            "templates/windows-bastion.template"
                         ]
                     ]
                 },
@@ -594,8 +620,7 @@
         "WorkloadStack": {
             "Type": "AWS::CloudFormation::Stack",
             "DependsOn": [
-                "VPCStack",
-                "BastionHost"
+                "VPCStack"
             ],
             "Properties": {
                 "TemplateURL": {
@@ -949,49 +974,28 @@
                 }
             }
         },
-        "DNSEntry": {
-            "Type": "AWS::CloudFormation::Stack",
+        "DNSNameEntry": {
+            "Type": "AWS::Route53::RecordSet",
+            "Condition" : "CreateDNSEntry",
             "DependsOn" : [
                 "LoadBalancer"
             ],
             "Properties": {
-                "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            {
-                                "Fn::FindInMap": [
-                                    "AWSInfoRegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "QuickStartS3URL"
-                                ]
-                            },
-                            {
-                                "Ref": "QSS3BucketName"
-                            },
-                            {
-                                "Ref": "QSS3KeyPrefix"
-                            },
-                            "templates/dns.template"
-                        ]
-                    ]
+                "HostedZoneId": {
+                    "Ref": "AwsHostedZoneId"
                 },
-                "Parameters": {
-                    "AwsHostedZoneId" : {
-                        "Ref" : "AwsHostedZoneId"
-                    },
-                    "AwsPublicFQDN" : {
-                        "Ref" : "AwsPublicFQDN"
-                    },
-                    "CanonicalHostedZoneId": {
+                "Name": {
+                    "Fn::Sub": "${AwsPublicFQDN}."
+                },
+                "Type": "A",
+                "AliasTarget": {
+                    "HostedZoneId": { 
                         "Fn::GetAtt": [
                             "LoadBalancer",
                             "Outputs.CanonicalHostedZoneNameID"
                         ]
                     },
-                    "CanonicalDNSName" : {
+                    "DNSName": {
                         "Fn::GetAtt": [
                             "LoadBalancer",
                             "Outputs.DNSName"
@@ -1031,6 +1035,7 @@
         },
         "ClusterDNSName": {
             "Description": "Public DNS name to reach cluster",
+            "Condition" : "CreateDNSEntry",
             "Value" : {
                 "Ref" : "AwsPublicFQDN"
             }

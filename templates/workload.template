@@ -305,8 +305,8 @@
                     "default": "Tableau Worker Installer Executable"
                 },
                 "VpcId": {
-                    "Description": "ID of the VPC",
-                }
+                    "Description": "ID of the VPC"
+                },
                 "WindowsAMIId": {
                     "default": "AMI ID for base Windows installation"
                 }
@@ -316,16 +316,12 @@
     "Resources": {
         "WorkloadSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
-            "DependsOn" : [ 
-                "VPCStack",
-                "BastionHost"
-            ],
             "Properties": {
                 "GroupDescription": "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts: TODO bastion and LB",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "InternalSecurityGroup"
+                        "Value": "WorkloadSecurityGroup"
                     }
                 ],
                 "VpcId": {
@@ -340,7 +336,7 @@
             ],
             "Properties" : {
                 "GroupId" : { 
-                    "Ref" : "InternalSecurityGroup"
+                    "Ref" : "WorkloadSecurityGroup"
                 },
                 "IpProtocol": "-1",
                 "SourceSecurityGroupId" : { 
