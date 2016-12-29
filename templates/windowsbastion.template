@@ -16,10 +16,6 @@
             "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "SecurityGroupId": {
-            "Description": "SecurityGroupId",
-            "Type": "AWS::EC2::SecurityGroup::Id"
-        },
         "SourceCidr": {
             "Default" : "69.25.143.0/24",
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
@@ -35,6 +31,10 @@
         "WindowsAMIId" : {
             "Description": "Name of AMI containing Windows OS used for bastion host",
             "Type": "AWS::EC2::Image::Id"
+        },
+        "VPCID": {
+            "Description": "ID of the VPC (e.g., vpc-0343606e)",
+            "Type": "AWS::EC2::VPC::Id"
         }
     },
     "Metadata": {
@@ -46,9 +46,9 @@
                     },
                     "Parameters": [
                         "AvailabilityZone",
-                        "SecurityGroupId",
                         "SourceCidr",
-                        "SubnetId"
+                        "SubnetId",
+                        "VPCID"
                     ]
                 },
                 {
@@ -72,9 +72,6 @@
                 "KeyPairName": {
                     "default" : "The KeyPair used to connect to the bastion"
                 },
-                "SecurityGroupId": {
-                    "default" : "The security group to assign to the bastion"
-                },
                 "SourceCidr": {
                     "default" : "CIDR describing who can connect to the bastion"
                 },
@@ -83,11 +80,41 @@
                 },
                 "WindowsAMIId": {
                     "default" : "The AMI used to create the bastion"
+                },
+                "VPCID": {
+                    "default" : "The VPC id in which to create the bastion"
                 }
             }
         }
     },
     "Resources": {
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable RDP traffic to the bastion host",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3389",
+                        "ToPort": "3389",
+                        "CidrIp": {
+                            "Ref": "SourceCidr"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-BastionSecurityGroup"
+                        }
+                    }
+                ],
+                "VpcId": { 
+                    "Ref" : "VPCID"
+                }
+            }
+        },
         "BastionHost": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
@@ -102,7 +129,7 @@
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "SecurityGroupId"
+                        "Ref": "BastionSecurityGroup"
                     }
                 ],
                 "KeyName": {
@@ -131,6 +158,10 @@
                     "PublicDnsName"
                 ]
             }
-        }
+        },
+        "SecurityGroup": {
+            "Description":"Baston Security Group",
+            "Value": { "Ref" : "BastionSecurityGroup" }
+        },
     }
 }
