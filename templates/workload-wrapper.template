@@ -16,7 +16,6 @@
         },
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
-            "Default": "passw0rd",
             "MinLength": "1",
             "NoEcho": "true",
             "Type": "String"
@@ -47,66 +46,54 @@
             "Type": "String"
         },
         "RegCity": {
-            "Default": "REMOVEME",
             "Description": "City",
             "Type": "String"
         },
         "RegCompany": {
-            "Default": "REMOVEME",
             "Description": "Company",
             "Type": "String"
         },
         "RegCountry": {
-            "Default": "REMOVEME",
             "Description": "Country",
             "Type": "String"
         },
         "RegDepartment": {
-            "Default": "REMOVEME",
             "Description": "Department",
             "Type": "String"
         },
         "RegEmail": {
-            "Default": "REMOVEME",
             "Description": "Email",
             "MinLength": "1",
             "Type": "String"
         },
         "RegFirstName": {
-            "Default": "REMOVEME",
             "Description": "First Name",
             "MinLength": "1",
             "Type": "String"
         },
         "RegIndustry": {
-            "Default": "REMOVEME",
             "Description": "Industry",
             "Type": "String"
         },
         "RegLastName": {
-            "Default": "REMOVEME",
             "Description": "Last Name",
             "MinLength": "1",
             "Type": "String"
         },
         "RegPhone": {
-            "Default": "REMOVEME",
             "Description": "Phone",
             "Type": "String"
         },
         "RegState": {
-            "Default": "REMOVEME",
             "Description": "State",
             "Type": "String"
         },
         "RegTitle": {
-            "Default": "REMOVEME",
             "Description": "Title",
             "Type": "String"
         },
         "RegZip": {
             "Description": "ZIP/Postal Code",
-            "Default": "REMOVEME",
             "Type": "String"
         },
         "SourceCidr": {
@@ -122,7 +109,6 @@
             "Type": "String"
         },
         "TableauServerLicenseKey": {
-            "Default": "REMOVEME",
             "Description": "License Key",
             "MinLength": "1",
             "Type": "String"
