@@ -317,7 +317,7 @@
         "WorkloadSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts: TODO bastion and LB",
+                "GroupDescription": "Enable traffic between hosts",
                 "Tags": [
                     {
                         "Key": "Name",
