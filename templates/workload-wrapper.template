@@ -389,7 +389,7 @@
                 "PrivateSubnet3CIDR" : "10.0.6.0/24",
                 "PrimaryIp" : "10.0.2.11",
                 "Worker1Ip" : "10.0.4.11",
-                "Worker2Ip" : "10.0.6.12"
+                "Worker2Ip" : "10.0.6.11"
             }
         }
     },
