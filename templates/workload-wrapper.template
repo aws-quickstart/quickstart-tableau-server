@@ -857,19 +857,19 @@
                                 {
                                     "Fn::GetAtt": [
                                         "VPCStack",
-                                        "Outputs.PrivateSubnet1AID"
+                                        "Outputs.PublicSubnet1ID"
                                     ]
                                 },
                                 {
                                     "Fn::GetAtt": [
                                         "VPCStack",
-                                        "Outputs.PrivateSubnet2AID"
+                                        "Outputs.PublicSubnet2ID"
                                     ]
                                 },
                                 {
                                     "Fn::GetAtt": [
                                         "VPCStack",
-                                        "Outputs.PrivateSubnet3AID"
+                                        "Outputs.PublicSubnet3ID"
                                     ]
                                 }
                             ]
