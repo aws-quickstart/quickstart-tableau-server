@@ -1,0 +1,1025 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname",
+    "Parameters": {
+        "AvailabilityZones": {
+            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 3 AZs MUST be used for this deployment",
+            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
+        },
+        "AwsHostedZoneId": {
+            "Description": "DNS ZoneID to contain the cluster's DNS entry",
+            "Type": "String"
+        },
+        "AwsPublicFQDN": {
+            "Description": "Tableau Server portal will be reachable at this address",
+            "Type": "String"
+        },
+        "ContentAdminPassword": {
+            "Description": "The password for the initial Admin user for Tableau server",
+            "MinLength": "1",
+            "NoEcho": "true",
+            "Type": "String"
+        },
+        "ContentAdminUser": {
+            "Default": "admin",
+            "Description": "The name of the initial Admin user for Tableau server",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "KeyPairName": {
+            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Type": "String"
+        },
+        "RegCity": {
+            "Description": "City",
+            "Type": "String"
+        },
+        "RegCompany": {
+            "Description": "Company",
+            "Type": "String"
+        },
+        "RegCountry": {
+            "Description": "Country",
+            "Type": "String"
+        },
+        "RegDepartment": {
+            "Description": "Department",
+            "Type": "String"
+        },
+        "RegEmail": {
+            "Description": "Email",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegFirstName": {
+            "Description": "First Name",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegIndustry": {
+            "Description": "Industry",
+            "Type": "String"
+        },
+        "RegLastName": {
+            "Description": "Last Name",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegPhone": {
+            "Description": "Phone",
+            "Type": "String"
+        },
+        "RegState": {
+            "Description": "State",
+            "Type": "String"
+        },
+        "RegTitle": {
+            "Description": "Title",
+            "Type": "String"
+        },
+        "RegZip": {
+            "Description": "ZIP/Postal Code",
+            "Type": "String"
+        },
+        "SourceCidr": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
+            "Type": "String"
+        },
+        "SSLCertificateARN": {
+            "Description": "The Amazon Resource Name for the existing SSL cert you wish to use; empty for none",
+            "Type": "String"
+        },
+        "TableauServerLicenseKey": {
+            "Description": "License Key",
+            "MinLength": "1",
+            "Type": "String"
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "AvailabilityZones",
+                        "SourceCidr"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Server DNS configuration"
+                    },
+                    "Parameters": [
+                        "SSLCertificateARN",
+                        "AwsPublicFQDN",
+                        "AwsHostedZoneId"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Configure Initial Tableau Admin User"
+                    },
+                    "Parameters": [
+                        "ContentAdminUser",
+                        "ContentAdminPassword"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Registration"
+                    },
+                    "Parameters": [
+                        "TableauServerLicenseKey",
+                        "RegFirstName",
+                        "RegLastName",
+                        "RegEmail",
+                        "RegCompany",
+                        "RegTitle",
+                        "RegDepartment",
+                        "RegIndustry",
+                        "RegPhone",
+                        "RegCity",
+                        "RegState",
+                        "RegZip",
+                        "RegCountry"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "AvailabilityZones": {
+                    "default": "Availability Zones"
+                },
+                "AwsHostedZoneId": {
+                    "default": "DNS ZoneID (blank = no DNS)"
+                },
+                "AwsPublicFQDN": {
+                    "default": "Full DNS name for cluster (blank = no DNS)"
+                },
+                "ContentAdminUser": {
+                    "default": "Portal admin username"
+                },
+                "ContentAdminPassword": {
+                    "default": "Portal admin password"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                },
+                "TableauServerLicenseKey": {
+                    "default": "Tableau Activation Key"
+                },
+                "RegFirstName": {
+                    "default": "First Name"
+                },
+                "RegLastName": {
+                    "default": "Last name"
+                },
+                "RegEmail": {
+                    "default": "Email Address"
+                },
+                "RegCompany": {
+                    "default": "Company"
+                },
+                "RegTitle": {
+                    "default": "Title"
+                },
+                "RegDepartment": {
+                    "default": "Department"
+                },
+                "RegIndustry": {
+                    "default": "Industry"
+                },
+                "RegPhone": {
+                    "default": "Phone"
+                },
+                "RegCity": {
+                    "default": "City"
+                },
+                "RegState": {
+                    "default": "State"
+                },
+                "RegZip": {
+                    "default": "Zip/Postal Code"
+                },
+                "RegCountry": {
+                    "default": "Country"
+                },
+                "SourceCidr": {
+                    "default": "Source CIDR for access"
+                },
+                "SSLCertificateARN": {
+                    "default": "SSL certificate ARN (Requires mattching DNS name)"
+                }
+            }
+        }
+    },
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2016.11.23"
+            },
+            "ap-northeast-1": {
+                "WS2012R2": "ami-5b299d3a"
+            },
+            "ap-northeast-2": {
+                "WS2012R2": "ami-69d30407"
+            },
+            "ap-south-1": {
+                "WS2012R2": "ami-79255216"
+            },
+            "ap-southeast-1": {
+                "WS2012R2": "ami-9d7ad8fe"
+            },
+            "ap-southeast-2": {
+                "WS2012R2": "ami-9fe7d9fc"
+            },
+            "ca-central-1": {
+                "WS2012R2": "ami-f57fcd91"
+            },
+            "eu-central-1": {
+                "WS2012R2": "ami-21cb0f4e"
+            },
+            "eu-west-1": {
+                "WS2012R2": "ami-95d984e6"
+            },
+            "eu-west-2": {
+                "WS2012R2": "ami-bb353fdf"
+            },
+            "sa-east-1": {
+                "WS2012R2": "ami-628e100e"
+            },
+            "us-east-1": {
+                "WS2012R2": "ami-bfeddca8"
+            },
+            "us-east-2": {
+                "WS2012R2": "ami-e999c38c"
+            },
+            "us-west-1": {
+                "WS2012R2": "ami-8b590deb"
+            },
+            "us-west-2": {
+                "WS2012R2": "ami-24e64944"
+            }
+        },
+        "AWSInfoRegionMap": {
+            "ap-northeast-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-northeast-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-south-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-southeast-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-southeast-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ca-central-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-central-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-west-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-west-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "sa-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-east-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-gov-west-1": {
+                "Partition": "aws-us-gov",
+                "QuickStartS3URL": "https://s3-us-gov-west-1.amazonaws.com"
+            },
+            "us-west-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-west-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            }
+        },
+        "DefaultConfiguration": {
+            "InstallationConfig": {
+                "InstallationBucket": "tableau-quickstart",
+                "InstallationExecutable": "Setup-Server-x64.exe",
+                "InstallationWorkerExecutable": "Setup-Worker-x64.exe"
+            },
+            "MachineConfiguration": {
+                "BastionInstanceType": "t2.micro",
+                "NATInstanceType":"t2.small",
+                "InstanceType": "m4.4xlarge",
+                "VolumeSize": 100,
+                "WindowsVersion": "WS2012R2"
+            },
+            "NetworkConfiguration": {
+                "VPCCIDR" : "10.0.0.0/16",
+                "PublicSubnet1CIDR" : "10.0.1.0/24",
+                "PrivateSubnet1CIDR" : "10.0.2.0/24",
+                "PublicSubnet2CIDR" : "10.0.3.0/24",
+                "PrivateSubnet2CIDR" : "10.0.4.0/24",
+                "PublicSubnet3CIDR" : "10.0.5.0/24",
+                "PrivateSubnet3CIDR" : "10.0.6.0/24",
+                "PrimaryIp" : "10.0.2.11",
+                "Worker1Ip" : "10.0.4.11",
+                "Worker2Ip" : "10.0.6.11"
+            }
+        }
+    },
+    "Conditions": {
+        "NoDNSEntry": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        "",
+                        {
+                            "Ref": "AwsHostedZoneId"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        "",
+                        {
+                            "Ref": "AwsPublicFQDN"
+                        }
+                    ]
+                }
+            ]
+        },
+        "CreateDNSEntry": {
+            "Fn::Not": [
+                {
+                    "Condition": "NoDNSEntry"
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "VPCStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "submodules/quickstart-aws-vpc",
+                            "templates/aws-vpc.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "AvailabilityZones": {
+                        "Fn::Join": [
+                            ",",
+                            {
+                                "Ref": "AvailabilityZones"
+                            }
+                        ]
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "NATInstanceType": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "MachineConfiguration",
+                            "NATInstanceType"
+                        ]
+                    },
+                    "NumberOfAZs": "3",
+                    "PrivateSubnet1ACIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PrivateSubnet1CIDR"
+                        ]
+                    },
+                    "PrivateSubnet2ACIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PrivateSubnet2CIDR"
+                        ]
+                    },
+                    "PrivateSubnet3ACIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PrivateSubnet3CIDR"
+                        ]
+                    },
+                    "PublicSubnet1CIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PublicSubnet1CIDR"
+                        ]
+                    },
+                    "PublicSubnet2CIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PublicSubnet2CIDR"
+                        ]
+                    },
+                    "PublicSubnet3CIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PublicSubnet3CIDR"
+                        ]
+                    },
+                    "VPCCIDR": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "VPCCIDR"
+                        ]
+                    }
+                }
+            }
+        },
+        "BastionHost": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn" : [
+                "VPCStack"
+            ],
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/windows-bastion.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "AvailabilityZone": {
+                        "Fn::Select": [
+                            "0",
+                            {
+                                "Ref": "AvailabilityZones"
+                            }
+                        ]
+                    },
+                    "InstanceType": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "MachineConfiguration",
+                            "BastionInstanceType"
+                        ]
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "SourceCidr": {
+                        "Ref" : "SourceCidr"
+                    },
+                    "SubnetId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PublicSubnet1ID"
+                        ]
+                    },
+                    "WindowsAMIId": {
+                        "Fn::FindInMap": [
+                            "AWSAMIRegionMap",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "WindowsVersion"
+                                ]
+                            }
+                        ]
+                    },
+                    "VpcId" : {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
+                        ]
+                    }
+                }
+            }
+        },
+        "WorkloadStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn": [
+                "VPCStack"
+            ],
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/tableau-cluster.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "ContentAdminPassword": {
+                        "Ref": "ContentAdminPassword"
+                    },
+                    "ContentAdminUser": {
+                        "Ref": "ContentAdminUser"
+                    },
+                    "InstallationBucket": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "InstallationConfig",
+                            "InstallationBucket"
+                        ]
+                    },
+                    "InstanceType": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "MachineConfiguration",
+                            "InstanceType"
+                        ]
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "PrimaryAvailabilityZone": {
+                        "Fn::Select": [
+                            "0",
+                            {
+                                "Ref": "AvailabilityZones"
+                            }
+                        ]
+                    },
+                    "PrimaryIp": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "PrimaryIp"
+                        ]
+                    },
+                    "PrimarySubnetId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PrivateSubnet1AID"
+                        ]
+                    },
+                    "Worker1AvailabilityZone": {
+                        "Fn::Select": [
+                            "1",
+                            {
+                                "Ref": "AvailabilityZones"
+                            }
+                        ]
+                    },
+                    "Worker1Ip": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "Worker1Ip"
+                        ]
+                    },
+                    "Worker1SubnetId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PrivateSubnet2AID"
+                        ]
+                    },
+                    "Worker2AvailabilityZone": {
+                        "Fn::Select": [
+                            "2",
+                            {
+                                "Ref": "AvailabilityZones"
+                            }
+                        ]
+                    },
+                    "Worker2Ip": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "NetworkConfiguration",
+                            "Worker2Ip"
+                        ]
+                    },
+                    "Worker2SubnetId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PrivateSubnet3AID"
+                        ]
+                    },
+                    "RegCity": {
+                        "Ref": "RegCity"
+                    },
+                    "RegCompany": {
+                        "Ref": "RegCompany"
+                    },
+                    "RegCountry": {
+                        "Ref": "RegCountry"
+                    },
+                    "RegDepartment": {
+                        "Ref": "RegDepartment"
+                    },
+                    "RegEmail": {
+                        "Ref": "RegEmail"
+                    },
+                    "RegFirstName": {
+                        "Ref": "RegFirstName"
+                    },
+                    "RegIndustry": {
+                        "Ref": "RegIndustry"
+                    },
+                    "RegLastName": {
+                        "Ref": "RegLastName"
+                    },
+                    "RegPhone": {
+                        "Ref": "RegPhone"
+                    },
+                    "RegState": {
+                        "Ref": "RegState"
+                    },
+                    "RegTitle": {
+                        "Ref": "RegTitle"
+                    },
+                    "RegZip": {
+                        "Ref": "RegZip"
+                    },
+                    "TableauServerLicenseKey": {
+                        "Ref": "TableauServerLicenseKey"
+                    },
+                    "TableauServerPrimaryInstaller": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "InstallationConfig",
+                            "InstallationExecutable"
+                        ]
+                    },
+                    "TableauServerWorkerInstaller": {
+                        "Fn::FindInMap": [
+                            "DefaultConfiguration",
+                            "InstallationConfig",
+                            "InstallationWorkerExecutable"
+                        ]
+                    },
+                    "VpcId": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
+                        ]
+                    },
+                    "WindowsAMIId": {
+                        "Fn::FindInMap": [
+                            "AWSAMIRegionMap",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "WindowsVersion"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "LoadBalancer": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn" : [
+                "VPCStack",
+                "WorkloadStack"
+            ],
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/loadbalancer.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "GatewayInstances":  {
+                        "Fn::Join" : [ ",",
+                            [
+                                {
+                                    "Fn::GetAtt": [
+                                        "WorkloadStack",
+                                        "Outputs.PrimaryHost"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "WorkloadStack",
+                                        "Outputs.WorkerHost1"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "WorkloadStack",
+                                        "Outputs.WorkerHost2"
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "LoadBalancerPublicSubnets": {
+                        "Fn::Join" : [ ",",
+                            [
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PublicSubnet1ID"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PublicSubnet2ID"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PublicSubnet3ID"
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "SourceCidr": {
+                        "Ref" : "SourceCidr"
+                    },
+                    "SSLCertificateARN" : {
+                        "Ref" : "SSLCertificateARN"
+                    },
+                    "VpcId" : {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
+                        ]
+                    }
+                }
+            }
+        },
+        "WorkloadSecurityGroupLoadBalancerIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "DependsOn" : [
+                "LoadBalancer",
+                "WorkloadStack"
+            ],
+            "Properties" : {
+                "GroupId" : {
+                    "Fn::GetAtt": [
+                        "WorkloadStack",
+                        "Outputs.SecurityGroup"
+                    ]
+                },
+                "IpProtocol" : "-1",
+                "SourceSecurityGroupId" : { 
+                    "Fn::GetAtt": [
+                        "LoadBalancer",
+                        "Outputs.SecurityGroup"
+                    ]
+                }
+            }
+        },
+        "WorkloadSecurityGroupBastionRDPIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "DependsOn" : [
+                "BastionHost",
+                "WorkloadStack"
+            ],
+            "Properties" : {
+                "GroupId" : { 
+                    "Fn::GetAtt": [
+                        "WorkloadStack",
+                        "Outputs.SecurityGroup"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "3389",
+                "ToPort": "3389",
+                "SourceSecurityGroupId" : { 
+                    "Fn::GetAtt": [
+                        "BastionHost",
+                        "Outputs.SecurityGroup"
+                    ]
+                }
+            }
+        },
+        "WorkloadSecurityGroupBastionWebIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "DependsOn" : [
+                "BastionHost",
+                "WorkloadStack"
+            ],
+            "Properties" : {
+                "GroupId" : { 
+                    "Fn::GetAtt": [
+                        "WorkloadStack",
+                        "Outputs.SecurityGroup"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "80",
+                "ToPort": "80",
+                "SourceSecurityGroupId" : { 
+                    "Fn::GetAtt": [
+                        "BastionHost",
+                        "Outputs.SecurityGroup"
+                    ]
+                }
+            }
+        },
+        "DNSNameEntry": {
+            "Type": "AWS::Route53::RecordSet",
+            "Condition" : "CreateDNSEntry",
+            "DependsOn" : [
+                "LoadBalancer"
+            ],
+            "Properties": {
+                "HostedZoneId": {
+                    "Ref": "AwsHostedZoneId"
+                },
+                "Name": {
+                    "Fn::Sub": "${AwsPublicFQDN}."
+                },
+                "Type": "A",
+                "AliasTarget": {
+                    "HostedZoneId": { 
+                        "Fn::GetAtt": [
+                            "LoadBalancer",
+                            "Outputs.CanonicalHostedZoneNameID"
+                        ]
+                    },
+                    "DNSName": {
+                        "Fn::GetAtt": [
+                            "LoadBalancer",
+                            "Outputs.DNSName"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "VpcId" : {
+            "Description":"VPC ID",
+            "Value": {
+                "Fn::GetAtt": [
+                    "VPCStack",
+                    "Outputs.VPCID"
+                ]
+            }
+        },
+        "LoadBalancerDNSName": {
+            "Description" : "DNS Name for the load balancer",
+            "Value" : {
+                    "Fn::GetAtt": [
+                        "LoadBalancer",
+                        "Outputs.DNSName"
+                    ]
+            }
+        },
+        "BastionDNSName": {
+            "Description": "Public DNS name of bastion host",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BastionHost",
+                    "Outputs.BastionDNSName"
+                ]
+            }
+        },
+        "ClusterDNSName": {
+            "Description": "Public DNS name to reach cluster",
+            "Condition" : "CreateDNSEntry",
+            "Value" : {
+                "Ref" : "AwsPublicFQDN"
+            }
+        }
+    }
+}

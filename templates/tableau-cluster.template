@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Tableau Server cluster with three nodes running on Windows, available via Amazon-based hostname",
+    "Description": "Three node cluster with instances placed as specified in parameters",
     "Parameters": {
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
@@ -14,10 +14,62 @@
             "MinLength": "1",
             "Type": "String"
         },
-        "KeyName": {
+        "InstallationBucket" : {
+          "Description" : "The name of the S3 bucket from which to fetch installer executables",
+          "Type" : "String",
+          "MinLength" : "1"
+        },
+        "InstanceType" : {
+          "Description" : "The AWS Instance Type to use for our servers",
+          "Type" : "String",
+          "MinLength" : "1"
+        },
+        "KeyPairName": {
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
             "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "PrimaryAvailabilityZone": {
+          "Description" : "The name of the Availability Zone for Primary server",
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
+        },
+        "PrimaryIp": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
+            "Description": "Fixed IP for the primary server",
+            "Type": "String"
+        },
+        "PrimarySubnetId": {
+          "Description" : "The Id of the subnet for the Primary server",
+          "Type" : "AWS::EC2::Subnet::Id"
+        },
+        "Worker1AvailabilityZone": {
+          "Description" : "The name of the Availability Zone for Worker1 server",
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
+        },
+        "Worker1Ip": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
+            "Description": "Fixed IP for the worker1 server",
+            "Type": "String"
+        },
+        "Worker1SubnetId": {
+          "Description" : "The Id of the subnet for the Worker1 server",
+          "Type" : "AWS::EC2::Subnet::Id"
+        },
+        "Worker2AvailabilityZone": {
+          "Description" : "The name of the Availability Zone for Worker2 server",
+          "Type" : "AWS::EC2::AvailabilityZone::Name"
+        },
+        "Worker2Ip": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
+            "Description": "Fixed IP for the worker2 server",
+            "Type": "String"
+        },
+        "Worker2SubnetId": {
+          "Description" : "The Id of the subnet for the Worker2 server",
+          "Type" : "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
             "Description": "City",
@@ -70,20 +122,28 @@
             "Description": "ZIP/Postal Code",
             "Type": "String"
         },
-        "ResourceAvailabilityZone": {
-            "Description": "The availability zone (AZ) in which our server and storage volume reside",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "SourceCidr": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
-            "Type": "String"
-        },
         "TableauServerLicenseKey": {
             "Description": "License Key",
             "MinLength": "1",
             "Type": "String"
+        },
+        "TableauServerPrimaryInstaller": {
+            "Description": "Name of primary installer",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "TableauServerWorkerInstaller": {
+            "Description": "Name of worker installer",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "VpcId": {
+            "Description": "ID of the VPC",
+            "Type": "AWS::EC2::VPC::Id"
+        },
+        "WindowsAMIId" : {
+            "Description": "Name of AMI containing Windows OS",
+            "Type": "AWS::EC2::Image::Id"
         }
     },
     "Metadata": {
@@ -94,9 +154,36 @@
                         "default": "AWS Environment"
                     },
                     "Parameters": [
-                        "KeyName",
-                        "ResourceAvailabilityZone",
-                        "SourceCidr"
+                        "KeyPairName",
+                        "InstallationBucket",
+                        "WindowsAMIId",
+                        "InstanceType"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Installer Files"
+                    },
+                    "Parameters": [
+                        "TableauServerPrimaryInstaller",
+                        "TableauServerWorkerInstaller"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Server Setup"
+                    },
+                    "Parameters": [
+                        "VpcId",
+                        "PrimaryIp",
+                        "PrimaryAvailabilityZone",
+                        "PrimarySubnetId",
+                        "Worker1Ip",
+                        "Worker1AvailabilityZone",
+                        "Worker1SubnetId",
+                        "Worker2Ip",
+                        "Worker2AvailabilityZone",
+                        "Worker2SubnetId"
                     ]
                 },
                 {
@@ -130,17 +217,14 @@
                 }
             ],
             "ParameterLabels": {
-                "KeyName": {
+                "InstallationBucket": {
+                    "default": "s3 Bucket from which to get installation files"
+                },
+                "InstanceType": {
+                    "default": "Instance Type to use for servers"
+                },
+                "KeyPairName": {
                     "default": "EC2 keypair"
-                },
-                "ResourceAvailabilityZone": {
-                    "default": "Target AZ"
-                },
-                "SourceCidr": {
-                    "default": "Source CIDR for access"
-                },
-                "RunasPassword": {
-                    "default": "Service runas password"
                 },
                 "ContentAdminUser": {
                     "default": "Portal admin username"
@@ -148,8 +232,32 @@
                 "ContentAdminPassword": {
                     "default": "Portal admin password"
                 },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
+                "PrimaryAvailabilityZone": {
+                    "default": "AZ for Primary server"
+                },
+                "PrimaryIp": {
+                    "default": "Primary Server IP"
+                },
+                "PrimarySubnetId": {
+                    "default": "Primary Server Subnet Id"
+                },
+                "Worker1AvailabilityZone": {
+                    "default": "AZ for Worker1 server"
+                },
+                "Worker1Ip": {
+                    "default": "Worker1 IP"
+                },
+                "Worker1SubnetId": {
+                    "default": "Worker1 Server Subnet Id"
+                },
+                "Worker2AvailabilityZone": {
+                    "default": "AZ for Worker2 server"
+                },
+                "Worker2Ip": {
+                    "default": "Worker2 IP"
+                },
+                "Worker2SubnetId": {
+                    "default": "Worker2 Server Subnet Id"
                 },
                 "RegFirstName": {
                     "default": "First Name"
@@ -186,443 +294,60 @@
                 },
                 "RegCountry": {
                     "default": "Country"
+                },
+                "TableauServerLicenseKey": {
+                    "default": "Tableau Activation Key"
+                },
+                "TableauServerPrimaryInstaller": {
+                    "default": "Tableau Server Installer Executable"
+                },
+                "TableauServerWorkerInstaller": {
+                    "default": "Tableau Worker Installer Executable"
+                },
+                "VpcId": {
+                    "Description": "ID of the VPC"
+                },
+                "WindowsAMIId": {
+                    "default": "AMI ID for base Windows installation"
                 }
             }
         }
     },
-    "Mappings": {
-        "AWSAMIRegionMap": {
-            "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2016.11.23"
-            },
-            "ap-northeast-1": {
-                "WS2012R2": "ami-5b299d3a"
-            },
-            "ap-northeast-2": {
-                "WS2012R2": "ami-69d30407"
-            },
-            "ap-south-1": {
-                "WS2012R2": "ami-79255216"
-            },
-            "ap-southeast-1": {
-                "WS2012R2": "ami-9d7ad8fe"
-            },
-            "ap-southeast-2": {
-                "WS2012R2": "ami-9fe7d9fc"
-            },
-            "ca-central-1": {
-                "WS2012R2": "ami-f57fcd91"
-            },
-            "eu-central-1": {
-                "WS2012R2": "ami-21cb0f4e"
-            },
-            "eu-west-1": {
-                "WS2012R2": "ami-95d984e6"
-            },
-            "eu-west-2": {
-                "WS2012R2": "ami-bb353fdf"
-            },
-            "sa-east-1": {
-                "WS2012R2": "ami-628e100e"
-            },
-            "us-east-1": {
-                "WS2012R2": "ami-bfeddca8"
-            },
-            "us-east-2": {
-                "WS2012R2": "ami-e999c38c"
-            },
-            "us-west-1": {
-                "WS2012R2": "ami-8b590deb"
-            },
-            "us-west-2": {
-                "WS2012R2": "ami-24e64944"
-            }
-        },
-        "DefaultConfiguration": {
-            "InstallationConfig": {
-                "InstallationBucket": "tableau-quickstart",
-                "InstallationExecutable": "Setup-Server-x64.exe",
-                "InstallationWorkerExecutable": "Setup-Worker-x64.exe"
-            },
-            "MachineConfiguration": {
-                "BastionInstanceType": "t2.micro",
-                "InstanceType": "m4.4xlarge",
-                "VolumeSize": 100,
-                "WindowsVersion": "WS2012R2"
-            }
-        }
-    },
-    "Conditions": {},
     "Resources": {
-        "ClusterVPC": {
-            "Type": "AWS::EC2::VPC",
-            "Properties": {
-                "CidrBlock": "10.0.0.0/16",
-                "EnableDnsSupport": "true",
-                "EnableDnsHostnames": "true",
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "ClusterVPC"
-                    }
-                ]
-            }
-        },
-        "ClusterInternetGateway": {
-            "Type": "AWS::EC2::InternetGateway",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "ClusterInternetGateway"
-                    }
-                ]
-            }
-        },
-        "ClusterInternetGatewayAssociation": {
-            "Type": "AWS::EC2::VPCGatewayAttachment",
-            "Properties": {
-                "InternetGatewayId": {
-                    "Ref": "ClusterInternetGateway"
-                },
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                }
-            }
-        },
-        "ClusterNATInternetGatewayEIP": {
-            "DependsOn": [
-                "ClusterInternetGatewayAssociation"
-            ],
-            "Type": "AWS::EC2::EIP",
-            "Properties": {
-                "Domain": "vpc"
-            }
-        },
-        "ClusterNATInternetGateway": {
-            "DependsOn": [
-                "ClusterInternetGatewayAssociation",
-                "ClusterNATInternetGatewayEIP"
-            ],
-            "Type": "AWS::EC2::NatGateway",
-            "Properties": {
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "ClusterNATInternetGatewayEIP",
-                        "AllocationId"
-                    ]
-                },
-                "SubnetId": {
-                    "Ref": "ClusterPublicSubnet"
-                }
-            }
-        },
-        "MainRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "MainRouteTable"
-                    }
-                ]
-            }
-        },
-        "MainRouteTableNonLocalEntry": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "GatewayId": {
-                    "Ref": "ClusterInternetGateway"
-                },
-                "RouteTableId": {
-                    "Ref": "MainRouteTable"
-                }
-            }
-        },
-        "MainRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "MainRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "ClusterPublicSubnet"
-                }
-            }
-        },
-        "PrivateRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "PrivateRouteTable"
-                    }
-                ]
-            }
-        },
-        "PrivateRouteTableNonLocalEntry": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "NatGatewayId": {
-                    "Ref": "ClusterNATInternetGateway"
-                },
-                "RouteTableId": {
-                    "Ref": "PrivateRouteTable"
-                }
-            }
-        },
-        "PrivateRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PrivateRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "ClusterPrivateSubnet"
-                }
-            }
-        },
-        "ClusterPublicSubnet": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
-                },
-                "CidrBlock": "10.0.0.0/24",
-                "MapPublicIpOnLaunch": "true",
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "cluster public subnet"
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                }
-            }
-        },
-        "ClusterPrivateSubnet": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
-                },
-                "CidrBlock": "10.0.1.0/24",
-                "MapPublicIpOnLaunch": "false",
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "cluster private subnet"
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                }
-            }
-        },
-        "BastionSecurityGroup": {
+        "WorkloadSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable RDP traffic to the bastion host",
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "3389",
-                        "ToPort": "3389",
-                        "CidrIp": {
-                            "Ref": "SourceCidr"
-                        }
-                    }
-                ],
+                "GroupDescription": "Enable traffic between hosts",
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "BastionSecurityGroup"
+                        "Value": "WorkloadSecurityGroup"
                     }
                 ],
                 "VpcId": {
-                    "Ref": "ClusterVPC"
+                    "Ref" : "VpcId"
                 }
             }
         },
-        "InternalSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts",
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "3389",
-                        "ToPort": "3389",
-                        "SourceSecurityGroupId": {
-                            "Ref": "BastionSecurityGroup"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "SourceSecurityGroupId": {
-                            "Ref": "BastionSecurityGroup"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "SourceSecurityGroupId": {
-                            "Ref": "LoadBalancerSecurityGroup"
-                        }
-                    },
-                    {
-                        "IpProtocol": "-1",
-                        "CidrIp": "10.0.1.0/24"
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "InternalSecurityGroup"
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                }
-            }
-        },
-        "LoadBalancerSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enable Web traffic",
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "CidrIp": {
-                            "Ref": "SourceCidr"
-                        }
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "LoadBalancerSecurityGroup"
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "ClusterVPC"
-                }
-            }
-        },
-        "ServerLoadBalancer": {
-            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-            "DependsOn": [
-                "LoadBalancerSecurityGroup",
-                "PrimaryHost"
+        "WorkloadSecurityGroupMutualIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "DependsOn" : [
+                "WorkloadSecurityGroup"
             ],
-            "Properties": {
-                "Scheme": "internet-facing",
-                "Instances": [
-                    {
-                        "Ref": "PrimaryHost"
-                    }
-                ],
-                "Subnets": [
-                    {
-                        "Ref": "ClusterPublicSubnet"
-                    }
-                ],
-                "SecurityGroups": [
-                    {
-                        "Ref": "LoadBalancerSecurityGroup"
-                    }
-                ],
-                "Listeners": [
-                    {
-                        "Protocol": "HTTP",
-                        "LoadBalancerPort": "80",
-                        "InstanceProtocol": "HTTP",
-                        "InstancePort": "80"
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-cfn-lb"
-                        }
-                    }
-                ]
-            }
-        },
-        "BastionHost": {
-            "Type": "AWS::EC2::Instance",
-            "DependsOn": [
-                "BastionSecurityGroup"
-            ],
-            "Properties": {
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "BastionInstanceType"
-                    ]
+            "Properties" : {
+                "GroupId" : { 
+                    "Ref" : "WorkloadSecurityGroup"
                 },
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
-                },
-                "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
-                },
-                "SecurityGroupIds": [
-                    {
-                        "Ref": "BastionSecurityGroup"
-                    }
-                ],
-                "KeyName": {
-                    "Ref": "KeyName"
-                },
-                "SubnetId": {
-                    "Ref": "ClusterPublicSubnet"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-bastion-host"
-                        }
-                    }
-                ]
+                "IpProtocol": "-1",
+                "SourceSecurityGroupId" : { 
+                    "Ref" : "WorkloadSecurityGroup"
+                }
             }
         },
         "PrimaryHost": {
             "Type": "AWS::EC2::Instance",
             "DependsOn": [
-                "InternalSecurityGroup",
-                "TableauWorkerWaitCondition",
-                "ClusterNATInternetGateway"
+                "TableauWorkerWaitCondition"
             ],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -659,13 +384,7 @@
                                         "",
                                         [
                                             "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
+                                            { "Ref" : "InstallationBucket" },
                                             ".s3.amazonaws.com/ScriptedInstaller.py"
                                         ]
                                     ]
@@ -734,10 +453,10 @@
                                     "config.version": "15",
                                     "install.component.samples": "true",
                                     "wgserver.authenticate": "local",
-                                    "worker.hosts": "10.0.1.11, 10.0.1.12, 10.0.1.13",
-                                    "pgsql.host": "10.0.1.12",
-                                    "pgsql0.host": "10.0.1.12",
-                                    "pgsql1.host": "10.0.1.13",
+                                    "worker.hosts" : { "Fn::Sub" : "${PrimaryIp}, ${Worker1Ip}, ${Worker2Ip}"},
+                                    "pgsql.host": { "Ref" : "Worker1Ip" },
+                                    "pgsql0.host": { "Ref" : "Worker1Ip" },
+                                    "pgsql1.host": { "Ref" : "Worker2Ip" },
                                     "worker0.gateway.enabled": "true",
                                     "worker0.gateway.port": "INTEGER:80",
                                     "worker0.vizportal.procs": "INTEGER:0",
@@ -779,21 +498,9 @@
                                         "",
                                         [
                                             "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
+                                            { "Ref" : "InstallationBucket" },
                                             ".s3.amazonaws.com/",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationExecutable"
-                                                ]
-                                            }
+                                            { "Ref" : "TableauServerPrimaryInstaller" }
                                         ]
                                     ]
                                 }
@@ -826,7 +533,6 @@
                                     "Fn::Join": [
                                         " ",
                                         [
-                                            "set \"TA_READ_FILE_CHUNK_SIZE=1500\" && ",
                                             "c:\\Python27\\python.exe",
                                             "ScriptedInstaller.py",
                                             "install",
@@ -857,42 +563,26 @@
             },
             "Properties": {
                 "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
+                    "Ref": "InstanceType"
                 },
                 "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
+                    "Ref": "WindowsAMIId"
                 },
                 "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
+                    "Ref": "PrimaryAvailabilityZone"
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "InternalSecurityGroup"
+                        "Ref": "WorkloadSecurityGroup"
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "SubnetId": {
-                    "Ref": "ClusterPrivateSubnet"
+                    "Ref": "PrimarySubnetId"
                 },
-                "PrivateIpAddress": "10.0.1.11",
+                "PrivateIpAddress": { "Ref": "PrimaryIp" },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
@@ -940,8 +630,6 @@
         "WorkerHost1": {
             "Type": "AWS::EC2::Instance",
             "DependsOn": [
-                "InternalSecurityGroup",
-                "ClusterNATInternetGateway"
             ],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -953,21 +641,9 @@
                                         "",
                                         [
                                             "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
+                                            { "Ref" : "InstallationBucket" },
                                             ".s3.amazonaws.com/",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationWorkerExecutable"
-                                                ]
-                                            }
+                                            { "Ref" : "TableauServerWorkerInstaller" }
                                         ]
                                     ]
                                 }
@@ -983,9 +659,11 @@
                                 "cwd": "c:\\tabsetup",
                                 "command": {
                                     "Fn::Join": [
-                                        " ",
+                                        "",
                                         [
-                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"10.0.1.11\" /DIR=C:\\TableauServer /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
+                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
+                                            { "Ref" : "PrimaryIp" },
+                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
                                         ]
                                     ]
@@ -998,42 +676,28 @@
             },
             "Properties": {
                 "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
+                    "Ref": "InstanceType"
                 },
                 "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
+                    "Ref": "WindowsAMIId"
                 },
                 "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
+                    "Ref": "Worker1AvailabilityZone"
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "InternalSecurityGroup"
+                        "Ref": "WorkloadSecurityGroup"
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "SubnetId": {
-                    "Ref": "ClusterPrivateSubnet"
+                    "Ref": "Worker1SubnetId"
                 },
-                "PrivateIpAddress": "10.0.1.12",
+                "PrivateIpAddress": { 
+                    "Ref": "Worker1Ip" 
+                },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
@@ -1081,8 +745,6 @@
         "WorkerHost2": {
             "Type": "AWS::EC2::Instance",
             "DependsOn": [
-                "InternalSecurityGroup",
-                "ClusterNATInternetGateway"
             ],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -1094,21 +756,9 @@
                                         "",
                                         [
                                             "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
+                                            { "Ref" : "InstallationBucket" },
                                             ".s3.amazonaws.com/",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationWorkerExecutable"
-                                                ]
-                                            }
+                                            { "Ref" : "TableauServerWorkerInstaller" }
                                         ]
                                     ]
                                 }
@@ -1124,9 +774,11 @@
                                 "cwd": "c:\\tabsetup",
                                 "command": {
                                     "Fn::Join": [
-                                        " ",
+                                        "",
                                         [
-                                            "c:\\tabsetup\\tableau-worker-installer.exe /DIR=C:\\TableauServer /PRIMARYIP=\"10.0.1.11\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
+                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
+                                            { "Ref" : "PrimaryIp" },
+                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
                                         ]
                                     ]
@@ -1139,42 +791,28 @@
             },
             "Properties": {
                 "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
+                    "Ref": "InstanceType"
                 },
                 "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
+                    "Ref": "WindowsAMIId"
                 },
                 "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
+                    "Ref": "Worker2AvailabilityZone"
                 },
                 "SecurityGroupIds": [
                     {
-                        "Ref": "InternalSecurityGroup"
+                        "Ref": "WorkloadSecurityGroup"
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "SubnetId": {
-                    "Ref": "ClusterPrivateSubnet"
+                    "Ref": "Worker2SubnetId"
                 },
-                "PrivateIpAddress": "10.0.1.13",
+                "PrivateIpAddress": { 
+                    "Ref": "Worker2Ip"
+                },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
@@ -1244,35 +882,48 @@
                 "Count": "1",
                 "Timeout": "5400"
             }
-        }
+        },
     },
     "Outputs": {
-        "BastionIpAddress": {
-            "Description": "Public IP Address of bastion host",
-            "Value": {
-                "Fn::GetAtt": [
-                    "BastionHost",
-                    "PublicIp"
-                ]
-            }
+        "PrimaryHost": {
+            "Description" : "Primary Server Host",
+            "Value" : { "Ref" : "PrimaryHost" }
         },
-        "BastionDNSName": {
-            "Description": "Public DNS name of bastion host",
-            "Value": {
-                "Fn::GetAtt": [
-                    "BastionHost",
-                    "PublicDnsName"
-                ]
-            }
+        "WorkerHost1": {
+            "Description" : "Worker1 Server Host",
+            "Value" : { "Ref" : "WorkerHost1" }
         },
-        "LoadBalancerDirectDNSName": {
-            "Description": "Direct DNS name of load balancer",
-            "Value": {
-                "Fn::GetAtt": [
-                    "ServerLoadBalancer",
-                    "DNSName"
-                ]
-            }
+        "WorkerHost2": {
+            "Description" : "Worker2 Server Host",
+            "Value" : { "Ref" : "WorkerHost2" }
+        },
+        "PrimaryInstanceId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "PrimaryHost" }
+        },
+        "PrimarySubnetId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "PrimarySubnetId" }
+        },
+        "Worker1InstanceId": {
+            "Description": "Instance ID of Worker1 Server",
+            "Value": { "Ref" : "WorkerHost1" }
+        },
+        "Worker1SubnetId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "Worker1SubnetId" }
+        },
+        "Worker2InstanceId": {
+            "Description": "Instance ID of Worker2 Server",
+            "Value": { "Ref" : "WorkerHost2" }
+        },
+        "Worker2SubnetId": {
+            "Description": "Instance ID of Primary Server",
+            "Value": { "Ref" : "Worker2SubnetId" }
+        },
+        "SecurityGroup" : {
+            "Description": "The security group the instances belong to",
+            "Value": { "Ref" : "WorkloadSecurityGroup" }
         }
     }
 }
