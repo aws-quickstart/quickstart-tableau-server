@@ -14,15 +14,15 @@
             "MinLength": "1",
             "Type": "String"
         },
-        "InstallationBucket" : {
-          "Description" : "The name of the S3 bucket from which to fetch installer executables",
-          "Type" : "String",
-          "MinLength" : "1"
+        "InstallationBucket": {
+            "Description": "The name of the S3 bucket from which to fetch installer executables",
+            "Type": "String",
+            "MinLength": "1"
         },
-        "InstanceType" : {
-          "Description" : "The AWS Instance Type to use for our servers",
-          "Type" : "String",
-          "MinLength" : "1"
+        "InstanceType": {
+            "Description": "The AWS Instance Type to use for our servers",
+            "Type": "String",
+            "MinLength": "1"
         },
         "KeyPairName": {
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
@@ -30,8 +30,8 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "PrimaryAvailabilityZone": {
-          "Description" : "The name of the Availability Zone for Primary server",
-          "Type" : "AWS::EC2::AvailabilityZone::Name"
+            "Description": "The name of the Availability Zone for Primary server",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "PrimaryIp": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -40,12 +40,12 @@
             "Type": "String"
         },
         "PrimarySubnetId": {
-          "Description" : "The Id of the subnet for the Primary server",
-          "Type" : "AWS::EC2::Subnet::Id"
+            "Description": "The Id of the subnet for the Primary server",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "Worker1AvailabilityZone": {
-          "Description" : "The name of the Availability Zone for Worker1 server",
-          "Type" : "AWS::EC2::AvailabilityZone::Name"
+            "Description": "The name of the Availability Zone for Worker1 server",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "Worker1Ip": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -54,12 +54,12 @@
             "Type": "String"
         },
         "Worker1SubnetId": {
-          "Description" : "The Id of the subnet for the Worker1 server",
-          "Type" : "AWS::EC2::Subnet::Id"
+            "Description": "The Id of the subnet for the Worker1 server",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "Worker2AvailabilityZone": {
-          "Description" : "The name of the Availability Zone for Worker2 server",
-          "Type" : "AWS::EC2::AvailabilityZone::Name"
+            "Description": "The name of the Availability Zone for Worker2 server",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "Worker2Ip": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -68,8 +68,8 @@
             "Type": "String"
         },
         "Worker2SubnetId": {
-          "Description" : "The Id of the subnet for the Worker2 server",
-          "Type" : "AWS::EC2::Subnet::Id"
+            "Description": "The Id of the subnet for the Worker2 server",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
             "Description": "City",
@@ -141,7 +141,7 @@
             "Description": "ID of the VPC",
             "Type": "AWS::EC2::VPC::Id"
         },
-        "WindowsAMIId" : {
+        "WindowsAMIId": {
             "Description": "Name of AMI containing Windows OS",
             "Type": "AWS::EC2::Image::Id"
         }
@@ -325,22 +325,22 @@
                     }
                 ],
                 "VpcId": {
-                    "Ref" : "VpcId"
+                    "Ref": "VpcId"
                 }
             }
         },
         "WorkloadSecurityGroupMutualIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn" : [
+            "DependsOn": [
                 "WorkloadSecurityGroup"
             ],
-            "Properties" : {
-                "GroupId" : { 
-                    "Ref" : "WorkloadSecurityGroup"
+            "Properties": {
+                "GroupId": {
+                    "Ref": "WorkloadSecurityGroup"
                 },
                 "IpProtocol": "-1",
-                "SourceSecurityGroupId" : { 
-                    "Ref" : "WorkloadSecurityGroup"
+                "SourceSecurityGroupId": {
+                    "Ref": "WorkloadSecurityGroup"
                 }
             }
         },
@@ -384,7 +384,9 @@
                                         "",
                                         [
                                             "https://",
-                                            { "Ref" : "InstallationBucket" },
+                                            {
+                                                "Ref": "InstallationBucket"
+                                            },
                                             ".s3.amazonaws.com/ScriptedInstaller.py"
                                         ]
                                     ]
@@ -453,10 +455,18 @@
                                     "config.version": "15",
                                     "install.component.samples": "true",
                                     "wgserver.authenticate": "local",
-                                    "worker.hosts" : { "Fn::Sub" : "${PrimaryIp}, ${Worker1Ip}, ${Worker2Ip}"},
-                                    "pgsql.host": { "Ref" : "Worker1Ip" },
-                                    "pgsql0.host": { "Ref" : "Worker1Ip" },
-                                    "pgsql1.host": { "Ref" : "Worker2Ip" },
+                                    "worker.hosts": {
+                                        "Fn::Sub": "${PrimaryIp}, ${Worker1Ip}, ${Worker2Ip}"
+                                    },
+                                    "pgsql.host": {
+                                        "Ref": "Worker1Ip"
+                                    },
+                                    "pgsql0.host": {
+                                        "Ref": "Worker1Ip"
+                                    },
+                                    "pgsql1.host": {
+                                        "Ref": "Worker2Ip"
+                                    },
                                     "worker0.gateway.enabled": "true",
                                     "worker0.gateway.port": "INTEGER:80",
                                     "worker0.vizportal.procs": "INTEGER:0",
@@ -498,9 +508,13 @@
                                         "",
                                         [
                                             "https://",
-                                            { "Ref" : "InstallationBucket" },
+                                            {
+                                                "Ref": "InstallationBucket"
+                                            },
                                             ".s3.amazonaws.com/",
-                                            { "Ref" : "TableauServerPrimaryInstaller" }
+                                            {
+                                                "Ref": "TableauServerPrimaryInstaller"
+                                            }
                                         ]
                                     ]
                                 }
@@ -582,7 +596,9 @@
                 "SubnetId": {
                     "Ref": "PrimarySubnetId"
                 },
-                "PrivateIpAddress": { "Ref": "PrimaryIp" },
+                "PrivateIpAddress": {
+                    "Ref": "PrimaryIp"
+                },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
@@ -629,8 +645,7 @@
         },
         "WorkerHost1": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": [
-            ],
+            "DependsOn": [],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
@@ -641,9 +656,13 @@
                                         "",
                                         [
                                             "https://",
-                                            { "Ref" : "InstallationBucket" },
+                                            {
+                                                "Ref": "InstallationBucket"
+                                            },
                                             ".s3.amazonaws.com/",
-                                            { "Ref" : "TableauServerWorkerInstaller" }
+                                            {
+                                                "Ref": "TableauServerWorkerInstaller"
+                                            }
                                         ]
                                     ]
                                 }
@@ -662,7 +681,9 @@
                                         "",
                                         [
                                             "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
-                                            { "Ref" : "PrimaryIp" },
+                                            {
+                                                "Ref": "PrimaryIp"
+                                            },
                                             "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
                                         ]
@@ -695,8 +716,8 @@
                 "SubnetId": {
                     "Ref": "Worker1SubnetId"
                 },
-                "PrivateIpAddress": { 
-                    "Ref": "Worker1Ip" 
+                "PrivateIpAddress": {
+                    "Ref": "Worker1Ip"
                 },
                 "BlockDeviceMappings": [
                     {
@@ -744,8 +765,7 @@
         },
         "WorkerHost2": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": [
-            ],
+            "DependsOn": [],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
@@ -756,9 +776,13 @@
                                         "",
                                         [
                                             "https://",
-                                            { "Ref" : "InstallationBucket" },
+                                            {
+                                                "Ref": "InstallationBucket"
+                                            },
                                             ".s3.amazonaws.com/",
-                                            { "Ref" : "TableauServerWorkerInstaller" }
+                                            {
+                                                "Ref": "TableauServerWorkerInstaller"
+                                            }
                                         ]
                                     ]
                                 }
@@ -777,7 +801,9 @@
                                         "",
                                         [
                                             "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
-                                            { "Ref" : "PrimaryIp" },
+                                            {
+                                                "Ref": "PrimaryIp"
+                                            },
                                             "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
                                         ]
@@ -810,7 +836,7 @@
                 "SubnetId": {
                     "Ref": "Worker2SubnetId"
                 },
-                "PrivateIpAddress": { 
+                "PrivateIpAddress": {
                     "Ref": "Worker2Ip"
                 },
                 "BlockDeviceMappings": [
@@ -886,44 +912,64 @@
     },
     "Outputs": {
         "PrimaryHost": {
-            "Description" : "Primary Server Host",
-            "Value" : { "Ref" : "PrimaryHost" }
+            "Description": "Primary Server Host",
+            "Value": {
+                "Ref": "PrimaryHost"
+            }
         },
         "WorkerHost1": {
-            "Description" : "Worker1 Server Host",
-            "Value" : { "Ref" : "WorkerHost1" }
+            "Description": "Worker1 Server Host",
+            "Value": {
+                "Ref": "WorkerHost1"
+            }
         },
         "WorkerHost2": {
-            "Description" : "Worker2 Server Host",
-            "Value" : { "Ref" : "WorkerHost2" }
+            "Description": "Worker2 Server Host",
+            "Value": {
+                "Ref": "WorkerHost2"
+            }
         },
         "PrimaryInstanceId": {
             "Description": "Instance ID of Primary Server",
-            "Value": { "Ref" : "PrimaryHost" }
+            "Value": {
+                "Ref": "PrimaryHost"
+            }
         },
         "PrimarySubnetId": {
             "Description": "Instance ID of Primary Server",
-            "Value": { "Ref" : "PrimarySubnetId" }
+            "Value": {
+                "Ref": "PrimarySubnetId"
+            }
         },
         "Worker1InstanceId": {
             "Description": "Instance ID of Worker1 Server",
-            "Value": { "Ref" : "WorkerHost1" }
+            "Value": {
+                "Ref": "WorkerHost1"
+            }
         },
         "Worker1SubnetId": {
             "Description": "Instance ID of Primary Server",
-            "Value": { "Ref" : "Worker1SubnetId" }
+            "Value": {
+                "Ref": "Worker1SubnetId"
+            }
         },
         "Worker2InstanceId": {
             "Description": "Instance ID of Worker2 Server",
-            "Value": { "Ref" : "WorkerHost2" }
+            "Value": {
+                "Ref": "WorkerHost2"
+            }
         },
         "Worker2SubnetId": {
             "Description": "Instance ID of Primary Server",
-            "Value": { "Ref" : "Worker2SubnetId" }
+            "Value": {
+                "Ref": "Worker2SubnetId"
+            }
         },
-        "SecurityGroup" : {
+        "SecurityGroup": {
             "Description": "The security group the instances belong to",
-            "Value": { "Ref" : "WorkloadSecurityGroup" }
+            "Value": {
+                "Ref": "WorkloadSecurityGroup"
+            }
         }
     }
 }

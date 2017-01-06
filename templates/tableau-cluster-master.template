@@ -371,22 +371,22 @@
             },
             "MachineConfiguration": {
                 "BastionInstanceType": "t2.micro",
-                "NATInstanceType":"t2.small",
+                "NATInstanceType": "t2.small",
                 "InstanceType": "m4.4xlarge",
                 "VolumeSize": 100,
                 "WindowsVersion": "WS2012R2"
             },
             "NetworkConfiguration": {
-                "VPCCIDR" : "10.0.0.0/16",
-                "PublicSubnet1CIDR" : "10.0.1.0/24",
-                "PrivateSubnet1CIDR" : "10.0.2.0/24",
-                "PublicSubnet2CIDR" : "10.0.3.0/24",
-                "PrivateSubnet2CIDR" : "10.0.4.0/24",
-                "PublicSubnet3CIDR" : "10.0.5.0/24",
-                "PrivateSubnet3CIDR" : "10.0.6.0/24",
-                "PrimaryIp" : "10.0.2.11",
-                "Worker1Ip" : "10.0.4.11",
-                "Worker2Ip" : "10.0.6.11"
+                "VPCCIDR": "10.0.0.0/16",
+                "PublicSubnet1CIDR": "10.0.1.0/24",
+                "PrivateSubnet1CIDR": "10.0.2.0/24",
+                "PublicSubnet2CIDR": "10.0.3.0/24",
+                "PrivateSubnet2CIDR": "10.0.4.0/24",
+                "PublicSubnet3CIDR": "10.0.5.0/24",
+                "PrivateSubnet3CIDR": "10.0.6.0/24",
+                "PrimaryIp": "10.0.2.11",
+                "Worker1Ip": "10.0.4.11",
+                "Worker2Ip": "10.0.6.11"
             }
         }
     },
@@ -521,7 +521,7 @@
         },
         "BastionHost": {
             "Type": "AWS::CloudFormation::Stack",
-            "DependsOn" : [
+            "DependsOn": [
                 "VPCStack"
             ],
             "Properties": {
@@ -568,7 +568,7 @@
                         "Ref": "KeyPairName"
                     },
                     "SourceCidr": {
-                        "Ref" : "SourceCidr"
+                        "Ref": "SourceCidr"
                     },
                     "SubnetId": {
                         "Fn::GetAtt": [
@@ -591,7 +591,7 @@
                             }
                         ]
                     },
-                    "VpcId" : {
+                    "VpcId": {
                         "Fn::GetAtt": [
                             "VPCStack",
                             "Outputs.VPCID"
@@ -795,7 +795,7 @@
         },
         "LoadBalancer": {
             "Type": "AWS::CloudFormation::Stack",
-            "DependsOn" : [
+            "DependsOn": [
                 "VPCStack",
                 "WorkloadStack"
             ],
@@ -824,8 +824,9 @@
                     ]
                 },
                 "Parameters": {
-                    "GatewayInstances":  {
-                        "Fn::Join" : [ ",",
+                    "GatewayInstances": {
+                        "Fn::Join": [
+                            ",",
                             [
                                 {
                                     "Fn::GetAtt": [
@@ -849,7 +850,8 @@
                         ]
                     },
                     "LoadBalancerPublicSubnets": {
-                        "Fn::Join" : [ ",",
+                        "Fn::Join": [
+                            ",",
                             [
                                 {
                                     "Fn::GetAtt": [
@@ -873,12 +875,12 @@
                         ]
                     },
                     "SourceCidr": {
-                        "Ref" : "SourceCidr"
+                        "Ref": "SourceCidr"
                     },
-                    "SSLCertificateARN" : {
-                        "Ref" : "SSLCertificateARN"
+                    "SSLCertificateARN": {
+                        "Ref": "SSLCertificateARN"
                     },
-                    "VpcId" : {
+                    "VpcId": {
                         "Fn::GetAtt": [
                             "VPCStack",
                             "Outputs.VPCID"
@@ -889,19 +891,19 @@
         },
         "WorkloadSecurityGroupLoadBalancerIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn" : [
+            "DependsOn": [
                 "LoadBalancer",
                 "WorkloadStack"
             ],
-            "Properties" : {
-                "GroupId" : {
+            "Properties": {
+                "GroupId": {
                     "Fn::GetAtt": [
                         "WorkloadStack",
                         "Outputs.SecurityGroup"
                     ]
                 },
-                "IpProtocol" : "-1",
-                "SourceSecurityGroupId" : { 
+                "IpProtocol": "-1",
+                "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
                         "LoadBalancer",
                         "Outputs.SecurityGroup"
@@ -911,12 +913,12 @@
         },
         "WorkloadSecurityGroupBastionRDPIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn" : [
+            "DependsOn": [
                 "BastionHost",
                 "WorkloadStack"
             ],
-            "Properties" : {
-                "GroupId" : { 
+            "Properties": {
+                "GroupId": {
                     "Fn::GetAtt": [
                         "WorkloadStack",
                         "Outputs.SecurityGroup"
@@ -925,7 +927,7 @@
                 "IpProtocol": "tcp",
                 "FromPort": "3389",
                 "ToPort": "3389",
-                "SourceSecurityGroupId" : { 
+                "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
                         "BastionHost",
                         "Outputs.SecurityGroup"
@@ -935,12 +937,12 @@
         },
         "WorkloadSecurityGroupBastionWebIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn" : [
+            "DependsOn": [
                 "BastionHost",
                 "WorkloadStack"
             ],
-            "Properties" : {
-                "GroupId" : { 
+            "Properties": {
+                "GroupId": {
                     "Fn::GetAtt": [
                         "WorkloadStack",
                         "Outputs.SecurityGroup"
@@ -949,7 +951,7 @@
                 "IpProtocol": "tcp",
                 "FromPort": "80",
                 "ToPort": "80",
-                "SourceSecurityGroupId" : { 
+                "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
                         "BastionHost",
                         "Outputs.SecurityGroup"
@@ -959,8 +961,8 @@
         },
         "DNSNameEntry": {
             "Type": "AWS::Route53::RecordSet",
-            "Condition" : "CreateDNSEntry",
-            "DependsOn" : [
+            "Condition": "CreateDNSEntry",
+            "DependsOn": [
                 "LoadBalancer"
             ],
             "Properties": {
@@ -972,7 +974,7 @@
                 },
                 "Type": "A",
                 "AliasTarget": {
-                    "HostedZoneId": { 
+                    "HostedZoneId": {
                         "Fn::GetAtt": [
                             "LoadBalancer",
                             "Outputs.CanonicalHostedZoneNameID"
@@ -989,8 +991,8 @@
         }
     },
     "Outputs": {
-        "VpcId" : {
-            "Description":"VPC ID",
+        "VpcId": {
+            "Description": "VPC ID",
             "Value": {
                 "Fn::GetAtt": [
                     "VPCStack",
@@ -999,12 +1001,12 @@
             }
         },
         "LoadBalancerDNSName": {
-            "Description" : "DNS Name for the load balancer",
-            "Value" : {
-                    "Fn::GetAtt": [
-                        "LoadBalancer",
-                        "Outputs.DNSName"
-                    ]
+            "Description": "DNS Name for the load balancer",
+            "Value": {
+                "Fn::GetAtt": [
+                    "LoadBalancer",
+                    "Outputs.DNSName"
+                ]
             }
         },
         "BastionDNSName": {
@@ -1018,9 +1020,9 @@
         },
         "ClusterDNSName": {
             "Description": "Public DNS name to reach cluster",
-            "Condition" : "CreateDNSEntry",
-            "Value" : {
-                "Ref" : "AwsPublicFQDN"
+            "Condition": "CreateDNSEntry",
+            "Value": {
+                "Ref": "AwsPublicFQDN"
             }
         }
     }

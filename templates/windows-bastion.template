@@ -3,13 +3,13 @@
     "Description": "Bastion host, useful to access private instances created inside a VPC",
     "Parameters": {
         "AvailabilityZone": {
-          "Description" : "The name of the Availability Zone for bastion host",
-          "Type" : "AWS::EC2::AvailabilityZone::Name"
+            "Description": "The name of the Availability Zone for bastion host",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
-        "InstanceType" : {
-          "Description" : "The AWS Instance Type to use for our bastion host",
-          "Type" : "String",
-          "MinLength" : "1"
+        "InstanceType": {
+            "Description": "The AWS Instance Type to use for our bastion host",
+            "Type": "String",
+            "MinLength": "1"
         },
         "KeyPairName": {
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
@@ -17,18 +17,18 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "SourceCidr": {
-            "Default" : "69.25.143.0/24",
+            "Default": "69.25.143.0/24",
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
             "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
             "Type": "String"
         },
         "SubnetId": {
-          "Description" : "The Id of the subnet for the bastion host",
-          "Type" : "AWS::EC2::Subnet::Id",
-          "MinLength" : "1"
+            "Description": "The Id of the subnet for the bastion host",
+            "Type": "AWS::EC2::Subnet::Id",
+            "MinLength": "1"
         },
-        "WindowsAMIId" : {
+        "WindowsAMIId": {
             "Description": "Name of AMI containing Windows OS used for bastion host",
             "Type": "AWS::EC2::Image::Id"
         },
@@ -39,7 +39,7 @@
     },
     "Metadata": {
         "AWS::CloudFormation::Interface": {
-            "ParameterGroups" : [
+            "ParameterGroups": [
                 {
                     "Label": {
                         "default": "Bastion Networking Information"
@@ -64,25 +64,25 @@
             ],
             "ParameterLabels": {
                 "AvailabilityZone": {
-                    "default" : "The AZ in which to place the bastion host"
+                    "default": "The AZ in which to place the bastion host"
                 },
                 "InstanceType": {
-                    "default" : "The instance type for the bastion"
+                    "default": "The instance type for the bastion"
                 },
                 "KeyPairName": {
-                    "default" : "The KeyPair used to connect to the bastion"
+                    "default": "The KeyPair used to connect to the bastion"
                 },
                 "SourceCidr": {
-                    "default" : "CIDR describing who can connect to the bastion"
+                    "default": "CIDR describing who can connect to the bastion"
                 },
                 "SubnetId": {
-                    "default" : "The subnet on which to place the bastion"
+                    "default": "The subnet on which to place the bastion"
                 },
                 "WindowsAMIId": {
-                    "default" : "The AMI used to create the bastion"
+                    "default": "The AMI used to create the bastion"
                 },
                 "VpcId": {
-                    "default" : "The VPC id in which to create the bastion"
+                    "default": "The VPC id in which to create the bastion"
                 }
             }
         }
@@ -110,19 +110,19 @@
                         }
                     }
                 ],
-                "VpcId": { 
-                    "Ref" : "VpcId"
+                "VpcId": {
+                    "Ref": "VpcId"
                 }
             }
         },
         "BastionHost": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "InstanceType": { 
-                    "Ref" : "InstanceType"
+                "InstanceType": {
+                    "Ref": "InstanceType"
                 },
                 "ImageId": {
-                    "Ref" : "WindowsAMIId"
+                    "Ref": "WindowsAMIId"
                 },
                 "AvailabilityZone": {
                     "Ref": "AvailabilityZone"
@@ -149,10 +149,12 @@
             }
         }
     },
-    "Outputs" : {
-        "BastionInstance" : {
-            "Description" : "The bastion EC2 instance",
-            "Value" : { "Ref" : "BastionHost" }
+    "Outputs": {
+        "BastionInstance": {
+            "Description": "The bastion EC2 instance",
+            "Value": {
+                "Ref": "BastionHost"
+            }
         },
         "BastionDNSName": {
             "Description": "Public DNS name of bastion host",
@@ -164,8 +166,10 @@
             }
         },
         "SecurityGroup": {
-            "Description":"Baston Security Group",
-            "Value": { "Ref" : "BastionSecurityGroup" }
+            "Description": "Baston Security Group",
+            "Value": {
+                "Ref": "BastionSecurityGroup"
+            }
         }
     }
 }
