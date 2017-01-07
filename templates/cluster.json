@@ -81,6 +81,6 @@
     },
     {
         "ParameterKey": "TableauServerLicenseKey",
-        "ParameterValue": ""
+        "ParameterValue": "TestKey"
     }
 ]
