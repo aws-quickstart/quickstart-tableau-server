@@ -3,28 +3,13 @@ global:
   owner: quickstart-eng@amazon.com
   qsname: quickstart-tableau-server
   regions:
-    - ap-northeast-1
-    - ap-northeast-2
-    - ap-south-1
-    - ap-southeast-1
     - ap-southeast-2
-    - ca-central-1
-    - eu-central-1
     - eu-west-1
-    - eu-west-2
-    - sa-east-1
     - us-east-1
     - us-east-2
-    - us-west-1
     - us-west-2
   reporting: true
 tests:
-  named:
-    parameter_input: named-cluster.json
-    template_file: named-cluster.template
-  single:
-    parameter_input: single-cluster.json
-    template_file: single-cluster.template
-  unnamed:
-    parameter_input: unnamed-cluster.json
-    template_file: unnamed-cluster.template
+  cluster:
+    parameter_input: cluster.json
+    template_file: tableau-cluster-master.template
