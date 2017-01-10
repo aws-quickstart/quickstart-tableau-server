@@ -911,7 +911,7 @@
                 "Count": "1",
                 "Timeout": "5400"
             }
-        },
+        }
     },
     "Outputs": {
         "PrimaryHost": {
