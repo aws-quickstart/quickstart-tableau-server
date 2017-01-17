@@ -81,6 +81,6 @@
     },
     {
         "ParameterKey": "TableauServerLicenseKey",
-        "ParameterValue": "TestKey"
+        "ParameterValue": "$[alfred_getlicensecontent]/tableau/server/license.key"
     }
 ]
