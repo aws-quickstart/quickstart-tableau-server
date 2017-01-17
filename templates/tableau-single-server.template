@@ -14,7 +14,7 @@
             "MinLength": "1",
             "Type": "String"
         },
-        "KeyName": {
+        "KeyPairName": {
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
             "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -93,7 +93,7 @@
                         "default": "AWS Environment"
                     },
                     "Parameters": [
-                        "KeyName",
+                        "KeyPairName",
                         "ResourceAvailabilityZone",
                         "SourceCidr"
                     ]
@@ -129,7 +129,7 @@
                 }
             ],
             "ParameterLabels": {
-                "KeyName": {
+                "KeyPairName": {
                     "default": "EC2 keypair"
                 },
                 "ResourceAvailabilityZone": {
@@ -491,7 +491,7 @@
                     }
                 ],
                 "KeyName": {
-                    "Ref": "KeyName"
+                    "Ref": "KeyPairName"
                 },
                 "UserData": {
                     "Fn::Base64": {
