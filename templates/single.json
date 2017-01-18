@@ -1,17 +1,5 @@
 [
     {
-        "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_genaz_3]"
-    },
-    {
-        "ParameterKey": "AwsHostedZoneId",
-        "ParameterValue": ""
-    },
-    {
-        "ParameterKey": "AwsPublicFQDN",
-        "ParameterValue": ""
-    },
-    {
         "ParameterKey": "ContentAdminPassword",
         "ParameterValue": "$[alfred_genpass_32]"
     },
@@ -72,8 +60,8 @@
         "ParameterValue": "Test Zip"
     },
     {
-        "ParameterKey": "SSLCertificateARN",
-        "ParameterValue": ""
+        "ParameterKey": "ResourceAvailabilityZone",
+        "ParameterValue": "$[alfred_gensingleaz_1]"
     },
     {
         "ParameterKey": "SourceCidr",
@@ -81,6 +69,6 @@
     },
     {
         "ParameterKey": "TableauServerLicenseKey",
-        "ParameterValue": "$[alfred_getlicensecontent]/tableau/server/license.key"
+        "ParameterValue": ""
     }
 ]
