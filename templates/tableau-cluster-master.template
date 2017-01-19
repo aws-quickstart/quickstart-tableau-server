@@ -603,7 +603,8 @@
         "WorkloadStack": {
             "Type": "AWS::CloudFormation::Stack",
             "DependsOn": [
-                "VPCStack"
+                "VPCStack",
+                "LoadBalancerStack"
             ],
             "Properties": {
                 "TemplateURL": {
@@ -630,6 +631,18 @@
                     ]
                 },
                 "Parameters": {
+                    "ClusterPublicName": {
+                        "Fn::If": [ 
+                            "CreateDNSEntry", 
+                            "AwsPublicFQDN", 
+                            {
+                                "Fn::GetAtt": [
+                                    "LoadBalancerStack",
+                                    "Outputs.DNSName"
+                                ]
+                            }
+                        ]
+                    },
                     "ContentAdminPassword": {
                         "Ref": "ContentAdminPassword"
                     },
@@ -652,6 +665,12 @@
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
+                    },
+                    "LoadBalancerName": {
+                        "Fn::GetAtt": [
+                            "LoadBalancerStack",
+                            "Outputs.Id"
+                        ]
                     },
                     "PrimaryAvailabilityZone": {
                         "Fn::Select": [
@@ -793,11 +812,10 @@
                 }
             }
         },
-        "LoadBalancer": {
+        "LoadBalancerStack": {
             "Type": "AWS::CloudFormation::Stack",
             "DependsOn": [
-                "VPCStack",
-                "WorkloadStack"
+                "VPCStack"
             ],
             "Properties": {
                 "TemplateURL": {
@@ -824,31 +842,6 @@
                     ]
                 },
                 "Parameters": {
-                    "GatewayInstances": {
-                        "Fn::Join": [
-                            ",",
-                            [
-                                {
-                                    "Fn::GetAtt": [
-                                        "WorkloadStack",
-                                        "Outputs.PrimaryHost"
-                                    ]
-                                },
-                                {
-                                    "Fn::GetAtt": [
-                                        "WorkloadStack",
-                                        "Outputs.WorkerHost1"
-                                    ]
-                                },
-                                {
-                                    "Fn::GetAtt": [
-                                        "WorkloadStack",
-                                        "Outputs.WorkerHost2"
-                                    ]
-                                }
-                            ]
-                        ]
-                    },
                     "LoadBalancerPublicSubnets": {
                         "Fn::Join": [
                             ",",
@@ -892,7 +885,7 @@
         "WorkloadSecurityGroupLoadBalancerIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn": [
-                "LoadBalancer",
+                "LoadBalancerStack",
                 "WorkloadStack"
             ],
             "Properties": {
@@ -905,7 +898,7 @@
                 "IpProtocol": "-1",
                 "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
-                        "LoadBalancer",
+                        "LoadBalancerStack",
                         "Outputs.SecurityGroup"
                     ]
                 }
@@ -963,7 +956,7 @@
             "Type": "AWS::Route53::RecordSet",
             "Condition": "CreateDNSEntry",
             "DependsOn": [
-                "LoadBalancer"
+                "LoadBalancerStack"
             ],
             "Properties": {
                 "HostedZoneId": {
@@ -976,13 +969,13 @@
                 "AliasTarget": {
                     "HostedZoneId": {
                         "Fn::GetAtt": [
-                            "LoadBalancer",
+                            "LoadBalancerStack",
                             "Outputs.CanonicalHostedZoneNameID"
                         ]
                     },
                     "DNSName": {
                         "Fn::GetAtt": [
-                            "LoadBalancer",
+                            "LoadBalancerStack",
                             "Outputs.DNSName"
                         ]
                     }
@@ -1004,7 +997,7 @@
             "Description": "DNS Name for the load balancer",
             "Value": {
                 "Fn::GetAtt": [
-                    "LoadBalancer",
+                    "LoadBalancerStack",
                     "Outputs.DNSName"
                 ]
             }

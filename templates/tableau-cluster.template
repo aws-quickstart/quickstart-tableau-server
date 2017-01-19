@@ -2,6 +2,11 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Three node cluster with instances placed as specified in parameters",
     "Parameters": {
+        "ClusterPublicName": {
+            "Description": "The DNS name used to reach the cluster (the load balancer DNS name)",
+            "Type": "String",
+            "MinLength": "1"
+        },
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
             "MinLength": "1",
@@ -28,6 +33,11 @@
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
             "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "LoadBalancerName" : {
+            "Description": "The AWS resource name of the load balancer we attach to",
+            "Type": "String",
+            "MinLength": "1"
         },
         "PrimaryAvailabilityZone": {
             "Description": "The name of the Availability Zone for Primary server",
@@ -157,7 +167,8 @@
                         "KeyPairName",
                         "InstallationBucket",
                         "WindowsAMIId",
-                        "InstanceType"
+                        "InstanceType",
+                        "LoadBalancerName"
                     ]
                 },
                 {
@@ -174,6 +185,7 @@
                         "default": "Server Setup"
                     },
                     "Parameters": [
+                        "ClusterPublicName",
                         "VpcId",
                         "PrimaryIp",
                         "PrimaryAvailabilityZone",
@@ -217,11 +229,17 @@
                 }
             ],
             "ParameterLabels": {
+                "ClusterPublicName": {
+                    "default": "Load Balancer DNS name"
+                },
                 "InstallationBucket": {
                     "default": "s3 Bucket from which to get installation files"
                 },
                 "InstanceType": {
                     "default": "Instance Type to use for servers"
+                },
+                "LoadBalancerName": {
+                    "default": "Load Balancer"
                 },
                 "KeyPairName": {
                     "default": "EC2 keypair"
@@ -314,6 +332,47 @@
         }
     },
     "Resources": {
+        "LoadBalancerRegisterRole" : {
+            "Type" : "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                   "Version" : "2012-10-17",
+                   "Statement": [{
+                      "Effect": "Allow",
+                      "Principal": {
+                         "Service": [ "ec2.amazonaws.com" ]
+                      },
+                      "Action": [ "sts:AssumeRole" ]
+                   }]
+                },
+                "Policies" : [
+                    {
+                        "PolicyName" : {"Fn::Sub" : "${AWS::StackName}-load-balancer-register-role"} ,
+                        "PolicyDocument" : {
+                            "Statement": [
+                                {
+                                  "Effect": "Allow",
+                                    "Action": [
+                                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+                                    ],
+                                    "Resource": [
+                                        {"Fn::Sub" : "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${LoadBalancerName}"}
+                                    ]
+                                }
+                              ]
+                        }
+                    }
+                ]
+            }
+        },
+        "TableauWindowsServerInstanceProfile" : {
+            "Type" : "AWS::IAM::InstanceProfile",
+            "DependsOn" : ["LoadBalancerRegisterRole"],
+            "Properties": {
+                "Path":"/",
+                "Roles": [ { "Ref" : "LoadBalancerRegisterRole" } ]
+            }
+        },
         "WorkloadSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -352,6 +411,11 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
+                        "packages": {
+                            "msi" : {
+                              "python" : "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
+                            }                        
+                        },
                         "files": {
                             "c:\\tabsetup\\json2yml.py": {
                                 "content": {
@@ -377,9 +441,6 @@
                                         ]
                                     ]
                                 }
-                            },
-                            "c:\\tabsetup\\python-2.7.12.msi": {
-                                "source": "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
                             },
                             "c:\\tabsetup\\ScriptedInstaller.py": {
                                 "source": {
@@ -470,6 +531,9 @@
                                     "pgsql1.host": {
                                         "Ref": "Worker2Ip"
                                     },
+                                    "gateway.public.host": {
+                                        "Ref": "ClusterPublicName"
+                                    },
                                     "worker0.gateway.enabled": "BOOLEAN:true",
                                     "worker0.gateway.port": "INTEGER:80",
                                     "worker0.vizportal.procs": "INTEGER:0",
@@ -521,6 +585,24 @@
                                         ]
                                     ]
                                 }
+                            },
+                            "c:\\tabsetup\\register-with-elb.py": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "import urllib2\n",
+                                            "import boto3\n",
+                                            "fyle = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id')\n",
+                                            "my_instance_id = fyle.read()\n",
+                                            { "Fn::Sub" : "client = boto3.client('elb', region_name='${AWS::Region}')\n" },
+                                            { "Fn::Sub" : "client.register_instances_with_load_balancer(LoadBalancerName='${LoadBalancerName}'," },
+                                            { "Fn::Sub" :   "Instances=[{'InstanceId': my_instance_id},{'InstanceId':'${WorkerHost1}'},{'InstanceId':'${WorkerHost2}'}]" },
+                                            ")\n",
+                                            ""
+                                        ]
+                                    ]
+                                }
                             }
                         },
                         "commands": {
@@ -529,14 +611,14 @@
                                 "command": "netsh advfirewall set allprofiles state off",
                                 "waitAfterCompletion": "0"
                             },
-                            "2-install-python": {
-                                "command": "c:\\tabsetup\\python-2.7.12.msi /quiet /qn",
-                                "cwd": "c:\\tabsetup",
+                            "2-pip-install-libs": {
+                                "command": "c:\\Python27\\Scripts\\pip.exe install pyyaml boto3",
+                                "cwd": "c:\\Python27\\Scripts",
                                 "waitAfterCompletion": "0"
                             },
-                            "3-pip-install-yaml": {
-                                "command": "c:\\Python27\\Scripts\\pip.exe install pyyaml",
-                                "cwd": "c:\\Python27\\Scripts",
+                            "3-register-with-load-balancer": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "c:\\Python27\\python register-with-elb.py > lb_register.log",
                                 "waitAfterCompletion": "0"
                             },
                             "4-convert-config": {
@@ -593,6 +675,9 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
+                "IamInstanceProfile" : { 
+                    "Ref" : "TableauWindowsServerInstanceProfile" 
+                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
@@ -713,6 +798,9 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
+                "IamInstanceProfile" : { 
+                    "Ref" : "TableauWindowsServerInstanceProfile" 
+                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
@@ -833,6 +921,9 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
+                "IamInstanceProfile" : { 
+                    "Ref" : "TableauWindowsServerInstanceProfile" 
+                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
