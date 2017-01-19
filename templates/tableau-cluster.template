@@ -616,17 +616,12 @@
                                 "cwd": "c:\\Python27\\Scripts",
                                 "waitAfterCompletion": "0"
                             },
-                            "3-register-with-load-balancer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": "c:\\Python27\\python register-with-elb.py > lb_register.log",
-                                "waitAfterCompletion": "0"
-                            },
-                            "4-convert-config": {
+                            "3-convert-config": {
                                 "cwd": "c:\\tabsetup",
                                 "command": "type config.json | c:\\Python27\\python json2yml.py > config.yml",
                                 "waitAfterCompletion": "0"
                             },
-                            "5-run-installer": {
+                            "4-run-installer": {
                                 "cwd": "c:\\tabsetup",
                                 "command": {
                                     "Fn::Join": [
@@ -651,9 +646,14 @@
                                 },
                                 "waitAfterCompletion": "0"
                             },
-                            "6-cleanup-secrets": {
+                            "5-cleanup-secrets": {
                                 "cwd": "c:\\tabsetup",
                                 "command": "del c:\\tabsetup\\secrets.json",
+                                "waitAfterCompletion": "0"
+                            },
+                            "6-register-with-load-balancer": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "c:\\Python27\\python register-with-elb.py > lb_register.log",
                                 "waitAfterCompletion": "0"
                             }
                         }
