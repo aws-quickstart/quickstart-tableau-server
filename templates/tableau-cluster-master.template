@@ -634,7 +634,9 @@
                     "ClusterPublicName": {
                         "Fn::If": [ 
                             "CreateDNSEntry", 
-                            "AwsPublicFQDN", 
+                            { 
+                                "Ref" : "AwsPublicFQDN" 
+                            }, 
                             {
                                 "Fn::GetAtt": [
                                     "LoadBalancerStack",
