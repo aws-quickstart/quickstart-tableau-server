@@ -248,7 +248,7 @@
                     "default": "Source CIDR for access"
                 },
                 "SSLCertificateARN": {
-                    "default": "SSL certificate ARN (Requires mattching DNS name)"
+                    "default": "SSL certificate ARN (Requires matching DNS name)"
                 }
             }
         }

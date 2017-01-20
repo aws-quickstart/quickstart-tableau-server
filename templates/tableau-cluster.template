@@ -194,7 +194,7 @@
                     "default": "EC2 keypair"
                 },
                 "LoadBalancerName": {
-                    "default": "Load Balancer"
+                    "default": "Load Balancer Name"
                 },
                 "PrimaryIP": {
                     "default": "Primary Server IP"
