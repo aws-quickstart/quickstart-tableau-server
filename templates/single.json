@@ -64,7 +64,7 @@
         "ParameterValue": "$[alfred_gensingleaz_1]"
     },
     {
-        "ParameterKey": "SourceCidr",
+        "ParameterKey": "SourceCIDR",
         "ParameterValue": "10.0.0.0/16"
     },
     {
