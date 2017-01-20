@@ -10,7 +10,7 @@
             "Description": "The public subnets on which to place the load balancer",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
-        "SourceCidr": {
+        "SourceCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
             "Description": "CIDR from which you may connect to web interface",
@@ -21,7 +21,7 @@
             "Description": "The Amazon Resource Name for the existing SSL cert you wish to use; empty for none",
             "Type": "String"
         },
-        "VpcId": {
+        "VPCID": {
             "Description": "ID of the VPC",
             "Type": "AWS::EC2::VPC::Id"
         }
@@ -36,9 +36,9 @@
                     "Parameters": [
                         "GatewayInstances",
                         "LoadBalancerPublicSubnets",
-                        "SourceCidr",
+                        "SourceCIDR",
                         "SSLCertificateARN",
-                        "VpcId"
+                        "VPCID"
                     ]
                 }
             ],
@@ -49,13 +49,13 @@
                 "LoadBalancerPublicSubnets": {
                     "default": "Public subnets on which to place this load balancer"
                 },
-                "SourceCidr": {
+                "SourceCIDR": {
                     "default": "CIDR describing who can reach this load balancer"
                 },
                 "SSLCertificateARN": {
                     "default": "SSL cert (if any) to attach to this load balancer"
                 },
-                "VpcId": {
+                "VPCID": {
                     "default": "The VPC id in which to create this load balancer"
                 }
             }
@@ -101,7 +101,7 @@
                             ]
                         },
                         "CidrIp": {
-                            "Ref": "SourceCidr"
+                            "Ref": "SourceCIDR"
                         }
                     }
                 ],
@@ -112,7 +112,7 @@
                     }
                 ],
                 "VpcId": {
-                    "Ref": "VpcId"
+                    "Ref": "VPCID"
                 }
             }
         },

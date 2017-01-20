@@ -14,60 +14,41 @@
             "MinLength": "1",
             "Type": "String"
         },
-        "InstallationBucket": {
-            "Description": "The name of the S3 bucket from which to fetch installer executables",
-            "Type": "String",
-            "MinLength": "1"
-        },
-        "InstanceType": {
-            "Description": "The AWS Instance Type to use for our servers",
-            "Type": "String",
-            "MinLength": "1"
-        },
         "KeyPairName": {
             "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
             "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "PrimaryAvailabilityZone": {
-            "Description": "The name of the Availability Zone for Primary server",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "PrimaryIp": {
+        "PrimaryIP": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
             "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
+            "Default": "10.0.2.11",
             "Description": "Fixed IP for the primary server",
             "Type": "String"
         },
-        "PrimarySubnetId": {
+        "PrimarySubnetID": {
             "Description": "The Id of the subnet for the Primary server",
             "Type": "AWS::EC2::Subnet::Id"
         },
-        "Worker1AvailabilityZone": {
-            "Description": "The name of the Availability Zone for Worker1 server",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "Worker1Ip": {
+        "Worker1IP": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
             "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
+            "Default": "10.0.4.11",
             "Description": "Fixed IP for the worker1 server",
             "Type": "String"
         },
-        "Worker1SubnetId": {
+        "Worker1SubnetID": {
             "Description": "The Id of the subnet for the Worker1 server",
             "Type": "AWS::EC2::Subnet::Id"
         },
-        "Worker2AvailabilityZone": {
-            "Description": "The name of the Availability Zone for Worker2 server",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "Worker2Ip": {
+        "Worker2IP": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
             "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
+            "Default": "10.0.6.11",
             "Description": "Fixed IP for the worker2 server",
             "Type": "String"
         },
-        "Worker2SubnetId": {
+        "Worker2SubnetID": {
             "Description": "The Id of the subnet for the Worker2 server",
             "Type": "AWS::EC2::Subnet::Id"
         },
@@ -127,23 +108,9 @@
             "MinLength": "1",
             "Type": "String"
         },
-        "TableauServerPrimaryInstaller": {
-            "Description": "Name of primary installer",
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "TableauServerWorkerInstaller": {
-            "Description": "Name of worker installer",
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "VpcId": {
+        "VPCID": {
             "Description": "ID of the VPC",
             "Type": "AWS::EC2::VPC::Id"
-        },
-        "WindowsAMIId": {
-            "Description": "Name of AMI containing Windows OS",
-            "Type": "AWS::EC2::Image::Id"
         }
     },
     "Metadata": {
@@ -151,39 +118,24 @@
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "AWS Environment"
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VPCID",
+                        "PrimarySubnetID",
+                        "Worker1SubnetID",
+                        "Worker2SubnetID"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
                     },
                     "Parameters": [
                         "KeyPairName",
-                        "InstallationBucket",
-                        "WindowsAMIId",
-                        "InstanceType"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Installer Files"
-                    },
-                    "Parameters": [
-                        "TableauServerPrimaryInstaller",
-                        "TableauServerWorkerInstaller"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Server Setup"
-                    },
-                    "Parameters": [
-                        "VpcId",
-                        "PrimaryIp",
-                        "PrimaryAvailabilityZone",
-                        "PrimarySubnetId",
-                        "Worker1Ip",
-                        "Worker1AvailabilityZone",
-                        "Worker1SubnetId",
-                        "Worker2Ip",
-                        "Worker2AvailabilityZone",
-                        "Worker2SubnetId"
+                        "PrimaryIP",
+                        "Worker1IP",
+                        "Worker2IP"
                     ]
                 },
                 {
@@ -217,47 +169,32 @@
                 }
             ],
             "ParameterLabels": {
-                "InstallationBucket": {
-                    "default": "s3 Bucket from which to get installation files"
-                },
-                "InstanceType": {
-                    "default": "Instance Type to use for servers"
-                },
-                "KeyPairName": {
-                    "default": "EC2 keypair"
-                },
                 "ContentAdminUser": {
                     "default": "Portal admin username"
                 },
                 "ContentAdminPassword": {
                     "default": "Portal admin password"
                 },
-                "PrimaryAvailabilityZone": {
-                    "default": "AZ for Primary server"
+                "KeyPairName": {
+                    "default": "EC2 keypair"
                 },
-                "PrimaryIp": {
+                "PrimaryIP": {
                     "default": "Primary Server IP"
                 },
-                "PrimarySubnetId": {
-                    "default": "Primary Server Subnet Id"
+                "PrimarySubnetID": {
+                    "default": "Primary Server Subnet ID"
                 },
-                "Worker1AvailabilityZone": {
-                    "default": "AZ for Worker1 server"
-                },
-                "Worker1Ip": {
+                "Worker1IP": {
                     "default": "Worker1 IP"
                 },
-                "Worker1SubnetId": {
-                    "default": "Worker1 Server Subnet Id"
+                "Worker1SubnetID": {
+                    "default": "Worker1 Server Subnet ID"
                 },
-                "Worker2AvailabilityZone": {
-                    "default": "AZ for Worker2 server"
-                },
-                "Worker2Ip": {
+                "Worker2IP": {
                     "default": "Worker2 IP"
                 },
-                "Worker2SubnetId": {
-                    "default": "Worker2 Server Subnet Id"
+                "Worker2SubnetID": {
+                    "default": "Worker2 Server Subnet ID"
                 },
                 "RegFirstName": {
                     "default": "First Name"
@@ -298,18 +235,70 @@
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
                 },
-                "TableauServerPrimaryInstaller": {
-                    "default": "Tableau Server Installer Executable"
-                },
-                "TableauServerWorkerInstaller": {
-                    "default": "Tableau Worker Installer Executable"
-                },
-                "VpcId": {
-                    "Description": "ID of the VPC"
-                },
-                "WindowsAMIId": {
-                    "default": "AMI ID for base Windows installation"
+                "VPCID": {
+                    "default": "VPC ID"
                 }
+            }
+        }
+    },
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2016.12.14"
+            },
+            "ap-northeast-1": {
+                "WS2012R2": "ami-3087e957"
+            },
+            "ap-northeast-2": {
+                "WS2012R2": "ami-b869bed6"
+            },
+            "ap-south-1": {
+                "WS2012R2": "ami-b5e790da"
+            },
+            "ap-southeast-1": {
+                "WS2012R2": "ami-a96cc3ca"
+            },
+            "ap-southeast-2": {
+                "WS2012R2": "ami-37526954"
+            },
+            "ca-central-1": {
+                "WS2012R2": "ami-04259760"
+            },
+            "eu-central-1": {
+                "WS2012R2": "ami-c35495ac"
+            },
+            "eu-west-1": {
+                "WS2012R2": "ami-ab381ed8"
+            },
+            "eu-west-2": {
+                "WS2012R2": "ami-7bd4de1f"
+            },
+            "sa-east-1": {
+                "WS2012R2": "ami-3aeb7356"
+            },
+            "us-east-1": {
+                "WS2012R2": "ami-21414f36"
+            },
+            "us-east-2": {
+                "WS2012R2": "ami-c6cb91a3"
+            },
+            "us-west-1": {
+                "WS2012R2": "ami-98b0e6f8"
+            },
+            "us-west-2": {
+                "WS2012R2": "ami-cf9722af"
+            }
+        },
+        "DefaultConfiguration": {
+            "InstallationConfig": {
+                "InstallationBucket": "tableau-quickstart",
+                "InstallationExecutable": "Setup-Server-x64.exe",
+                "InstallationWorkerExecutable": "Setup-Worker-x64.exe"
+            },
+            "MachineConfiguration": {
+                "InstanceType": "m4.4xlarge",
+                "VolumeSize": 100,
+                "WindowsVersion": "WS2012R2"
             }
         }
     },
@@ -325,7 +314,7 @@
                     }
                 ],
                 "VpcId": {
-                    "Ref": "VpcId"
+                    "Ref": "VPCID"
                 }
             }
         },
@@ -388,7 +377,11 @@
                                         [
                                             "https://",
                                             {
-                                                "Ref": "InstallationBucket"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
                                             },
                                             ".s3.amazonaws.com/ScriptedInstaller.py"
                                         ]
@@ -459,16 +452,16 @@
                                     "install.component.samples": "BOOLEAN:true",
                                     "wgserver.authenticate": "local",
                                     "worker.hosts": {
-                                        "Fn::Sub": "${PrimaryIp}, ${Worker1Ip}, ${Worker2Ip}"
+                                        "Fn::Sub": "${PrimaryIP}, ${Worker1IP}, ${Worker2IP}"
                                     },
                                     "pgsql.host": {
-                                        "Ref": "Worker1Ip"
+                                        "Ref": "Worker1IP"
                                     },
                                     "pgsql0.host": {
-                                        "Ref": "Worker1Ip"
+                                        "Ref": "Worker1IP"
                                     },
                                     "pgsql1.host": {
-                                        "Ref": "Worker2Ip"
+                                        "Ref": "Worker2IP"
                                     },
                                     "worker0.gateway.enabled": "BOOLEAN:true",
                                     "worker0.gateway.port": "INTEGER:80",
@@ -512,11 +505,19 @@
                                         [
                                             "https://",
                                             {
-                                                "Ref": "InstallationBucket"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
                                             },
                                             ".s3.amazonaws.com/",
                                             {
-                                                "Ref": "TableauServerPrimaryInstaller"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationExecutable"
+                                                ]
                                             }
                                         ]
                                     ]
@@ -580,13 +581,26 @@
             },
             "Properties": {
                 "InstanceType": {
-                    "Ref": "InstanceType"
+                    "Fn::FindInMap": [
+                        "DefaultConfiguration",
+                        "MachineConfiguration",
+                        "InstanceType"
+                    ]
                 },
                 "ImageId": {
-                    "Ref": "WindowsAMIId"
-                },
-                "AvailabilityZone": {
-                    "Ref": "PrimaryAvailabilityZone"
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "DefaultConfiguration",
+                                "MachineConfiguration",
+                                "WindowsVersion"
+                            ]
+                        }
+                    ]
                 },
                 "SecurityGroupIds": [
                     {
@@ -597,16 +611,22 @@
                     "Ref": "KeyPairName"
                 },
                 "SubnetId": {
-                    "Ref": "PrimarySubnetId"
+                    "Ref": "PrimarySubnetID"
                 },
                 "PrivateIpAddress": {
-                    "Ref": "PrimaryIp"
+                    "Ref": "PrimaryIP"
                 },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "100"
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "VolumeSize"
+                                ]
+                            }
                         }
                     }
                 ],
@@ -660,11 +680,19 @@
                                         [
                                             "https://",
                                             {
-                                                "Ref": "InstallationBucket"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
                                             },
                                             ".s3.amazonaws.com/",
                                             {
-                                                "Ref": "TableauServerWorkerInstaller"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationWorkerExecutable"
+                                                ]
                                             }
                                         ]
                                     ]
@@ -685,7 +713,7 @@
                                         [
                                             "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
                                             {
-                                                "Ref": "PrimaryIp"
+                                                "Ref": "PrimaryIP"
                                             },
                                             "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
@@ -700,13 +728,26 @@
             },
             "Properties": {
                 "InstanceType": {
-                    "Ref": "InstanceType"
+                    "Fn::FindInMap": [
+                        "DefaultConfiguration",
+                        "MachineConfiguration",
+                        "InstanceType"
+                    ]
                 },
                 "ImageId": {
-                    "Ref": "WindowsAMIId"
-                },
-                "AvailabilityZone": {
-                    "Ref": "Worker1AvailabilityZone"
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "DefaultConfiguration",
+                                "MachineConfiguration",
+                                "WindowsVersion"
+                            ]
+                        }
+                    ]
                 },
                 "SecurityGroupIds": [
                     {
@@ -717,16 +758,22 @@
                     "Ref": "KeyPairName"
                 },
                 "SubnetId": {
-                    "Ref": "Worker1SubnetId"
+                    "Ref": "Worker1SubnetID"
                 },
                 "PrivateIpAddress": {
-                    "Ref": "Worker1Ip"
+                    "Ref": "Worker1IP"
                 },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "100"
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "VolumeSize"
+                                ]
+                            }
                         }
                     }
                 ],
@@ -780,11 +827,19 @@
                                         [
                                             "https://",
                                             {
-                                                "Ref": "InstallationBucket"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
                                             },
                                             ".s3.amazonaws.com/",
                                             {
-                                                "Ref": "TableauServerWorkerInstaller"
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationWorkerExecutable"
+                                                ]
                                             }
                                         ]
                                     ]
@@ -805,7 +860,7 @@
                                         [
                                             "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
                                             {
-                                                "Ref": "PrimaryIp"
+                                                "Ref": "PrimaryIP"
                                             },
                                             "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
@@ -820,13 +875,26 @@
             },
             "Properties": {
                 "InstanceType": {
-                    "Ref": "InstanceType"
+                    "Fn::FindInMap": [
+                        "DefaultConfiguration",
+                        "MachineConfiguration",
+                        "InstanceType"
+                    ]
                 },
                 "ImageId": {
-                    "Ref": "WindowsAMIId"
-                },
-                "AvailabilityZone": {
-                    "Ref": "Worker2AvailabilityZone"
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "DefaultConfiguration",
+                                "MachineConfiguration",
+                                "WindowsVersion"
+                            ]
+                        }
+                    ]
                 },
                 "SecurityGroupIds": [
                     {
@@ -837,16 +905,22 @@
                     "Ref": "KeyPairName"
                 },
                 "SubnetId": {
-                    "Ref": "Worker2SubnetId"
+                    "Ref": "Worker2SubnetID"
                 },
                 "PrivateIpAddress": {
-                    "Ref": "Worker2Ip"
+                    "Ref": "Worker2IP"
                 },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "VolumeSize": "100"
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "VolumeSize"
+                                ]
+                            }
                         }
                     }
                 ],
@@ -932,40 +1006,40 @@
                 "Ref": "WorkerHost2"
             }
         },
-        "PrimaryInstanceId": {
+        "PrimaryInstanceID": {
             "Description": "Instance ID of Primary Server",
             "Value": {
                 "Ref": "PrimaryHost"
             }
         },
-        "PrimarySubnetId": {
+        "PrimarySubnetID": {
             "Description": "Instance ID of Primary Server",
             "Value": {
-                "Ref": "PrimarySubnetId"
+                "Ref": "PrimarySubnetID"
             }
         },
-        "Worker1InstanceId": {
+        "Worker1InstanceID": {
             "Description": "Instance ID of Worker1 Server",
             "Value": {
                 "Ref": "WorkerHost1"
             }
         },
-        "Worker1SubnetId": {
+        "Worker1SubnetID": {
             "Description": "Instance ID of Primary Server",
             "Value": {
-                "Ref": "Worker1SubnetId"
+                "Ref": "Worker1SubnetID"
             }
         },
-        "Worker2InstanceId": {
+        "Worker2InstanceID": {
             "Description": "Instance ID of Worker2 Server",
             "Value": {
                 "Ref": "WorkerHost2"
             }
         },
-        "Worker2SubnetId": {
+        "Worker2SubnetID": {
             "Description": "Instance ID of Primary Server",
             "Value": {
-                "Ref": "Worker2SubnetId"
+                "Ref": "Worker2SubnetID"
             }
         },
         "SecurityGroup": {

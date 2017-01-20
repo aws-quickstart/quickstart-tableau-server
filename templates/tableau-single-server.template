@@ -74,7 +74,7 @@
             "Description": "The availability zone in which our server and storage volume reside",
             "Type": "AWS::EC2::AvailabilityZone::Name"
         },
-        "SourceCidr": {
+        "SourceCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
             "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
@@ -95,7 +95,7 @@
                     "Parameters": [
                         "KeyPairName",
                         "ResourceAvailabilityZone",
-                        "SourceCidr"
+                        "SourceCIDR"
                     ]
                 },
                 {
@@ -135,7 +135,7 @@
                 "ResourceAvailabilityZone": {
                     "default": "Target AZ"
                 },
-                "SourceCidr": {
+                "SourceCIDR": {
                     "default": "Source CIDR for access"
                 },
                 "ContentAdminUser": {
@@ -267,7 +267,7 @@
                         "FromPort": "3389",
                         "ToPort": "3389",
                         "CidrIp": {
-                            "Ref": "SourceCidr"
+                            "Ref": "SourceCIDR"
                         }
                     },
                     {
@@ -275,7 +275,7 @@
                         "FromPort": "80",
                         "ToPort": "80",
                         "CidrIp": {
-                            "Ref": "SourceCidr"
+                            "Ref": "SourceCIDR"
                         }
                     }
                 ]
