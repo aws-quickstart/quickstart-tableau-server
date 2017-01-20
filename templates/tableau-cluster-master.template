@@ -592,7 +592,7 @@
                         "Fn::If": [ 
                             "CreateDNSEntry", 
                             { 
-                                "Ref" : "AwsPublicFQDN" 
+                                "Ref" : "AWSPublicFQDN" 
                             }, 
                             {
                                 "Fn::GetAtt": [
