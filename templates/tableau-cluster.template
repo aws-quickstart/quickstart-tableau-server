@@ -25,6 +25,7 @@
             "MinLength": "1"
         },
         "InstanceType": {
+            "Default": "m4.4xlarge",
             "Description": "The AWS Instance Type to use for our servers",
             "Type": "String",
             "MinLength": "1"
@@ -323,7 +324,7 @@
                     "default": "Tableau Worker Installer Executable"
                 },
                 "VpcId": {
-                    "Description": "ID of the VPC"
+                    "default": "ID of the VPC"
                 },
                 "WindowsAMIId": {
                     "default": "AMI ID for base Windows installation"
@@ -798,9 +799,6 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
-                "IamInstanceProfile" : { 
-                    "Ref" : "TableauWindowsServerInstanceProfile" 
-                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
@@ -921,9 +919,6 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
-                "IamInstanceProfile" : { 
-                    "Ref" : "TableauWindowsServerInstanceProfile" 
-                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
