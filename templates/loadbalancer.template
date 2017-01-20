@@ -2,10 +2,6 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "A load balancer for number of instances",
     "Parameters": {
-        "GatewayInstances": {
-            "Description": "The instances to attach to this load balancer",
-            "Type": "List<AWS::EC2::Instance::Id>"
-        },
         "LoadBalancerPublicSubnets": {
             "Description": "The public subnets on which to place the load balancer",
             "Type": "List<AWS::EC2::Subnet::Id>"
@@ -34,7 +30,6 @@
                         "default": "Load Balancer Information"
                     },
                     "Parameters": [
-                        "GatewayInstances",
                         "LoadBalancerPublicSubnets",
                         "SourceCIDR",
                         "SSLCertificateARN",
@@ -43,9 +38,6 @@
                 }
             ],
             "ParameterLabels": {
-                "GatewayInstances": {
-                    "default": "The instances to attach to this load balancer"
-                },
                 "LoadBalancerPublicSubnets": {
                     "default": "Public subnets on which to place this load balancer"
                 },
@@ -123,9 +115,6 @@
             ],
             "Properties": {
                 "Scheme": "internet-facing",
-                "Instances": {
-                    "Ref": "GatewayInstances"
-                },
                 "Subnets": {
                     "Ref": "LoadBalancerPublicSubnets"
                 },
