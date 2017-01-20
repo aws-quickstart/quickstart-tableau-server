@@ -4,11 +4,11 @@
         "ParameterValue": "$[alfred_genaz_3]"
     },
     {
-        "ParameterKey": "AwsHostedZoneId",
+        "ParameterKey": "AWSHostedZoneID",
         "ParameterValue": ""
     },
     {
-        "ParameterKey": "AwsPublicFQDN",
+        "ParameterKey": "AWSPublicFQDN",
         "ParameterValue": ""
     },
     {
