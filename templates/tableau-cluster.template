@@ -244,49 +244,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2016.12.14"
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.01.11"
             },
             "ap-northeast-1": {
-                "WS2012R2": "ami-3087e957"
+                "WS2012R2": "ami-7accbe1d"
             },
             "ap-northeast-2": {
-                "WS2012R2": "ami-b869bed6"
+                "WS2012R2": "ami-e979af87"
             },
             "ap-south-1": {
-                "WS2012R2": "ami-b5e790da"
+                "WS2012R2": "ami-31a6d05e"
             },
             "ap-southeast-1": {
-                "WS2012R2": "ami-a96cc3ca"
+                "WS2012R2": "ami-89e74cea"
             },
             "ap-southeast-2": {
-                "WS2012R2": "ami-37526954"
+                "WS2012R2": "ami-059d9866"
             },
             "ca-central-1": {
-                "WS2012R2": "ami-04259760"
+                "WS2012R2": "ami-7805b71c"
             },
             "eu-central-1": {
-                "WS2012R2": "ami-c35495ac"
+                "WS2012R2": "ami-6f559800"
             },
             "eu-west-1": {
-                "WS2012R2": "ami-ab381ed8"
+                "WS2012R2": "ami-dd9eb6ae"
             },
             "eu-west-2": {
-                "WS2012R2": "ami-7bd4de1f"
+                "WS2012R2": "ami-738a8017"
             },
             "sa-east-1": {
-                "WS2012R2": "ami-3aeb7356"
+                "WS2012R2": "ami-f4d84298"
             },
             "us-east-1": {
-                "WS2012R2": "ami-21414f36"
+                "WS2012R2": "ami-abf616bd"
             },
             "us-east-2": {
-                "WS2012R2": "ami-c6cb91a3"
+                "WS2012R2": "ami-c06d48a5"
             },
             "us-west-1": {
-                "WS2012R2": "ami-98b0e6f8"
+                "WS2012R2": "ami-76227116"
             },
             "us-west-2": {
-                "WS2012R2": "ami-cf9722af"
+                "WS2012R2": "ami-1562d075"
             }
         },
         "DefaultConfiguration": {
