@@ -2,6 +2,11 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Three node cluster with instances placed as specified in parameters",
     "Parameters": {
+        "ClusterPublicName": {
+            "Description": "The DNS name used to reach the cluster (the load balancer DNS name)",
+            "Type": "String",
+            "MinLength": "1"
+        },
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
             "MinLength": "1",
@@ -15,9 +20,14 @@
             "Type": "String"
         },
         "KeyPairName": {
-            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
-            "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
+            "ConstraintDescription": "The name of an existing EC2 Key Pair",
+            "Description": "Name of an existing EC2 Key Pair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "LoadBalancerName" : {
+            "Description": "The AWS name of the load balancer we attach to",
+            "Type": "String",
+            "MinLength": "1"
         },
         "PrimaryIP": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -27,7 +37,7 @@
             "Type": "String"
         },
         "PrimarySubnetID": {
-            "Description": "The Id of the subnet for the Primary server",
+            "Description": "The ID of the subnet for the Primary server",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "Worker1IP": {
@@ -38,7 +48,7 @@
             "Type": "String"
         },
         "Worker1SubnetID": {
-            "Description": "The Id of the subnet for the Worker1 server",
+            "Description": "The ID of the subnet for the Worker1 server",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "Worker2IP": {
@@ -49,58 +59,46 @@
             "Type": "String"
         },
         "Worker2SubnetID": {
-            "Description": "The Id of the subnet for the Worker2 server",
+            "Description": "The ID of the subnet for the Worker2 server",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
-            "Description": "City",
             "Type": "String"
         },
         "RegCompany": {
-            "Description": "Company",
             "Type": "String"
         },
         "RegCountry": {
-            "Description": "Country",
             "Type": "String"
         },
         "RegDepartment": {
-            "Description": "Department",
             "Type": "String"
         },
         "RegEmail": {
-            "Description": "Email",
             "MinLength": "1",
             "Type": "String"
         },
         "RegFirstName": {
-            "Description": "First Name",
             "MinLength": "1",
             "Type": "String"
         },
         "RegIndustry": {
-            "Description": "Industry",
             "Type": "String"
         },
         "RegLastName": {
-            "Description": "Last Name",
             "MinLength": "1",
             "Type": "String"
         },
         "RegPhone": {
-            "Description": "Phone",
             "Type": "String"
         },
         "RegState": {
-            "Description": "State",
             "Type": "String"
         },
         "RegTitle": {
-            "Description": "Title",
             "Type": "String"
         },
         "RegZip": {
-            "Description": "ZIP/Postal Code",
             "Type": "String"
         },
         "TableauServerLicenseKey": {
@@ -109,7 +107,7 @@
             "Type": "String"
         },
         "VPCID": {
-            "Description": "ID of the VPC",
+            "Description": "The ID of the VPC into which to deploy the cluster",
             "Type": "AWS::EC2::VPC::Id"
         }
     },
@@ -121,6 +119,8 @@
                         "default": "Network Configuration"
                     },
                     "Parameters": [
+                        "ClusterPublicName",
+                        "LoadBalancerName",
                         "VPCID",
                         "PrimarySubnetID",
                         "Worker1SubnetID",
@@ -169,14 +169,20 @@
                 }
             ],
             "ParameterLabels": {
+                "ClusterPublicName": {
+                    "default": "Load Balancer DNS Name"
+                },
                 "ContentAdminUser": {
-                    "default": "Portal admin username"
+                    "default": "Portal Admin Username"
                 },
                 "ContentAdminPassword": {
-                    "default": "Portal admin password"
+                    "default": "Portal Admin Password"
                 },
                 "KeyPairName": {
-                    "default": "EC2 keypair"
+                    "default": "Key Pair Name"
+                },
+                "LoadBalancerName": {
+                    "default": "Load Balancer Name"
                 },
                 "PrimaryIP": {
                     "default": "Primary Server IP"
@@ -200,7 +206,7 @@
                     "default": "First Name"
                 },
                 "RegLastName": {
-                    "default": "Last name"
+                    "default": "Last Name"
                 },
                 "RegEmail": {
                     "default": "Email Address"
@@ -303,6 +309,47 @@
         }
     },
     "Resources": {
+        "LoadBalancerRegisterRole" : {
+            "Type" : "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                   "Version" : "2012-10-17",
+                   "Statement": [{
+                      "Effect": "Allow",
+                      "Principal": {
+                         "Service": [ "ec2.amazonaws.com" ]
+                      },
+                      "Action": [ "sts:AssumeRole" ]
+                   }]
+                },
+                "Policies" : [
+                    {
+                        "PolicyName" : {"Fn::Sub" : "${AWS::StackName}-load-balancer-register-role"} ,
+                        "PolicyDocument" : {
+                            "Statement": [
+                                {
+                                  "Effect": "Allow",
+                                    "Action": [
+                                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+                                    ],
+                                    "Resource": [
+                                        {"Fn::Sub" : "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${LoadBalancerName}"}
+                                    ]
+                                }
+                              ]
+                        }
+                    }
+                ]
+            }
+        },
+        "TableauWindowsServerInstanceProfile" : {
+            "Type" : "AWS::IAM::InstanceProfile",
+            "DependsOn" : ["LoadBalancerRegisterRole"],
+            "Properties": {
+                "Path":"/",
+                "Roles": [ { "Ref" : "LoadBalancerRegisterRole" } ]
+            }
+        },
         "WorkloadSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -341,6 +388,11 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
+                        "packages": {
+                            "msi" : {
+                              "python" : "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
+                            }                        
+                        },
                         "files": {
                             "c:\\tabsetup\\json2yml.py": {
                                 "content": {
@@ -366,9 +418,6 @@
                                         ]
                                     ]
                                 }
-                            },
-                            "c:\\tabsetup\\python-2.7.12.msi": {
-                                "source": "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
                             },
                             "c:\\tabsetup\\ScriptedInstaller.py": {
                                 "source": {
@@ -463,6 +512,9 @@
                                     "pgsql1.host": {
                                         "Ref": "Worker2IP"
                                     },
+                                    "gateway.public.host": {
+                                        "Ref": "ClusterPublicName"
+                                    },
                                     "worker0.gateway.enabled": "BOOLEAN:true",
                                     "worker0.gateway.port": "INTEGER:80",
                                     "worker0.vizportal.procs": "INTEGER:0",
@@ -522,6 +574,24 @@
                                         ]
                                     ]
                                 }
+                            },
+                            "c:\\tabsetup\\register-with-elb.py": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "import urllib2\n",
+                                            "import boto3\n",
+                                            "fyle = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id')\n",
+                                            "my_instance_id = fyle.read()\n",
+                                            { "Fn::Sub" : "client = boto3.client('elb', region_name='${AWS::Region}')\n" },
+                                            { "Fn::Sub" : "client.register_instances_with_load_balancer(LoadBalancerName='${LoadBalancerName}'," },
+                                            { "Fn::Sub" :   "Instances=[{'InstanceId': my_instance_id},{'InstanceId':'${WorkerHost1}'},{'InstanceId':'${WorkerHost2}'}]" },
+                                            ")\n",
+                                            ""
+                                        ]
+                                    ]
+                                }
                             }
                         },
                         "commands": {
@@ -530,22 +600,17 @@
                                 "command": "netsh advfirewall set allprofiles state off",
                                 "waitAfterCompletion": "0"
                             },
-                            "2-install-python": {
-                                "command": "c:\\tabsetup\\python-2.7.12.msi /quiet /qn",
-                                "cwd": "c:\\tabsetup",
-                                "waitAfterCompletion": "0"
-                            },
-                            "3-pip-install-yaml": {
-                                "command": "c:\\Python27\\Scripts\\pip.exe install pyyaml",
+                            "2-pip-install-libs": {
+                                "command": "c:\\Python27\\Scripts\\pip.exe install pyyaml boto3",
                                 "cwd": "c:\\Python27\\Scripts",
                                 "waitAfterCompletion": "0"
                             },
-                            "4-convert-config": {
+                            "3-convert-config": {
                                 "cwd": "c:\\tabsetup",
                                 "command": "type config.json | c:\\Python27\\python json2yml.py > config.yml",
                                 "waitAfterCompletion": "0"
                             },
-                            "5-run-installer": {
+                            "4-run-installer": {
                                 "cwd": "c:\\tabsetup",
                                 "command": {
                                     "Fn::Join": [
@@ -570,9 +635,14 @@
                                 },
                                 "waitAfterCompletion": "0"
                             },
-                            "6-cleanup-secrets": {
+                            "5-cleanup-secrets": {
                                 "cwd": "c:\\tabsetup",
                                 "command": "del c:\\tabsetup\\secrets.json",
+                                "waitAfterCompletion": "0"
+                            },
+                            "6-register-with-load-balancer": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "c:\\Python27\\python register-with-elb.py > lb_register.log",
                                 "waitAfterCompletion": "0"
                             }
                         }
@@ -607,6 +677,9 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
+                "IamInstanceProfile" : { 
+                    "Ref" : "TableauWindowsServerInstanceProfile" 
+                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
