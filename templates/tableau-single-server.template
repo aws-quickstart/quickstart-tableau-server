@@ -537,7 +537,7 @@
                 "Ref": "TableauWindowsServer"
             }
         },
-        "PublicIpAddress": {
+        "PublicIPAddress": {
             "Description": "Public IP Address of instance running Tableau Server",
             "Value": {
                 "Fn::GetAtt": [
