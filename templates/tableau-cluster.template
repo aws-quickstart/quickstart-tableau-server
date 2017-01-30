@@ -2,10 +2,9 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Three node cluster with instances placed as specified in parameters",
     "Parameters": {
-        "ClusterPublicName": {
-            "Description": "The DNS name used to reach the cluster (the load balancer DNS name)",
-            "Type": "String",
-            "MinLength": "1"
+        "AWSPublicFQDN": {
+            "Description": "Tableau Server portal will be reachable at this address (blank = no DNS)",
+            "Type": "String"
         },
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
@@ -24,11 +23,6 @@
             "Description": "Name of an existing EC2 Key Pair used to get the Administrator password for the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "LoadBalancerName" : {
-            "Description": "The AWS name of the load balancer we attach to",
-            "Type": "String",
-            "MinLength": "1"
-        },
         "PrimaryIP": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
             "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
@@ -36,9 +30,24 @@
             "Description": "Fixed IP for the primary server",
             "Type": "String"
         },
+        "PrimaryPublicSubnetID": {
+            "Description": "The ID of the public subnet in the Primary server's Availability Zone",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
         "PrimarySubnetID": {
             "Description": "The ID of the subnet for the Primary server",
             "Type": "AWS::EC2::Subnet::Id"
+        },
+        "SourceCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "CIDR from which you may connect to web interface",
+            "Type": "String"
+        },
+        "SSLCertificateARN": {
+            "Default": "",
+            "Description": "The Amazon Resource Name for the existing SSL cert you wish to use; empty for none",
+            "Type": "String"
         },
         "Worker1IP": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
@@ -46,6 +55,10 @@
             "Default": "10.0.4.11",
             "Description": "Fixed IP for the worker1 server",
             "Type": "String"
+        },
+        "Worker1PublicSubnetID": {
+            "Description": "The ID of the public subnet in the Worker1 server's Availability Zone",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "Worker1SubnetID": {
             "Description": "The ID of the subnet for the Worker1 server",
@@ -57,6 +70,10 @@
             "Default": "10.0.6.11",
             "Description": "Fixed IP for the worker2 server",
             "Type": "String"
+        },
+        "Worker2PublicSubnetID": {
+            "Description": "The ID of the public subnet in the Worker2 server's Availability Zone",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "Worker2SubnetID": {
             "Description": "The ID of the subnet for the Worker2 server",
@@ -119,11 +136,15 @@
                         "default": "Network Configuration"
                     },
                     "Parameters": [
-                        "ClusterPublicName",
-                        "LoadBalancerName",
+                        "SourceCIDR",
+                        "SSLCertificateARN",
+                        "AWSPublicFQDN",
                         "VPCID",
+                        "PrimaryPublicSubnetID",
                         "PrimarySubnetID",
+                        "Worker1PublicSubnetID",
                         "Worker1SubnetID",
+                        "Worker2PublicSubnetID",
                         "Worker2SubnetID"
                     ]
                 },
@@ -169,8 +190,8 @@
                 }
             ],
             "ParameterLabels": {
-                "ClusterPublicName": {
-                    "default": "Load Balancer DNS Name"
+                "AWSPublicFQDN": {
+                    "default": "Full DNS Name for Cluster"
                 },
                 "ContentAdminUser": {
                     "default": "Portal Admin Username"
@@ -181,11 +202,11 @@
                 "KeyPairName": {
                     "default": "Key Pair Name"
                 },
-                "LoadBalancerName": {
-                    "default": "Load Balancer Name"
-                },
                 "PrimaryIP": {
                     "default": "Primary Server IP"
+                },
+                "PrimaryPublicSubnetID": {
+                    "default": "Primary AZ Public Subnet ID"
                 },
                 "PrimarySubnetID": {
                     "default": "Primary Server Subnet ID"
@@ -193,11 +214,17 @@
                 "Worker1IP": {
                     "default": "Worker1 IP"
                 },
+                "Worker1PublicSubnetID": {
+                    "default": "Worker1 AZ Public Subnet ID"
+                },
                 "Worker1SubnetID": {
                     "default": "Worker1 Server Subnet ID"
                 },
                 "Worker2IP": {
                     "default": "Worker2 IP"
+                },
+                "Worker2PublicSubnetID": {
+                    "default": "Worker2 AZ Public Subnet ID"
                 },
                 "Worker2SubnetID": {
                     "default": "Worker2 Server Subnet ID"
@@ -238,6 +265,12 @@
                 "RegCountry": {
                     "default": "Country"
                 },
+                "SourceCIDR": {
+                    "default": "Source CIDR for Access"
+                },
+                "SSLCertificateARN": {
+                    "default": "SSL Certificate ARN (Requires matching DNS name)"
+                },
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
                 },
@@ -245,6 +278,31 @@
                     "default": "VPC ID"
                 }
             }
+        }
+    },
+    "Conditions": {
+        "NoSSLCertficate": {
+            "Fn::Equals": [
+                "",
+                {
+                    "Ref": "SSLCertificateARN"
+                }
+            ]
+        },
+        "HasSSLCertificate": {
+            "Fn::Not": [
+                {
+                    "Condition": "NoSSLCertficate"
+                }
+            ]
+        },
+        "NoDNSEntry": {
+            "Fn::Equals": [
+                "",
+                {
+                    "Ref": "AWSPublicFQDN"
+                }
+            ]
         }
     },
     "Mappings": {
@@ -309,6 +367,107 @@
         }
     },
     "Resources": {
+        "LoadBalancerSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable Web traffic",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {
+                            "Fn::If": [
+                                "HasSSLCertificate",
+                                "443",
+                                "80"
+                            ]
+                        },
+                        "ToPort": {
+                            "Fn::If": [
+                                "HasSSLCertificate",
+                                "443",
+                                "80"
+                            ]
+                        },
+                        "CidrIp": {
+                            "Ref": "SourceCIDR"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "LoadBalancerSecurityGroup"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPCID"
+                }
+            }
+        },
+        "ServerLoadBalancer": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "DependsOn": [
+                "LoadBalancerSecurityGroup"
+            ],
+            "Properties": {
+                "Scheme": "internet-facing",
+                "Subnets": [
+                    {
+                        "Ref": "PrimaryPublicSubnetID"
+                    },
+                    {
+                        "Ref": "Worker1PublicSubnetID"
+                    },
+                    {
+                        "Ref": "Worker2PublicSubnetID"
+                    }
+                ],
+                "SecurityGroups": [
+                    {
+                        "Ref": "LoadBalancerSecurityGroup"
+                    }
+                ],
+                "Listeners": [
+                    {
+                        "Protocol": {
+                            "Fn::If": [
+                                "HasSSLCertificate",
+                                "HTTPS",
+                                "HTTP"
+                            ]
+                        },
+                        "LoadBalancerPort": {
+                            "Fn::If": [
+                                "HasSSLCertificate",
+                                "443",
+                                "80"
+                            ]
+                        },
+                        "InstanceProtocol": "HTTP",
+                        "InstancePort": "80",
+                        "SSLCertificateId": {
+                            "Fn::If": [
+                                "HasSSLCertificate",
+                                {
+                                    "Ref": "SSLCertificateARN"
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-cfn-lb"
+                        }
+                    }
+                ]
+            }
+        },
         "LoadBalancerRegisterRole" : {
             "Type" : "AWS::IAM::Role",
             "Properties": {
@@ -333,7 +492,7 @@
                                         "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
                                     ],
                                     "Resource": [
-                                        {"Fn::Sub" : "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${LoadBalancerName}"}
+                                        {"Fn::Sub" : "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}"}
                                     ]
                                 }
                               ]
@@ -365,6 +524,22 @@
                 }
             }
         },
+        "WorkloadSecurityGroupLoadBalancerIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "DependsOn": [
+                "WorkloadSecurityGroup",
+                "LoadBalancerSecurityGroup"
+            ],
+            "Properties": {
+                "GroupId": {
+                    "Ref": "WorkloadSecurityGroup"
+                },
+                "IpProtocol": "-1",
+                "SourceSecurityGroupId": {
+                    "Ref": "LoadBalancerSecurityGroup"
+                }
+            }
+        },        
         "WorkloadSecurityGroupMutualIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn": [
@@ -383,7 +558,8 @@
         "PrimaryHost": {
             "Type": "AWS::EC2::Instance",
             "DependsOn": [
-                "TableauWorkerWaitCondition"
+                "TableauWorkerWaitCondition",
+                "ServerLoadBalancer"
             ],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -513,7 +689,18 @@
                                         "Ref": "Worker2IP"
                                     },
                                     "gateway.public.host": {
-                                        "Ref": "ClusterPublicName"
+                                        "Fn::If": [
+                                            "NoDNSEntry",
+                                            { 
+                                                "Fn::GetAtt": [
+                                                    "ServerLoadBalancer",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "AWSPublicFQDN"
+                                            }
+                                        ]
                                     },
                                     "worker0.gateway.enabled": "BOOLEAN:true",
                                     "worker0.gateway.port": "INTEGER:80",
@@ -585,7 +772,7 @@
                                             "fyle = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id')\n",
                                             "my_instance_id = fyle.read()\n",
                                             { "Fn::Sub" : "client = boto3.client('elb', region_name='${AWS::Region}')\n" },
-                                            { "Fn::Sub" : "client.register_instances_with_load_balancer(LoadBalancerName='${LoadBalancerName}'," },
+                                            { "Fn::Sub" : "client.register_instances_with_load_balancer(LoadBalancerName='${ServerLoadBalancer}'," },
                                             { "Fn::Sub" :   "Instances=[{'InstanceId': my_instance_id},{'InstanceId':'${WorkerHost1}'},{'InstanceId':'${WorkerHost2}'}]" },
                                             ")\n",
                                             ""
@@ -1061,22 +1248,28 @@
         }
     },
     "Outputs": {
-        "PrimaryHost": {
-            "Description": "Primary Server Host",
+        "LoadBalancerID": {
+            "Description": "Load Balancer ID",
             "Value": {
-                "Ref": "PrimaryHost"
+                "Ref": "ServerLoadBalancer"
             }
         },
-        "WorkerHost1": {
-            "Description": "Worker1 Server Host",
+        "LoadBalancerDNSName": {
+            "Description": "Direct DNS name of load balancer",
             "Value": {
-                "Ref": "WorkerHost1"
+                "Fn::GetAtt": [
+                    "ServerLoadBalancer",
+                    "DNSName"
+                ]
             }
         },
-        "WorkerHost2": {
-            "Description": "Worker2 Server Host",
+        "LoadBalancerCanonicalHostedZoneNameID": {
+            "Description": "The Route53 ZoneID of the domain that handles the Amazon-assigned name of the load balancer",
             "Value": {
-                "Ref": "WorkerHost2"
+                "Fn::GetAtt": [
+                    "ServerLoadBalancer",
+                    "CanonicalHostedZoneNameID"
+                ]
             }
         },
         "PrimaryInstanceID": {
@@ -1086,7 +1279,7 @@
             }
         },
         "PrimarySubnetID": {
-            "Description": "Instance ID of Primary Server",
+            "Description": "Subnet ID of Primary Server",
             "Value": {
                 "Ref": "PrimarySubnetID"
             }
@@ -1098,7 +1291,7 @@
             }
         },
         "Worker1SubnetID": {
-            "Description": "Instance ID of Primary Server",
+            "Description": "Subnet ID of Primary Server",
             "Value": {
                 "Ref": "Worker1SubnetID"
             }
@@ -1110,7 +1303,7 @@
             }
         },
         "Worker2SubnetID": {
-            "Description": "Instance ID of Primary Server",
+            "Description": "Subnet ID of Primary Server",
             "Value": {
                 "Ref": "Worker2SubnetID"
             }
