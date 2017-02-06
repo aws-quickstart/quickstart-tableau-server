@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS QuickStart Template for Tableau Server instance running on Windows",
+    "Description": "AWS QuickStart Template for Tableau Server instance running on Windows QS(0040)",
     "Parameters": {
         "ContentAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
