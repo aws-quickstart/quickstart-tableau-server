@@ -308,49 +308,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.01.11"
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.03.15"
             },
             "ap-northeast-1": {
-                "WS2012R2": "ami-7accbe1d"
+                "WS2012R2": "ami-cb7429ac"
             },
             "ap-northeast-2": {
-                "WS2012R2": "ami-e979af87"
+                "WS2012R2": "ami-34d4075a"
             },
             "ap-south-1": {
-                "WS2012R2": "ami-31a6d05e"
+                "WS2012R2": "ami-dd8cfcb2"
             },
             "ap-southeast-1": {
-                "WS2012R2": "ami-89e74cea"
+                "WS2012R2": "ami-e5a51786"
             },
             "ap-southeast-2": {
-                "WS2012R2": "ami-059d9866"
+                "WS2012R2": "ami-a63934c5"
             },
             "ca-central-1": {
-                "WS2012R2": "ami-7805b71c"
+                "WS2012R2": "ami-d242ffb6"
             },
             "eu-central-1": {
-                "WS2012R2": "ami-6f559800"
+                "WS2012R2": "ami-d029febf"
             },
             "eu-west-1": {
-                "WS2012R2": "ami-dd9eb6ae"
+                "WS2012R2": "ami-d3dee9b5"
             },
             "eu-west-2": {
-                "WS2012R2": "ami-738a8017"
+                "WS2012R2": "ami-e5b3a681"
             },
             "sa-east-1": {
-                "WS2012R2": "ami-f4d84298"
+                "WS2012R2": "ami-83f594ef"
             },
             "us-east-1": {
-                "WS2012R2": "ami-abf616bd"
+                "WS2012R2": "ami-11e84107"
             },
             "us-east-2": {
-                "WS2012R2": "ami-c06d48a5"
+                "WS2012R2": "ami-d85773bd"
             },
             "us-west-1": {
-                "WS2012R2": "ami-76227116"
+                "WS2012R2": "ami-052d7565"
             },
             "us-west-2": {
-                "WS2012R2": "ami-1562d075"
+                "WS2012R2": "ami-09f47d69"
             }
         },
         "DefaultConfiguration": {
@@ -468,45 +468,61 @@
                 ]
             }
         },
-        "LoadBalancerRegisterRole" : {
-            "Type" : "AWS::IAM::Role",
+        "LoadBalancerRegisterRole": {
+            "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
-                   "Version" : "2012-10-17",
-                   "Statement": [{
-                      "Effect": "Allow",
-                      "Principal": {
-                         "Service": [ "ec2.amazonaws.com" ]
-                      },
-                      "Action": [ "sts:AssumeRole" ]
-                   }]
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
                 },
-                "Policies" : [
+                "Policies": [
                     {
-                        "PolicyName" : {"Fn::Sub" : "${AWS::StackName}-load-balancer-register-role"} ,
-                        "PolicyDocument" : {
+                        "PolicyName": {
+                            "Fn::Sub": "${AWS::StackName}-load-balancer-register-role"
+                        },
+                        "PolicyDocument": {
                             "Statement": [
                                 {
-                                  "Effect": "Allow",
+                                    "Effect": "Allow",
                                     "Action": [
                                         "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
                                     ],
                                     "Resource": [
-                                        {"Fn::Sub" : "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}"}
+                                        {
+                                            "Fn::Sub": "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}"
+                                        }
                                     ]
                                 }
-                              ]
+                            ]
                         }
                     }
                 ]
             }
         },
-        "TableauWindowsServerInstanceProfile" : {
-            "Type" : "AWS::IAM::InstanceProfile",
-            "DependsOn" : ["LoadBalancerRegisterRole"],
+        "TableauWindowsServerInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "DependsOn": [
+                "LoadBalancerRegisterRole"
+            ],
             "Properties": {
-                "Path":"/",
-                "Roles": [ { "Ref" : "LoadBalancerRegisterRole" } ]
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "LoadBalancerRegisterRole"
+                    }
+                ]
             }
         },
         "WorkloadSecurityGroup": {
@@ -539,7 +555,7 @@
                     "Ref": "LoadBalancerSecurityGroup"
                 }
             }
-        },        
+        },
         "WorkloadSecurityGroupMutualIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "DependsOn": [
@@ -565,9 +581,9 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "packages": {
-                            "msi" : {
-                              "python" : "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
-                            }                        
+                            "msi": {
+                                "python": "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
+                            }
                         },
                         "files": {
                             "c:\\tabsetup\\json2yml.py": {
@@ -691,7 +707,7 @@
                                     "gateway.public.host": {
                                         "Fn::If": [
                                             "NoDNSEntry",
-                                            { 
+                                            {
                                                 "Fn::GetAtt": [
                                                     "ServerLoadBalancer",
                                                     "DNSName"
@@ -771,9 +787,15 @@
                                             "import boto3\n",
                                             "fyle = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id')\n",
                                             "my_instance_id = fyle.read()\n",
-                                            { "Fn::Sub" : "client = boto3.client('elb', region_name='${AWS::Region}')\n" },
-                                            { "Fn::Sub" : "client.register_instances_with_load_balancer(LoadBalancerName='${ServerLoadBalancer}'," },
-                                            { "Fn::Sub" :   "Instances=[{'InstanceId': my_instance_id},{'InstanceId':'${WorkerHost1}'},{'InstanceId':'${WorkerHost2}'}]" },
+                                            {
+                                                "Fn::Sub": "client = boto3.client('elb', region_name='${AWS::Region}')\n"
+                                            },
+                                            {
+                                                "Fn::Sub": "client.register_instances_with_load_balancer(LoadBalancerName='${ServerLoadBalancer}',"
+                                            },
+                                            {
+                                                "Fn::Sub": "Instances=[{'InstanceId': my_instance_id},{'InstanceId':'${WorkerHost1}'},{'InstanceId':'${WorkerHost2}'}]"
+                                            },
                                             ")\n",
                                             ""
                                         ]
@@ -864,8 +886,8 @@
                         "Ref": "WorkloadSecurityGroup"
                     }
                 ],
-                "IamInstanceProfile" : { 
-                    "Ref" : "TableauWindowsServerInstanceProfile" 
+                "IamInstanceProfile": {
+                    "Ref": "TableauWindowsServerInstanceProfile"
                 },
                 "KeyName": {
                     "Ref": "KeyPairName"

@@ -244,49 +244,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.01.11"
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.03.15"
             },
             "ap-northeast-1": {
-                "WS2012R2": "ami-7accbe1d"
+                "WS2012R2": "ami-cb7429ac"
             },
             "ap-northeast-2": {
-                "WS2012R2": "ami-e979af87"
+                "WS2012R2": "ami-34d4075a"
             },
             "ap-south-1": {
-                "WS2012R2": "ami-31a6d05e"
+                "WS2012R2": "ami-dd8cfcb2"
             },
             "ap-southeast-1": {
-                "WS2012R2": "ami-89e74cea"
+                "WS2012R2": "ami-e5a51786"
             },
             "ap-southeast-2": {
-                "WS2012R2": "ami-059d9866"
+                "WS2012R2": "ami-a63934c5"
             },
             "ca-central-1": {
-                "WS2012R2": "ami-7805b71c"
+                "WS2012R2": "ami-d242ffb6"
             },
             "eu-central-1": {
-                "WS2012R2": "ami-6f559800"
+                "WS2012R2": "ami-d029febf"
             },
             "eu-west-1": {
-                "WS2012R2": "ami-dd9eb6ae"
+                "WS2012R2": "ami-d3dee9b5"
             },
             "eu-west-2": {
-                "WS2012R2": "ami-738a8017"
+                "WS2012R2": "ami-e5b3a681"
             },
             "sa-east-1": {
-                "WS2012R2": "ami-f4d84298"
+                "WS2012R2": "ami-83f594ef"
             },
             "us-east-1": {
-                "WS2012R2": "ami-abf616bd"
+                "WS2012R2": "ami-11e84107"
             },
             "us-east-2": {
-                "WS2012R2": "ami-c06d48a5"
+                "WS2012R2": "ami-d85773bd"
             },
             "us-west-1": {
-                "WS2012R2": "ami-76227116"
+                "WS2012R2": "ami-052d7565"
             },
             "us-west-2": {
-                "WS2012R2": "ami-1562d075"
+                "WS2012R2": "ami-09f47d69"
             }
         },
         "AWSInfoRegionMap": {
