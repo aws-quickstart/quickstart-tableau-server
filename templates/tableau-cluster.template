@@ -361,7 +361,8 @@
             },
             "MachineConfiguration": {
                 "InstanceType": "m4.4xlarge",
-                "VolumeSize": 100,
+                "SystemVolumeSize": 50,
+                "DataVolumeSize": 100,
                 "WindowsVersion": "WS2012R2"
             }
         }
@@ -833,6 +834,7 @@
                                             "--secretsFile c:\\tabsetup\\secrets.json",
                                             "--configFile c:\\tabsetup\\config.yml",
                                             "--registrationFile c:\\tabsetup\\registration.json",
+                                            "--installDir d:\\tableau",
                                             "--licenseKey",
                                             {
                                                 "Ref": "TableauServerLicenseKey"
@@ -906,9 +908,23 @@
                                 "Fn::FindInMap": [
                                     "DefaultConfiguration",
                                     "MachineConfiguration",
-                                    "VolumeSize"
+                                    "SystemVolumeSize"
                                 ]
-                            }
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    },
+                    {
+                        "DeviceName": "xvdc",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "DataVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
                         }
                     }
                 ],
@@ -997,7 +1013,7 @@
                                             {
                                                 "Ref": "PrimaryIP"
                                             },
-                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
+                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /DIR=d:\\tableau /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
                                         ]
                                     ]
@@ -1046,19 +1062,33 @@
                     "Ref": "Worker1IP"
                 },
                 "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "VolumeSize"
-                                ]
-                            }
-                        }
-                    }
-                ],
+                      {
+                          "DeviceName": "/dev/sda1",
+                          "Ebs": {
+                              "VolumeSize": {
+                                  "Fn::FindInMap": [
+                                      "DefaultConfiguration",
+                                      "MachineConfiguration",
+                                      "SystemVolumeSize"
+                                  ]
+                              },
+                              "VolumeType": "gp2"
+                          }
+                      },
+                      {
+                          "DeviceName": "xvdc",
+                          "Ebs": {
+                              "VolumeSize": {
+                                  "Fn::FindInMap": [
+                                      "DefaultConfiguration",
+                                      "MachineConfiguration",
+                                      "DataVolumeSize"
+                                  ]
+                              },
+                              "VolumeType": "gp2"
+                          }
+                      }
+                  ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -1144,7 +1174,7 @@
                                             {
                                                 "Ref": "PrimaryIP"
                                             },
-                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /LOG=c:\\tabsetup\\installerlog.txt",
+                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /DIR=d:\\tableau /LOG=c:\\tabsetup\\installerlog.txt",
                                             " > c:\\tabsetup\\installer-output.txt 2>&1"
                                         ]
                                     ]
@@ -1193,19 +1223,33 @@
                     "Ref": "Worker2IP"
                 },
                 "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "VolumeSize"
-                                ]
-                            }
-                        }
-                    }
-                ],
+                      {
+                          "DeviceName": "/dev/sda1",
+                          "Ebs": {
+                              "VolumeSize": {
+                                  "Fn::FindInMap": [
+                                      "DefaultConfiguration",
+                                      "MachineConfiguration",
+                                      "SystemVolumeSize"
+                                  ]
+                              },
+                              "VolumeType": "gp2"
+                          }
+                      },
+                      {
+                          "DeviceName": "xvdc",
+                          "Ebs": {
+                              "VolumeSize": {
+                                  "Fn::FindInMap": [
+                                      "DefaultConfiguration",
+                                      "MachineConfiguration",
+                                      "DataVolumeSize"
+                                  ]
+                              },
+                              "VolumeType": "gp2"
+                          }
+                      }
+                  ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
