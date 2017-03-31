@@ -1062,33 +1062,33 @@
                     "Ref": "Worker1IP"
                 },
                 "BlockDeviceMappings": [
-                      {
-                          "DeviceName": "/dev/sda1",
-                          "Ebs": {
-                              "VolumeSize": {
-                                  "Fn::FindInMap": [
-                                      "DefaultConfiguration",
-                                      "MachineConfiguration",
-                                      "SystemVolumeSize"
-                                  ]
-                              },
-                              "VolumeType": "gp2"
-                          }
-                      },
-                      {
-                          "DeviceName": "xvdc",
-                          "Ebs": {
-                              "VolumeSize": {
-                                  "Fn::FindInMap": [
-                                      "DefaultConfiguration",
-                                      "MachineConfiguration",
-                                      "DataVolumeSize"
-                                  ]
-                              },
-                              "VolumeType": "gp2"
-                          }
-                      }
-                  ],
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "SystemVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    },
+                    {
+                        "DeviceName": "xvdc",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "DataVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -1223,33 +1223,33 @@
                     "Ref": "Worker2IP"
                 },
                 "BlockDeviceMappings": [
-                      {
-                          "DeviceName": "/dev/sda1",
-                          "Ebs": {
-                              "VolumeSize": {
-                                  "Fn::FindInMap": [
-                                      "DefaultConfiguration",
-                                      "MachineConfiguration",
-                                      "SystemVolumeSize"
-                                  ]
-                              },
-                              "VolumeType": "gp2"
-                          }
-                      },
-                      {
-                          "DeviceName": "xvdc",
-                          "Ebs": {
-                              "VolumeSize": {
-                                  "Fn::FindInMap": [
-                                      "DefaultConfiguration",
-                                      "MachineConfiguration",
-                                      "DataVolumeSize"
-                                  ]
-                              },
-                              "VolumeType": "gp2"
-                          }
-                      }
-                  ],
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "SystemVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    },
+                    {
+                        "DeviceName": "xvdc",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "DataVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
