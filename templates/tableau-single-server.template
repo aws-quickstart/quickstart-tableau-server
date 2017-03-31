@@ -229,7 +229,8 @@
             },
             "MachineConfiguration": {
                 "InstanceType": "m4.4xlarge",
-                "VolumeSize": 100,
+                "SystemVolumeSize": 50,
+                "DataVolumeSize": 100,
                 "WindowsVersion": "WS2012R2"
             }
         }
@@ -408,6 +409,7 @@
                                             "--enablePublicFwRule",
                                             "--secretsFile c:\\tabsetup\\secrets.json",
                                             "--registrationFile c:\\tabsetup\\registration.json",
+                                            "--installDir d:\\tableau",
                                             {
                                                 "Fn::If": [
                                                     "IsTrial",
@@ -467,9 +469,23 @@
                                 "Fn::FindInMap": [
                                     "DefaultConfiguration",
                                     "MachineConfiguration",
-                                    "VolumeSize"
+                                    "SystemVolumeSize"
                                 ]
-                            }
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    },
+                    {
+                        "DeviceName": "xvdc",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "DataVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
                         }
                     }
                 ],
