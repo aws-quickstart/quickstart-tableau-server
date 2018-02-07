@@ -2,16 +2,23 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "AWS QuickStart Template for Tableau Server instance running on Windows QS(0040)",
     "Parameters": {
-        "ContentAdminPassword": {
-            "Description": "The password for the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "NoEcho": "true",
-            "Type": "String"
+        "InstanceType" : {
+            "Description" : "Amazon EC2 instance type",
+            "Type" : "String",
+            "Default" : "m4.4xlarge",
+            "AllowedValues" : [ "m4.2xlarge", "m4.4xlarge", "m4.10xlarge"],
+            "ConstraintDescription" : "must be a valid EC2 instance type."
         },
-        "ContentAdminUser": {
+        "TableauServerAdminUser": {
             "Default": "admin",
             "Description": "The name of the initial Admin user for Tableau server",
             "MinLength": "1",
+            "Type": "String"
+        },
+        "TableauServerAdminPassword": {
+            "Description": "The password for the initial Admin user for Tableau server",
+            "MinLength": "1",
+            "NoEcho": "true",
             "Type": "String"
         },
         "KeyPairName": {
@@ -19,48 +26,44 @@
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "RegCity": {
-            "Type": "String"
-        },
-        "RegCompany": {
-            "Type": "String"
-        },
-        "RegCountry": {
-            "Type": "String"
-        },
-        "RegDepartment": {
-            "Type": "String"
-        },
-        "RegEmail": {
-            "MinLength": "1",
-            "Type": "String"
-        },
         "RegFirstName": {
             "MinLength": "1",
-            "Type": "String"
-        },
-        "RegIndustry": {
             "Type": "String"
         },
         "RegLastName": {
             "MinLength": "1",
             "Type": "String"
         },
-        "RegPhone": {
+        "RegEmail": {
+            "MinLength": "1",
             "Type": "String"
         },
-        "RegState": {
+        "RegCompany": {
             "Type": "String"
         },
         "RegTitle": {
             "Type": "String"
         },
+        "RegDepartment": {
+            "Type": "String"
+        },
+        "RegIndustry": {
+            "Type": "String"
+        },
+        "RegPhone": {
+            "Type": "String"
+        },
+        "RegCity": {
+            "Type": "String"
+        },
+        "RegState": {
+            "Type": "String"
+        },
         "RegZip": {
             "Type": "String"
         },
-        "ResourceAvailabilityZone": {
-            "Description": "The availability zone in which our server and storage volume reside",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
+        "RegCountry": {
+            "Type": "String"
         },
         "SourceCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
@@ -71,6 +74,14 @@
         "TableauServerLicenseKey": {
             "Description": "License Key (leave blank for trial)",
             "Type": "String"
+        },
+        "ExistingSecurityGroup" : {
+            "Description" : "Provide an existing security group or leave blank for creating a new one",
+            "Type" : "String"
+        },
+        "IPAddress" : {
+            "Description" : "Provide an EIP for the node (blank = no EIP)",
+            "Type" : "String"
         }
     },
     "Metadata": {
@@ -81,9 +92,11 @@
                         "default": "AWS Environment"
                     },
                     "Parameters": [
+                        "InstanceType",
                         "KeyPairName",
-                        "ResourceAvailabilityZone",
-                        "SourceCIDR"
+                        "SourceCIDR",
+                        "ExistingSecurityGroup",
+                        "IPAddress"
                     ]
                 },
                 {
@@ -91,8 +104,8 @@
                         "default": "Configure Initial Tableau Admin User"
                     },
                     "Parameters": [
-                        "ContentAdminUser",
-                        "ContentAdminPassword"
+                        "TableauServerAdminUser",
+                        "TableauServerAdminPassword"
                     ]
                 },
                 {
@@ -117,19 +130,25 @@
                 }
             ],
             "ParameterLabels": {
+                "InstanceType" : {
+                    "default" : "Tableau Amazon EC2 instance type"
+                },
                 "KeyPairName": {
                     "default": "Key Pair Name"
-                },
-                "ResourceAvailabilityZone": {
-                    "default": "Target Availability Zone"
                 },
                 "SourceCIDR": {
                     "default": "Source CIDR for Access"
                 },
-                "ContentAdminUser": {
+                "ExistingSecurityGroup": {
+                    "default": "Existing Security Group"
+                },
+                "IPAddress": {
+                    "default": "EIP address for the node"
+                },
+                "TableauServerAdminUser": {
                     "default": "Portal Admin Username"
                 },
-                "ContentAdminPassword": {
+                "TableauServerAdminPassword": {
                     "default": "Portal Admin Password"
                 },
                 "TableauServerLicenseKey": {
@@ -228,7 +247,6 @@
                 "InstallationExecutable": "Setup-Server-x64.exe"
             },
             "MachineConfiguration": {
-                "InstanceType": "m4.4xlarge",
                 "SystemVolumeSize": 50,
                 "DataVolumeSize": 100,
                 "WindowsVersion": "WS2012R2"
@@ -243,11 +261,42 @@
                     "Ref": "TableauServerLicenseKey"
                 }
             ]
+        },
+        "NoServerSecurityGroup": {
+            "Fn::Equals": [
+                "",
+                {
+                    "Ref" : "ExistingSecurityGroup"
+                }
+            ]
+        },
+        "HasServerSecurityGroup": {
+            "Fn::Not": [
+                {
+                    "Condition" : "NoServerSecurityGroup"
+                }
+            ]
+        },
+        "NoElasticIP": {
+            "Fn::Equals": [
+                "",
+                {
+                    "Ref" : "IPAddress"
+                }
+            ]
+        },
+        "HasElasticIP": {
+            "Fn::Not": [
+                {
+                    "Condition" : "NoElasticIP"
+                }
+            ]
         }
     },
     "Resources": {
         "InstanceSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
+            "Condition": "NoServerSecurityGroup",
             "Properties": {
                 "GroupDescription": "Enable RDP",
                 "SecurityGroupIngress": [
@@ -270,11 +319,16 @@
                 ]
             }
         },
+        "IPAssoc" : {
+            "Type" : "AWS::EC2::EIPAssociation",
+            "Condition": "HasElasticIP",
+            "Properties" : {
+                "InstanceId" : { "Ref" : "TableauWindowsServer" },
+                "EIP" : { "Ref" : "IPAddress" }
+            }
+        },
         "TableauWindowsServer": {
             "Type": "AWS::EC2::Instance",
-            "DependsOn": [
-                "InstanceSecurityGroup"
-            ],
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
@@ -282,10 +336,10 @@
                             "c:\\tabsetup\\secrets.json": {
                                 "content": {
                                     "content_admin_user": {
-                                        "Ref": "ContentAdminUser"
+                                        "Ref": "TableauServerAdminUser"
                                     },
                                     "content_admin_pass": {
-                                        "Ref": "ContentAdminPassword"
+                                        "Ref": "TableauServerAdminPassword"
                                     }
                                 }
                             },
@@ -436,12 +490,8 @@
                 }
             },
             "Properties": {
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
+                "InstanceType" : {
+                    "Ref" : "InstanceType"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -457,9 +507,6 @@
                             ]
                         }
                     ]
-                },
-                "AvailabilityZone": {
-                    "Ref": "ResourceAvailabilityZone"
                 },
                 "BlockDeviceMappings": [
                     {
@@ -489,11 +536,13 @@
                         }
                     }
                 ],
-                "SecurityGroups": [
-                    {
-                        "Ref": "InstanceSecurityGroup"
-                    }
-                ],
+                "SecurityGroups": {
+                    "Fn::If" : [
+                        "HasServerSecurityGroup",
+                        [{ "Ref" : "ExistingSecurityGroup" }],
+                        [{ "Ref" : "InstanceSecurityGroup" }]
+                    ]
+                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
@@ -562,12 +611,18 @@
                 ]
             }
         },
-        "PublicDNSName": {
+        "TableauServerURL": {
             "Description": "Public DNS name of instance running Tableau Server",
-            "Value": {
-                "Fn::GetAtt": [
-                    "TableauWindowsServer",
-                    "PublicDnsName"
+            "Value" : {
+                "Fn::Join" : [
+                    "",
+                    [
+                        "http://",
+                        {
+                            "Fn::GetAtt" : [ "TableauWindowsServer", "PublicDnsName" ]
+                        },
+                        "/"
+                    ]
                 ]
             }
         }
