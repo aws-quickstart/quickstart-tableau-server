@@ -21,7 +21,7 @@ global:
 tests:
   single:
     parameter_input: single.json
-    template_file: tableau-single-server.template
+    template_file: tableau-single-server-master.template
   cluster:
     parameter_input: cluster.json
     regions:

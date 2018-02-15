@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_genaz_3]"
+        "ParameterValue": "$[alfred_getaz_3]"
     },
     {
         "ParameterKey": "AWSHostedZoneID",
@@ -21,7 +21,7 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "cikey"
+        "ParameterValue": "$[alfred_getkeypair]"
     },
     {
         "ParameterKey": "RegCity",
