@@ -225,12 +225,12 @@
                             {
                                 "Fn::If": [
                                     "InfaOnWindows",
-                                    "templates/tableau-single-server.template",
+                                    "templates/tableau-single-server-windows.template",
                                     {
                                         "Fn::If": [
                                             "InfaOnCentos",
-                                            "templates/tableau_server_standalone_centos.json",
-                                            "templates/tableau_server_standalone_ubuntu.json"]
+                                            "templates/tableau-single-server-centos.template",
+                                            "templates/tableau-single-server-ubuntu.template"]
                                     }
                                 ]
                             }
