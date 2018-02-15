@@ -1,89 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "AWS QuickStart Template for Tableau Server instance running on Windows QS(0040)",
-    "Parameters": {
-        "InstanceType" : {
-            "Description" : "Amazon EC2 instance type",
-            "Type" : "String",
-            "Default" : "m4.4xlarge",
-            "AllowedValues" : [ "m4.2xlarge", "m4.4xlarge", "m4.10xlarge"],
-            "ConstraintDescription" : "must be a valid EC2 instance type."
-        },
-        "TableauServerAdminUser": {
-            "Default": "admin",
-            "Description": "The name of the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "TableauServerAdminPassword": {
-            "Description": "The password for the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "NoEcho": "true",
-            "Type": "String"
-        },
-        "KeyPairName": {
-            "ConstraintDescription": "The name of an existing EC2 KeyPair.",
-            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
-            "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "RegFirstName": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegLastName": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegEmail": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegCompany": {
-            "Type": "String"
-        },
-        "RegTitle": {
-            "Type": "String"
-        },
-        "RegDepartment": {
-            "Type": "String"
-        },
-        "RegIndustry": {
-            "Type": "String"
-        },
-        "RegPhone": {
-            "Type": "String"
-        },
-        "RegCity": {
-            "Type": "String"
-        },
-        "RegState": {
-            "Type": "String"
-        },
-        "RegZip": {
-            "Type": "String"
-        },
-        "RegCountry": {
-            "Type": "String"
-        },
-        "SourceCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "The CIDR address from which you will connect to the instance",
-            "Type": "String"
-        },
-        "TableauServerLicenseKey": {
-            "Description": "License Key (leave blank for trial)",
-            "Type": "String"
-        },
-        "ExistingSecurityGroup" : {
-            "Description" : "Provide an existing security group or leave blank for creating a new one",
-            "Type" : "String"
-        },
-        "IPAddress" : {
-            "Description" : "Provide an EIP for the node (blank = no EIP)",
-            "Type" : "String"
-        }
-    },
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -130,67 +47,154 @@
                 }
             ],
             "ParameterLabels": {
-                "InstanceType" : {
-                    "default" : "Tableau Amazon EC2 instance type"
-                },
-                "KeyPairName": {
-                    "default": "Key Pair Name"
-                },
-                "SourceCIDR": {
-                    "default": "Source CIDR for Access"
-                },
                 "ExistingSecurityGroup": {
                     "default": "Existing Security Group"
                 },
                 "IPAddress": {
                     "default": "EIP address for the node"
                 },
-                "TableauServerAdminUser": {
-                    "default": "Portal Admin Username"
+                "InstanceType": {
+                    "default": "Tableau Amazon EC2 instance type"
                 },
-                "TableauServerAdminPassword": {
-                    "default": "Portal Admin Password"
-                },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegLastName": {
-                    "default": "Last Name"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
-                },
-                "RegCompany": {
-                    "default": "Company"
-                },
-                "RegTitle": {
-                    "default": "Title"
-                },
-                "RegDepartment": {
-                    "default": "Department"
-                },
-                "RegIndustry": {
-                    "default": "Industry"
-                },
-                "RegPhone": {
-                    "default": "Phone"
+                "KeyPairName": {
+                    "default": "Key Pair Name"
                 },
                 "RegCity": {
                     "default": "City"
                 },
+                "RegCompany": {
+                    "default": "Company"
+                },
+                "RegCountry": {
+                    "default": "Country"
+                },
+                "RegDepartment": {
+                    "default": "Department"
+                },
+                "RegEmail": {
+                    "default": "Email Address"
+                },
+                "RegFirstName": {
+                    "default": "First Name"
+                },
+                "RegIndustry": {
+                    "default": "Industry"
+                },
+                "RegLastName": {
+                    "default": "Last Name"
+                },
+                "RegPhone": {
+                    "default": "Phone"
+                },
                 "RegState": {
                     "default": "State"
+                },
+                "RegTitle": {
+                    "default": "Title"
                 },
                 "RegZip": {
                     "default": "Zip/Postal Code"
                 },
-                "RegCountry": {
-                    "default": "Country"
+                "SourceCIDR": {
+                    "default": "Source CIDR for Access"
+                },
+                "TableauServerAdminPassword": {
+                    "default": "Portal Admin Password"
+                },
+                "TableauServerAdminUser": {
+                    "default": "Portal Admin Username"
+                },
+                "TableauServerLicenseKey": {
+                    "default": "Tableau Activation Key"
                 }
             }
+        }
+    },
+    "Parameters": {
+        "ExistingSecurityGroup": {
+            "Description": "Provide an existing security group or leave blank for creating a new one",
+            "Type": "String"
+        },
+        "IPAddress": {
+            "Description": "Provide an EIP for the node (blank = no EIP)",
+            "Type": "String"
+        },
+        "InstanceType": {
+            "AllowedValues": [
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type.",
+            "Default": "m4.4xlarge",
+            "Description": "Amazon EC2 instance type",
+            "Type": "String"
+        },
+        "KeyPairName": {
+            "ConstraintDescription": "The name of an existing EC2 KeyPair.",
+            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "RegCity": {
+            "Type": "String"
+        },
+        "RegCompany": {
+            "Type": "String"
+        },
+        "RegCountry": {
+            "Type": "String"
+        },
+        "RegDepartment": {
+            "Type": "String"
+        },
+        "RegEmail": {
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegFirstName": {
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegIndustry": {
+            "Type": "String"
+        },
+        "RegLastName": {
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "RegPhone": {
+            "Type": "String"
+        },
+        "RegState": {
+            "Type": "String"
+        },
+        "RegTitle": {
+            "Type": "String"
+        },
+        "RegZip": {
+            "Type": "String"
+        },
+        "SourceCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "The CIDR address from which you will connect to the instance",
+            "Type": "String"
+        },
+        "TableauServerAdminPassword": {
+            "Description": "The password for the initial Admin user for Tableau server",
+            "MinLength": "1",
+            "NoEcho": "true",
+            "Type": "String"
+        },
+        "TableauServerAdminUser": {
+            "Default": "admin",
+            "Description": "The name of the initial Admin user for Tableau server",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "TableauServerLicenseKey": {
+            "Description": "License Key (leave blank for trial)",
+            "Type": "String"
         }
     },
     "Mappings": {
@@ -266,14 +270,14 @@
             "Fn::Equals": [
                 "",
                 {
-                    "Ref" : "ExistingSecurityGroup"
+                    "Ref": "ExistingSecurityGroup"
                 }
             ]
         },
         "HasServerSecurityGroup": {
             "Fn::Not": [
                 {
-                    "Condition" : "NoServerSecurityGroup"
+                    "Condition": "NoServerSecurityGroup"
                 }
             ]
         },
@@ -281,14 +285,14 @@
             "Fn::Equals": [
                 "",
                 {
-                    "Ref" : "IPAddress"
+                    "Ref": "IPAddress"
                 }
             ]
         },
         "HasElasticIP": {
             "Fn::Not": [
                 {
-                    "Condition" : "NoElasticIP"
+                    "Condition": "NoElasticIP"
                 }
             ]
         }
@@ -319,12 +323,16 @@
                 ]
             }
         },
-        "IPAssoc" : {
-            "Type" : "AWS::EC2::EIPAssociation",
+        "IPAssoc": {
+            "Type": "AWS::EC2::EIPAssociation",
             "Condition": "HasElasticIP",
-            "Properties" : {
-                "InstanceId" : { "Ref" : "TableauWindowsServer" },
-                "EIP" : { "Ref" : "IPAddress" }
+            "Properties": {
+                "InstanceId": {
+                    "Ref": "TableauWindowsServer"
+                },
+                "EIP": {
+                    "Ref": "IPAddress"
+                }
             }
         },
         "TableauWindowsServer": {
@@ -490,8 +498,8 @@
                 }
             },
             "Properties": {
-                "InstanceType" : {
-                    "Ref" : "InstanceType"
+                "InstanceType": {
+                    "Ref": "InstanceType"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [
@@ -537,10 +545,18 @@
                     }
                 ],
                 "SecurityGroups": {
-                    "Fn::If" : [
+                    "Fn::If": [
                         "HasServerSecurityGroup",
-                        [{ "Ref" : "ExistingSecurityGroup" }],
-                        [{ "Ref" : "InstanceSecurityGroup" }]
+                        [
+                            {
+                                "Ref": "ExistingSecurityGroup"
+                            }
+                        ],
+                        [
+                            {
+                                "Ref": "InstanceSecurityGroup"
+                            }
+                        ]
                     ]
                 },
                 "KeyName": {
@@ -613,13 +629,16 @@
         },
         "TableauServerURL": {
             "Description": "Public DNS name of instance running Tableau Server",
-            "Value" : {
-                "Fn::Join" : [
+            "Value": {
+                "Fn::Join": [
                     "",
                     [
                         "http://",
                         {
-                            "Fn::GetAtt" : [ "TableauWindowsServer", "PublicDnsName" ]
+                            "Fn::GetAtt": [
+                                "TableauWindowsServer",
+                                "PublicDnsName"
+                            ]
                         },
                         "/"
                     ]
