@@ -230,47 +230,50 @@
     },
     "Mappings": {
         "AwsRegionToAMI": {
+            "AMI": {
+                "US1604HVM": "Ubuntu-Server-16.04-LTS-HVM"
+            },
             "us-east-1": {
-                "id": "ami-08c35d72"
+                "US1604HVM": "ami-08c35d72"
             },
             "us-east-2": {
-                "id": "ami-b84b62dd"
+                "US1604HVM": "ami-b84b62dd"
             },
             "us-west-1": {
-                "id": "ami-a089b2c0"
+                "US1604HVM": "ami-a089b2c0"
             },
             "us-west-2": {
-                "id": "ami-4a4b9232"
+                "US1604HVM": "ami-4a4b9232"
             },
             "ca-central-1": {
-                "id": "ami-5541fa31"
+                "US1604HVM": "ami-5541fa31"
             },
             "sa-east-1": {
-                "id": "ami-81a1e5ed"
+                "US1604HVM": "ami-81a1e5ed"
             },
             "eu-west-1": {
-                "id": "ami-f7e8558e"
+                "US1604HVM": "ami-f7e8558e"
             },
             "eu-west-2": {
-                "id": "ami-ce736daa"
+                "US1604HVM": "ami-ce736daa"
             },
             "eu-central-1": {
-                "id": "ami-f4de519b"
+                "US1604HVM": "ami-f4de519b"
             },
             "ap-south-1": {
-                "id": ""
+                "US1604HVM": ""
             },
             "ap-southeast-1": {
-                "id": "ami-54b3e137"
+                "US1604HVM": "ami-54b3e137"
             },
             "ap-southeast-2": {
-                "id": "ami-c10ffaa3"
+                "US1604HVM": "ami-c10ffaa3"
             },
             "ap-northeast-1": {
-                "id": "ami-09cb706f"
+                "US1604HVM": "ami-09cb706f"
             },
             "ap-northeast-2": {
-                "id": "ami-d21fb8bc"
+                "US1604HVM": "ami-d21fb8bc"
             }
         },
         "DefaultConfiguration": {
@@ -279,7 +282,8 @@
                 "AutomatedInstaller": "https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer"
             },
             "MachineConfiguration": {
-                "SystemVolumeSize": 100
+                "SystemVolumeSize": 100,
+                "UbuntuVersion": "US1604HVM"                
             }
         }
     },
@@ -459,7 +463,13 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "id"
+                        {
+                            "Fn::FindInMap": [
+                                "DefaultConfiguration",
+                                "MachineConfiguration",
+                                "UbuntuVersion"
+                            ]
+                        }
                     ]
                 },
                 "InstanceType": {
@@ -504,7 +514,7 @@
                         "Fn::Join": [
                             "\n",
                             [
-                                "#!/bin/bash -xe",
+                                "#!/bin/bash -x",
                                 "apt-get update",
                                 "apt-get install -y python-setuptools\n",
                                 "# Call Init",

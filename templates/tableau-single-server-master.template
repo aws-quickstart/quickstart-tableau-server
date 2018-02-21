@@ -239,8 +239,6 @@
     "Mappings": {
         "DefaultConfiguration": {
             "QSS3Config": {
-                "QSS3BucketName": "quickstart-reference",
-                "QSS3KeyPrefix": "tableau",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             }
         }
@@ -278,20 +276,7 @@
                                     "QuickStartS3URL"
                                 ]
                             },
-                            {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "QSS3Config",
-                                    "QSS3BucketName"
-                                ]
-                            },
-                            {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "QSS3Config",
-                                    "QSS3KeyPrefix"
-                                ]
-                            },
+                            "quickstart-reference/tableau",
                             {
                                 "Fn::If": [
                                     "InfaOnWindows",
