@@ -231,49 +231,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "US1604HVM": "Ubuntu-Server-16.04-LTS-HVM"
-            },
-            "us-east-1": {
-                "US1604HVM": "ami-08c35d72"
-            },
-            "us-east-2": {
-                "US1604HVM": "ami-b84b62dd"
-            },
-            "us-west-1": {
-                "US1604HVM": "ami-a089b2c0"
-            },
-            "us-west-2": {
-                "US1604HVM": "ami-4a4b9232"
-            },
-            "ca-central-1": {
-                "US1604HVM": "ami-5541fa31"
-            },
-            "sa-east-1": {
-                "US1604HVM": "ami-81a1e5ed"
-            },
-            "eu-west-1": {
-                "US1604HVM": "ami-f7e8558e"
-            },
-            "eu-west-2": {
-                "US1604HVM": "ami-ce736daa"
-            },
-            "eu-central-1": {
-                "US1604HVM": "ami-f4de519b"
-            },
-            "ap-south-1": {
-                "US1604HVM": ""
-            },
-            "ap-southeast-1": {
-                "US1604HVM": "ami-54b3e137"
-            },
-            "ap-southeast-2": {
-                "US1604HVM": "ami-c10ffaa3"
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180222"
             },
             "ap-northeast-1": {
-                "US1604HVM": "ami-09cb706f"
+                "US1604HVM": "ami-06d9a360"
             },
             "ap-northeast-2": {
-                "US1604HVM": "ami-d21fb8bc"
+                "US1604HVM": "ami-daaf02b4"
+            },
+            "ap-south-1": {
+                "US1604HVM": "ami-5383df3c"
+            },
+            "ap-southeast-1": {
+                "US1604HVM": "ami-c52b62b9"
+            },
+            "ap-southeast-2": {
+                "US1604HVM": "ami-4ef83f2c"
+            },
+            "ca-central-1": {
+                "US1604HVM": "ami-11da5d75"
+            },
+            "eu-central-1": {
+                "US1604HVM": "ami-4d6c0e22"
+            },
+            "eu-west-1": {
+                "US1604HVM": "ami-cc166eb5"
+            },
+            "eu-west-2": {
+                "US1604HVM": "ami-30c22657"
+            },
+            "sa-east-1": {
+                "US1604HVM": "ami-9188c0fd"
+            },
+            "us-east-1": {
+                "US1604HVM": "ami-ee4eac93"
+            },
+            "us-east-2": {
+                "US1604HVM": "ami-b84c7bdd"
+            },
+            "us-west-1": {
+                "US1604HVM": "ami-9abbb3fa"
+            },
+            "us-west-2": {
+                "US1604HVM": "ami-0ee66876"
             }
         },
         "DefaultConfiguration": {
@@ -283,7 +283,7 @@
             },
             "MachineConfiguration": {
                 "SystemVolumeSize": 100,
-                "UbuntuVersion": "US1604HVM"                
+                "UbuntuVersion": "US1604HVM"
             }
         }
     },
