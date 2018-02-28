@@ -1,15 +1,27 @@
 [
     {
-        "ParameterKey": "ContentAdminPassword",
-        "ParameterValue": "$[alfred_genpass_32]"
+        "ParameterKey": "AMIOS",
+        "ParameterValue": "CentOS-7-HVM"
     },
     {
-        "ParameterKey": "ContentAdminUser",
-        "ParameterValue": "admin"
+        "ParameterKey": "ExistingSecurityGroup",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "IPAddress",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "InstanceType",
+        "ParameterValue": "m4.2xlarge"
     },
     {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "$[alfred_getkeypair]"
+    },
+    {
+        "ParameterKey": "Password",
+        "ParameterValue": "$[alfred_genpass_32]"
     },
     {
         "ParameterKey": "RegCity",
@@ -60,15 +72,23 @@
         "ParameterValue": "Test Zip"
     },
     {
-        "ParameterKey": "ResourceAvailabilityZone",
-        "ParameterValue": "$[alfred_getsingleaz_1]"
-    },
-    {
         "ParameterKey": "SourceCIDR",
         "ParameterValue": "10.0.0.0/16"
     },
     {
+        "ParameterKey": "TableauServerAdminPassword",
+        "ParameterValue": "$[alfred_genpass_32]"
+    },
+    {
+        "ParameterKey": "TableauServerAdminUser",
+        "ParameterValue": "admin"
+    },
+    {
         "ParameterKey": "TableauServerLicenseKey",
         "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "Username",
+        "ParameterValue": "tsmadmin"
     }
 ]
