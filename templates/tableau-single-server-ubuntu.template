@@ -229,7 +229,7 @@
         }
     },
     "Mappings": {
-        "AwsRegionToAMI": {
+        "AWSAMIRegionMap": {
             "AMI": {
                 "US1604HVM": "Ubuntu-Server-16.04-LTS-HVM"
             },
