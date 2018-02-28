@@ -47,6 +47,15 @@
                         "RegZip",
                         "RegCountry"
                     ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
                 }
             ],
             "ParameterLabels": {
@@ -115,6 +124,12 @@
                 },
                 "Username": {
                     "default": "Tableau Services Manager (TSM) administrator username"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
                 }
             }
         }
@@ -234,13 +249,25 @@
         "Username": {
             "Description": "(Linux only) Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin')",
             "Type": "String"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Default": "quickstart-reference",
+            "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Default": "tableau/server/latest/",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Type": "String"
         }
     },
     "Mappings": {
         "DefaultConfiguration": {
             "QSS3Config": {
-                "QSS3BucketName": "quickstart-reference",
-                "QSS3KeyPrefix": "tableau",
                 "QuickStartS3URL": "https://s3.amazonaws.com"
             }
         }
@@ -279,18 +306,10 @@
                                 ]
                             },
                             {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "QSS3Config",
-                                    "QSS3BucketName"
-                                ]
+                                "Ref": "QSS3BucketName"
                             },
                             {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "QSS3Config",
-                                    "QSS3KeyPrefix"
-                                ]
+                                "Ref": "QSS3KeyPrefix"
                             },
                             {
                                 "Fn::If": [

@@ -230,47 +230,50 @@
     },
     "Mappings": {
         "AwsRegionToAMI": {
+            "AMI": {
+                "CENTOS7HVM": "CentOS-7-HVM"
+            },
             "us-east-1": {
-                "id": "ami-6d1c2007"
+                "CENTOS7HVM": "ami-6d1c2007"
             },
             "us-east-2": {
-                "id": "ami-6a2d760f"
+                "CENTOS7HVM": "ami-6a2d760f"
             },
             "us-west-1": {
-                "id": "ami-af4333cf"
+                "CENTOS7HVM": "ami-af4333cf"
             },
             "us-west-2": {
-                "id": "ami-d2c924b2"
+                "CENTOS7HVM": "ami-d2c924b2"
             },
             "ca-central-1": {
-                "id": "ami-af62d0cb"
+                "CENTOS7HVM": "ami-af62d0cb"
             },
             "sa-east-1": {
-                "id": "ami-26b93b4a"
+                "CENTOS7HVM": "ami-26b93b4a"
             },
             "eu-west-1": {
-                "id": "ami-7abd0209"
+                "CENTOS7HVM": "ami-7abd0209"
             },
             "eu-west-2": {
-                "id": "ami-bb373ddf"
+                "CENTOS7HVM": "ami-bb373ddf"
             },
             "eu-central-1": {
-                "id": "ami-9bf712f4"
+                "CENTOS7HVM": "ami-9bf712f4"
             },
             "ap-south-1": {
-                "id": "ami-95cda6fa"
+                "CENTOS7HVM": "ami-95cda6fa"
             },
             "ap-southeast-1": {
-                "id": "ami-f068a193"
+                "CENTOS7HVM": "ami-f068a193"
             },
             "ap-southeast-2": {
-                "id": "ami-fedafc9d"
+                "CENTOS7HVM": "ami-fedafc9d"
             },
             "ap-northeast-1": {
-                "id": "ami-eec1c380"
+                "CENTOS7HVM": "ami-eec1c380"
             },
             "ap-northeast-2": {
-                "id": "ami-c74789a9"
+                "CENTOS7HVM": "ami-c74789a9"
             }
         },
         "DefaultConfiguration": {
@@ -279,7 +282,8 @@
                 "AutomatedInstaller": "https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer"
             },
             "MachineConfiguration": {
-                "SystemVolumeSize": 100
+                "SystemVolumeSize": 100,
+                "CentosVersion": "CENTOS7HVM"                
             }
         }
     },
@@ -460,7 +464,13 @@
                         {
                             "Ref": "AWS::Region"
                         },
-                        "id"
+                        {
+                            "Fn::FindInMap": [
+                                "DefaultConfiguration",
+                                "MachineConfiguration",
+                                "CentosVersion"
+                            ]
+                        }
                     ]
                 },
                 "InstanceType": {
@@ -505,7 +515,7 @@
                         "Fn::Join": [
                             "\n",
                             [
-                                "#!/bin/bash -xe",
+                                "#!/bin/bash -x",
                                 "# Call Init",
                                 "/usr/bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
                                 {
@@ -597,7 +607,7 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Condition": "NoServerSecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable HTTP access via ports 80 and HTTPS access on port 8850, and SSH access from the provided network CIDR",
+                "GroupDescription": "Enable HTTP access via port 80 and HTTPS access on port 8850, and SSH access from the provided network CIDR",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
