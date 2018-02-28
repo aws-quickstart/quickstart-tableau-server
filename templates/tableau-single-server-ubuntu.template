@@ -459,7 +459,7 @@
             "Properties": {
                 "ImageId": {
                     "Fn::FindInMap": [
-                        "AwsRegionToAMI",
+                        "AWSAMIRegionMap",
                         {
                             "Ref": "AWS::Region"
                         },
