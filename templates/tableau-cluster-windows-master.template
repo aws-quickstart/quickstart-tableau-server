@@ -512,7 +512,8 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/windows-bastion.template"
+                            "submodules/quickstart-microsoft-rdgateway",
+							"templates/rdgw-standalone.template"
                         ]
                     ]
                 },
@@ -570,7 +571,7 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/tableau-cluster.template"
+                            "templates/tableau-cluster-windows.template"
                         ]
                     ]
                 },
