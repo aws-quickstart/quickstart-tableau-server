@@ -2,3 +2,11 @@
 	path = submodules/quickstart-aws-vpc
 	url = git@github.com:aws-quickstart/quickstart-aws-vpc.git
 	branch = master
+[submodule "submodules/linux-bastion"]
+	path = submodules/linux-bastion
+	url = https://github.com/aws-quickstart/quickstart-linux-bastion.git
+	branch = master
+[submodule "submodules/windows-bastion"]
+	path = submodules/windows-bastion
+	url = https://github.com/aws-quickstart/quickstart-microsoft-rdgateway.git
+	branch = master
