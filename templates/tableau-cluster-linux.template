@@ -323,10 +323,10 @@
     },
     "Mappings":{
         "AwsRegionToAMI":{
-			"AMI": {
-				"CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS 1801_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-0a537770.4",
-				"US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180306"
-			},
+            "AMI": {
+                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS 1801_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-0a537770.4",
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180306"
+            },
             "ap-northeast-1": {
                 "CENTOS7HVM": "ami-25bd2743",
                 "US1604HVM": "ami-0d74386b"
