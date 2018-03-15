@@ -570,7 +570,7 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/tableau-cluster.template"
+                            "templates/tableau-cluster-windows.template"
                         ]
                     ]
                 },
