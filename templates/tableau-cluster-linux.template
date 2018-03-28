@@ -1330,7 +1330,32 @@
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
                 "VPCZoneIdentifier": {
-                    "Ref": "PrivateSubnetIds"
+                    "Fn::Split":[
+                        ",",
+                        {
+                            "Fn::Join":[
+                                ",",
+                                [
+                                    {
+                                        "Fn::Select":[
+                                            "1",
+                                            {
+                                                "Ref":"PrivateSubnetIds"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "Fn::Select":[
+                                            "2",
+                                            {
+                                                "Ref":"PrivateSubnetIds"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        }
+                    ]
                 },
                 "LaunchConfigurationName": {
                     "Ref": "WorkerLaunchConfig"
