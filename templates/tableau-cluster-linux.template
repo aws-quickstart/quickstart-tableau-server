@@ -185,7 +185,6 @@
         },
         "InstanceType": {
             "AllowedValues": [
-                "m4.2xlarge",
                 "m4.4xlarge",
                 "m4.10xlarge"
             ],
@@ -750,7 +749,7 @@
                 "Handle": {
                     "Ref": "WorkerWaitHandle"
                 },
-                "Timeout": "600"
+                "Timeout": "1200"
             }
         },
         "TopologyWaitHandle": {
@@ -1011,12 +1010,15 @@
                                                     "    tsm topology cleanup-coordination-service -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    tsm start -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "}",
-                                                    "set_topology",
-                                                    "unset -f set_topology",
+						    "send_singal_to_topologyWaitHandle() {",
                                                     "# Signal successful completion",
                                                     {
                                                         "Fn::Sub": "/opt/aws/bin/cfn-signal -e $? '${TopologyWaitHandle}'"
-                                                    }
+                                                    },						    
+						    "}",
+                                                    "set_topology",
+                                                    "unset -f set_topology",
+						    "trap send_singal_to_topologyWaitHandle EXIT"
                                                 ]
                                             ]
                                         },
