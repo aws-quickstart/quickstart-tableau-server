@@ -1010,15 +1010,15 @@
                                                     "    tsm topology cleanup-coordination-service -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    tsm start -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "}",
-						    "send_singal_to_topologyWaitHandle() {",
+                                                    "send_singal_to_topologyWaitHandle() {",
                                                     "# Signal successful completion",
                                                     {
                                                         "Fn::Sub": "/opt/aws/bin/cfn-signal -e $? '${TopologyWaitHandle}'"
-                                                    },						    
-						    "}",
+                                                    },
+                                                    "}",
                                                     "set_topology",
                                                     "unset -f set_topology",
-						    "trap send_singal_to_topologyWaitHandle EXIT"
+                                                    "trap send_singal_to_topologyWaitHandle EXIT"
                                                 ]
                                             ]
                                         },
@@ -1332,25 +1332,25 @@
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "Properties": {
                 "VPCZoneIdentifier": {
-                    "Fn::Split":[
+                    "Fn::Split": [
                         ",",
                         {
-                            "Fn::Join":[
+                            "Fn::Join": [
                                 ",",
                                 [
                                     {
-                                        "Fn::Select":[
+                                        "Fn::Select": [
                                             "1",
                                             {
-                                                "Ref":"PrivateSubnetIds"
+                                                "Ref": "PrivateSubnetIds"
                                             }
                                         ]
                                     },
                                     {
-                                        "Fn::Select":[
+                                        "Fn::Select": [
                                             "2",
                                             {
-                                                "Ref":"PrivateSubnetIds"
+                                                "Ref": "PrivateSubnetIds"
                                             }
                                         ]
                                     }
