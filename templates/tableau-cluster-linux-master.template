@@ -123,7 +123,7 @@
                     "default": "First Name"
                 },
                 "RegLastName": {
-                    "default": "Last name"
+                    "default": "Last Name"
                 },
                 "RegEmail": {
                     "default": "Email Address"
@@ -160,6 +160,9 @@
                 },
                 "QSS3KeyPrefix": {
                     "default": "Quick Start S3 Key Prefix"
+                },
+                "AcceptEULA": {
+                    "default" : "Accept Tableau End User License Agreement"
                 }
             }
         }
@@ -197,7 +200,9 @@
         "InstanceType": {
             "AllowedValues": [
                 "m4.4xlarge",
-                "m4.10xlarge"
+                "m4.10xlarge",
+                "m5.4xlarge",
+                "m5.12xlarge"
             ],
             "ConstraintDescription": "must be a valid EC2 instance type.",
             "Default": "m4.4xlarge",
@@ -319,7 +324,7 @@
         },
         "Username": {
             "AllowedPattern": "[A-Za-z0-9]+",
-            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent')",
+            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
         },
@@ -329,6 +334,12 @@
             "MaxValue": "30",
             "MinValue": "2",
             "Type": "Number"
+        },
+        "AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "Type" : "String",
+            "AllowedValues" : ["Yes", "No"],
+            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
         }
     },
     "Mappings": {
@@ -609,6 +620,9 @@
                     },
                     "IPAddress": {
                         "Ref": "IPAddress"
+                    },
+                    "AcceptEULA": {
+                        "Ref": "AcceptEULA"
                     }
                 }
             }

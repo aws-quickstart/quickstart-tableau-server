@@ -86,7 +86,7 @@
                     "default": "Industry"
                 },
                 "RegLastName": {
-                    "default": "Last name"
+                    "default": "Last Name"
                 },
                 "RegPhone": {
                     "default": "Phone"
@@ -114,6 +114,9 @@
                 },
                 "Username": {
                     "default": "Tableau Services Manager (TSM) administrator username"
+                },
+                "AcceptEULA": {
+                    "default" : "Accept Tableau End User License Agreement"
                 }
             }
         }
@@ -131,7 +134,9 @@
             "AllowedValues": [
                 "m4.2xlarge",
                 "m4.4xlarge",
-                "m4.10xlarge"
+                "m4.10xlarge",
+                "m5.4xlarge",
+                "m5.12xlarge"
             ],
             "ConstraintDescription": "must be a valid EC2 instance type.",
             "Default": "m4.4xlarge",
@@ -223,9 +228,15 @@
         },
         "Username": {
             "AllowedPattern": "[A-Za-z0-9]+",
-            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent')",
+            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
+        },
+        "AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "Type" : "String",
+            "AllowedValues" : ["Yes", "No"],
+            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
         }
     },
     "Mappings": {
