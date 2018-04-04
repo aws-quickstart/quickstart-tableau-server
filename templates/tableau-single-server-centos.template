@@ -227,7 +227,7 @@
             "Type": "String"
         },
         "Username": {
-            "AllowedPattern": "[A-Za-z0-9]+",
+            "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$",
             "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
