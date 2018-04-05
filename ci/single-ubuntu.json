@@ -1,5 +1,9 @@
 [
     {
+        "ParameterKey": "AcceptEULA",
+        "ParameterValue": "Yes"
+    },
+    {
         "ParameterKey": "AMIOS",
         "ParameterValue": "Ubuntu-Server-16.04-LTS-HVM"
     },

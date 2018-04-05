@@ -33,6 +33,7 @@
                         "default": "Registration"
                     },
                     "Parameters": [
+                        "AcceptEULA",
                         "TableauServerLicenseKey",
                         "RegFirstName",
                         "RegLastName",
@@ -138,6 +139,12 @@
         }
     },
     "Parameters": {
+        "AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "Type" : "String",
+            "AllowedValues" : ["Yes", "No"],
+            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
+        },
         "AMIOS": {
             "AllowedValues": [
                 "Windows",
@@ -270,12 +277,6 @@
             "Description": "(Linux only) Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
-        },
-        "AcceptEULA": {
-            "AllowedPattern": "Yes",
-            "Type" : "String",
-            "AllowedValues" : ["Yes", "No"],
-            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
         }
     },
     "Conditions": {

@@ -47,6 +47,7 @@
                         "default": "Registration"
                     },
                     "Parameters": [
+                        "AcceptEULA",
                         "TableauServerLicenseKey",
                         "RegFirstName",
                         "RegLastName",
@@ -161,6 +162,12 @@
         }
     },
     "Parameters": {
+        "AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "Type" : "String",
+            "AllowedValues" : ["Yes", "No"],
+            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
+        },
         "AMIOS": {
             "AllowedValues": [
                 "CentOS-7-HVM",
@@ -321,12 +328,6 @@
             "MaxValue": "30",
             "MinValue": "2",
             "Type": "Number"
-        },
-        "AcceptEULA": {
-            "AllowedPattern": "Yes",
-            "Type" : "String",
-            "AllowedValues" : ["Yes", "No"],
-            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
         }
     },
     "Mappings": {
