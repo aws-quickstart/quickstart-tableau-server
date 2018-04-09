@@ -116,6 +116,9 @@
                 "TableauServerAdminPassword": {
                     "default": "Tableau Server administrator password"
                 },
+                "AcceptEULA": {
+                    "default" : "Accept Tableau End User License Agreement"
+                },
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
                 },
@@ -154,9 +157,6 @@
                 },
                 "RegCountry": {
                     "default": "Country"
-                },
-                "AcceptEULA": {
-                    "default" : "Accept Tableau End User License Agreement"
                 }
             }
         }
