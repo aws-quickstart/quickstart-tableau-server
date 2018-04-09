@@ -32,6 +32,7 @@
                         "default": "Registration"
                     },
                     "Parameters": [
+                        "AcceptEULA",
                         "TableauServerLicenseKey",
                         "RegFirstName",
                         "RegLastName",
@@ -49,76 +50,85 @@
                 }
             ],
             "ParameterLabels": {
-                "ExistingSecurityGroup": {
-                    "default": "Existing Security Group"
-                },
-                "IPAddress": {
-                    "default": "EIP address for the node"
-                },
                 "InstanceType": {
                     "default": "Tableau Amazon EC2 instance type"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
                 },
-                "Password": {
-                    "default": "Tableau Services Manager (TSM) administrator password"
-                },
-                "RegCity": {
-                    "default": "City"
-                },
-                "RegCompany": {
-                    "default": "Company"
-                },
-                "RegCountry": {
-                    "default": "Country"
-                },
-                "RegDepartment": {
-                    "default": "Department"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegIndustry": {
-                    "default": "Industry"
-                },
-                "RegLastName": {
-                    "default": "Last name"
-                },
-                "RegPhone": {
-                    "default": "Phone"
-                },
-                "RegState": {
-                    "default": "State"
-                },
-                "RegTitle": {
-                    "default": "Title"
-                },
-                "RegZip": {
-                    "default": "Zip/Postal Code"
-                },
                 "SourceCIDR": {
                     "default": "Source CIDR for Access"
                 },
-                "TableauServerAdminPassword": {
-                    "default": "Tableau Server administrator password"
+                "ExistingSecurityGroup": {
+                    "default": "Existing Security Group"
+                },
+                "IPAddress": {
+                    "default": "EIP address for the node"
+                },
+                "Username": {
+                    "default": "Tableau Services Manager (TSM) administrator username"
+                },
+                "Password": {
+                    "default": "Tableau Services Manager (TSM) administrator password"
                 },
                 "TableauServerAdminUser": {
                     "default": "Tableau Server administrator username"
                 },
+                "TableauServerAdminPassword": {
+                    "default": "Tableau Server administrator password"
+                },
+                "AcceptEULA": {
+                    "default" : "Accept Tableau End User License Agreement"
+                },
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
                 },
-                "Username": {
-                    "default": "Tableau Services Manager (TSM) administrator username"
+                "RegFirstName": {
+                    "default": "First Name"
+                },
+                "RegLastName": {
+                    "default": "Last Name"
+                },
+                "RegEmail": {
+                    "default": "Email Address"
+                },
+                "RegCompany": {
+                    "default": "Company"
+                },
+                "RegTitle": {
+                    "default": "Title"
+                },
+                "RegDepartment": {
+                    "default": "Department"
+                },
+                "RegIndustry": {
+                    "default": "Industry"
+                },
+                "RegPhone": {
+                    "default": "Phone"
+                },
+                "RegCity": {
+                    "default": "City"
+                },
+                "RegState": {
+                    "default": "State"
+                },
+                "RegZip": {
+                    "default": "Zip/Postal Code"
+                },
+                "RegCountry": {
+                    "default": "Country"
                 }
             }
         }
     },
     "Parameters": {
+        "AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "Type" : "String",
+            "AllowedValues" : ["Yes", "No"],
+            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
+        },
         "ExistingSecurityGroup": {
             "Description": "Provide an existing security group or leave blank for creating a new one",
             "Type": "String"
@@ -131,7 +141,9 @@
             "AllowedValues": [
                 "m4.2xlarge",
                 "m4.4xlarge",
-                "m4.10xlarge"
+                "m4.10xlarge",
+                "m5.4xlarge",
+                "m5.12xlarge"
             ],
             "ConstraintDescription": "must be a valid EC2 instance type.",
             "Default": "m4.4xlarge",
@@ -222,8 +234,8 @@
             "Type": "String"
         },
         "Username": {
-            "AllowedPattern": "[A-Za-z0-9]+",
-            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent')",
+            "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$",
+            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
         }

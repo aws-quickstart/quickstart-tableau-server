@@ -1,5 +1,9 @@
 [
     {
+        "ParameterKey": "AcceptEULA",
+        "ParameterValue": "Yes"
+    },
+    {
         "ParameterKey": "AMIOS",
         "ParameterValue": "Windows"
     },
