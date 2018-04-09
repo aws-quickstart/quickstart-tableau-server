@@ -50,14 +50,8 @@
                 }
             ],
             "ParameterLabels": {
-                "InstanceType": {
-                    "default": "Tableau Amazon EC2 instance type"
-                },
-                "KeyPairName": {
-                    "default": "Key Pair Name"
-                },
-                "SourceCIDR": {
-                    "default": "Source CIDR for Access"
+                "AcceptEULA": {
+                    "default": "Accept Tableau End User License Agreement"
                 },
                 "ExistingSecurityGroup": {
                     "default": "Existing Security Group"
@@ -65,59 +59,65 @@
                 "IPAddress": {
                     "default": "EIP address for the node"
                 },
-                "Username": {
-                    "default": "Tableau Services Manager (TSM) administrator username"
+                "InstanceType": {
+                    "default": "Tableau Amazon EC2 instance type"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
                 },
                 "Password": {
                     "default": "Tableau Services Manager (TSM) administrator password"
                 },
-                "TableauServerAdminUser": {
-                    "default": "Tableau Server administrator username"
-                },
-                "TableauServerAdminPassword": {
-                    "default": "Tableau Server administrator password"
-                },
-                "AcceptEULA": {
-                    "default" : "Accept Tableau End User License Agreement"
-                },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegLastName": {
-                    "default": "Last Name"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
+                "RegCity": {
+                    "default": "City"
                 },
                 "RegCompany": {
                     "default": "Company"
                 },
-                "RegTitle": {
-                    "default": "Title"
+                "RegCountry": {
+                    "default": "Country"
                 },
                 "RegDepartment": {
                     "default": "Department"
                 },
+                "RegEmail": {
+                    "default": "Email Address"
+                },
+                "RegFirstName": {
+                    "default": "First Name"
+                },
                 "RegIndustry": {
                     "default": "Industry"
+                },
+                "RegLastName": {
+                    "default": "Last Name"
                 },
                 "RegPhone": {
                     "default": "Phone"
                 },
-                "RegCity": {
-                    "default": "City"
-                },
                 "RegState": {
                     "default": "State"
+                },
+                "RegTitle": {
+                    "default": "Title"
                 },
                 "RegZip": {
                     "default": "Zip/Postal Code"
                 },
-                "RegCountry": {
-                    "default": "Country"
+                "SourceCIDR": {
+                    "default": "Source CIDR for Access"
+                },
+                "TableauServerAdminPassword": {
+                    "default": "Tableau Server administrator password"
+                },
+                "TableauServerAdminUser": {
+                    "default": "Tableau Server administrator username"
+                },
+                "TableauServerLicenseKey": {
+                    "default": "Tableau Activation Key"
+                },
+                "Username": {
+                    "default": "Tableau Services Manager (TSM) administrator username"
                 }
             }
         }
@@ -125,9 +125,12 @@
     "Parameters": {
         "AcceptEULA": {
             "AllowedPattern": "Yes",
-            "Type" : "String",
-            "AllowedValues" : ["Yes", "No"],
-            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
+            "AllowedValues": [
+                "Yes",
+                "No"
+            ],
+            "Description": "View the EULA at the Link: https://www.tableau.com/eula",
+            "Type": "String"
         },
         "ExistingSecurityGroup": {
             "Description": "Provide an existing security group or leave blank for creating a new one",

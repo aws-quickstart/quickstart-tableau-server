@@ -72,26 +72,8 @@
                 }
             ],
             "ParameterLabels": {
-                "AvailabilityZones": {
-                    "default": "Availability Zones"
-                },
-                "InstanceType": {
-                    "default": "Amazon EC2 instance type"
-                },
-                "WorkerCount": {
-                    "default": "Number of additional Tableau Server instances"
-                },
-                "KeyPairName": {
-                    "default": "Key Pair Name"
-                },
                 "AMIOS": {
                     "default": "AMI Operating System"
-                },
-                "SourceCIDR": {
-                    "default": "Source CIDR for Access"
-                },
-                "SSLCertificateARN": {
-                    "default": "SSL Certificate ARN (Requires matching DNS name)"
                 },
                 "AWSHostedZoneID": {
                     "default": "DNS Zone ID"
@@ -99,82 +81,94 @@
                 "AWSPublicFQDN": {
                     "default": "Full DNS Name for Cluster"
                 },
+                "AcceptEULA": {
+                    "default": "Accept Tableau End User License Agreement"
+                },
+                "AvailabilityZones": {
+                    "default": "Availability Zones"
+                },
                 "ExistingSecurityGroup": {
                     "default": "Existing Security Group"
                 },
                 "IPAddress": {
                     "default": "EIP address for initial node"
                 },
-                "Username": {
-                    "default": "Tableau Services Manager (TSM) administrator username"
+                "InstanceType": {
+                    "default": "Amazon EC2 instance type"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
                 },
                 "Password": {
                     "default": "Tableau Services Manager (TSM) administrator password"
-                },
-                "TableauServerAdminUser": {
-                    "default": "Tableau Server administrator username"
-                },
-                "TableauServerAdminPassword": {
-                    "default": "Tableau Server administrator password"
-                },
-                "AcceptEULA": {
-                    "default" : "Accept Tableau End User License Agreement"
-                },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegLastName": {
-                    "default": "Last Name"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
-                },
-                "RegCompany": {
-                    "default": "Company"
-                },
-                "RegTitle": {
-                    "default": "Title"
-                },
-                "RegDepartment": {
-                    "default": "Department"
-                },
-                "RegIndustry": {
-                    "default": "Industry"
-                },
-                "RegPhone": {
-                    "default": "Phone"
-                },
-                "RegCity": {
-                    "default": "City"
-                },
-                "RegState": {
-                    "default": "State"
-                },
-                "RegZip": {
-                    "default": "Zip/Postal Code"
-                },
-                "RegCountry": {
-                    "default": "Country"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
                 },
                 "QSS3KeyPrefix": {
                     "default": "Quick Start S3 Key Prefix"
+                },
+                "RegCity": {
+                    "default": "City"
+                },
+                "RegCompany": {
+                    "default": "Company"
+                },
+                "RegCountry": {
+                    "default": "Country"
+                },
+                "RegDepartment": {
+                    "default": "Department"
+                },
+                "RegEmail": {
+                    "default": "Email Address"
+                },
+                "RegFirstName": {
+                    "default": "First Name"
+                },
+                "RegIndustry": {
+                    "default": "Industry"
+                },
+                "RegLastName": {
+                    "default": "Last Name"
+                },
+                "RegPhone": {
+                    "default": "Phone"
+                },
+                "RegState": {
+                    "default": "State"
+                },
+                "RegTitle": {
+                    "default": "Title"
+                },
+                "RegZip": {
+                    "default": "Zip/Postal Code"
+                },
+                "SSLCertificateARN": {
+                    "default": "SSL Certificate ARN (Requires matching DNS name)"
+                },
+                "SourceCIDR": {
+                    "default": "Source CIDR for Access"
+                },
+                "TableauServerAdminPassword": {
+                    "default": "Tableau Server administrator password"
+                },
+                "TableauServerAdminUser": {
+                    "default": "Tableau Server administrator username"
+                },
+                "TableauServerLicenseKey": {
+                    "default": "Tableau Activation Key"
+                },
+                "Username": {
+                    "default": "Tableau Services Manager (TSM) administrator username"
+                },
+                "WorkerCount": {
+                    "default": "Number of additional Tableau Server instances"
                 }
             }
         }
     },
     "Parameters": {
-        "AcceptEULA": {
-            "AllowedPattern": "Yes",
-            "Type" : "String",
-            "AllowedValues" : ["Yes", "No"],
-            "Description" : "View the EULA at the Link: https://www.tableau.com/eula"
-        },
         "AMIOS": {
             "AllowedValues": [
                 "CentOS-7-HVM",
@@ -190,6 +184,15 @@
         },
         "AWSPublicFQDN": {
             "Description": "Tableau Server portal will be reachable at this address (blank = no DNS)",
+            "Type": "String"
+        },
+        "AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "AllowedValues": [
+                "Yes",
+                "No"
+            ],
+            "Description": "View the EULA at the Link: https://www.tableau.com/eula",
             "Type": "String"
         },
         "AvailabilityZones": {

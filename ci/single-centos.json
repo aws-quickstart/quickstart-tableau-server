@@ -1,11 +1,11 @@
 [
     {
-        "ParameterKey": "AcceptEULA",
-        "ParameterValue": "Yes"
-    },
-    {
         "ParameterKey": "AMIOS",
         "ParameterValue": "CentOS-7-HVM"
+    },
+    {
+        "ParameterKey": "AcceptEULA",
+        "ParameterValue": "Yes"
     },
     {
         "ParameterKey": "ExistingSecurityGroup",
