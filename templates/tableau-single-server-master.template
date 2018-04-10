@@ -325,25 +325,28 @@
                     ]
                 },
                 "Parameters": {
-                    "InstanceType": {
-                        "Ref": "InstanceType"
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "SourceCIDR": {
-                        "Ref": "SourceCIDR"
-                    },
-                    "Username": {
+                    "AcceptEULA": {
                         "Fn::If": [
                             "InfaOnWindows",
                             {
                                 "Ref": "AWS::NoValue"
                             },
                             {
-                                "Ref": "Username"
+                                "Ref": "AcceptEULA"
                             }
                         ]
+                    },
+                    "ExistingSecurityGroup": {
+                        "Ref": "ExistingSecurityGroup"
+                    },
+                    "IPAddress": {
+                        "Ref": "IPAddress"
+                    },
+                    "InstanceType": {
+                        "Ref": "InstanceType"
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
                     },
                     "Password": {
                         "Fn::If": [
@@ -356,59 +359,64 @@
                             }
                         ]
                     },
-                    "TableauServerAdminUser": {
-                        "Ref": "TableauServerAdminUser"
-                    },
-                    "TableauServerAdminPassword": {
-                        "Ref": "TableauServerAdminPassword"
-                    },
-                    "TableauServerLicenseKey": {
-                        "Ref": "TableauServerLicenseKey"
-                    },
-                    "RegFirstName": {
-                        "Ref": "RegFirstName"
-                    },
-                    "RegLastName": {
-                        "Ref": "RegLastName"
-                    },
-                    "RegEmail": {
-                        "Ref": "RegEmail"
+                    "RegCity": {
+                        "Ref": "RegCity"
                     },
                     "RegCompany": {
                         "Ref": "RegCompany"
                     },
-                    "RegTitle": {
-                        "Ref": "RegTitle"
+                    "RegCountry": {
+                        "Ref": "RegCountry"
                     },
                     "RegDepartment": {
                         "Ref": "RegDepartment"
                     },
+                    "RegEmail": {
+                        "Ref": "RegEmail"
+                    },
+                    "RegFirstName": {
+                        "Ref": "RegFirstName"
+                    },
                     "RegIndustry": {
                         "Ref": "RegIndustry"
+                    },
+                    "RegLastName": {
+                        "Ref": "RegLastName"
                     },
                     "RegPhone": {
                         "Ref": "RegPhone"
                     },
-                    "RegCity": {
-                        "Ref": "RegCity"
-                    },
                     "RegState": {
                         "Ref": "RegState"
+                    },
+                    "RegTitle": {
+                        "Ref": "RegTitle"
                     },
                     "RegZip": {
                         "Ref": "RegZip"
                     },
-                    "RegCountry": {
-                        "Ref": "RegCountry"
+                    "SourceCIDR": {
+                        "Ref": "SourceCIDR"
                     },
-                    "ExistingSecurityGroup": {
-                        "Ref": "ExistingSecurityGroup"
+                    "TableauServerAdminPassword": {
+                        "Ref": "TableauServerAdminPassword"
                     },
-                    "IPAddress": {
-                        "Ref": "IPAddress"
+                    "TableauServerAdminUser": {
+                        "Ref": "TableauServerAdminUser"
                     },
-                    "AcceptEULA": {
-                        "Ref": "AcceptEULA"
+                    "TableauServerLicenseKey": {
+                        "Ref": "TableauServerLicenseKey"
+                    },
+                    "Username": {
+                        "Fn::If": [
+                            "InfaOnWindows",
+                            {
+                                "Ref": "AWS::NoValue"
+                            },
+                            {
+                                "Ref": "Username"
+                            }
+                        ]
                     }
                 }
             }
