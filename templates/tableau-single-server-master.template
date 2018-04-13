@@ -63,6 +63,9 @@
                 "AcceptEULA": {
                     "default": "Accept Tableau End User License Agreement"
                 },
+                "AMIOS": {
+                    "default": "AMI Operating System"
+                },
                 "ExistingSecurityGroup": {
                     "default": "Existing Security Group"
                 },
