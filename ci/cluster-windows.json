@@ -12,14 +12,6 @@
         "ParameterValue": ""
     },
     {
-        "ParameterKey": "ContentAdminPassword",
-        "ParameterValue": "$[alfred_genpass_32]"
-    },
-    {
-        "ParameterKey": "ContentAdminUser",
-        "ParameterValue": "admin"
-    },
-    {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "$[alfred_getkeypair]"
     },
@@ -78,6 +70,14 @@
     {
         "ParameterKey": "SourceCIDR",
         "ParameterValue": "10.0.0.0/16"
+    },
+    {
+        "ParameterKey": "TableauServerAdminPassword",
+        "ParameterValue": "$[alfred_genpass_32]"
+    },
+    {
+        "ParameterKey": "TableauServerAdminUser",
+        "ParameterValue": "admin"
     },
     {
         "ParameterKey": "TableauServerLicenseKey",
