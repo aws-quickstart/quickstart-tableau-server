@@ -99,10 +99,10 @@
                     "default": "Source CIDR for Access"
                 },
                 "TableauServerAdminPassword": {
-                    "default": "Portal Admin Password"
+                    "default": "Tableau Server administrator password"
                 },
                 "TableauServerAdminUser": {
-                    "default": "Portal Admin Username"
+                    "default": "Tableau Server administrator username"
                 },
                 "TableauServerLicenseKey": {
                     "default": "Tableau Activation Key"
