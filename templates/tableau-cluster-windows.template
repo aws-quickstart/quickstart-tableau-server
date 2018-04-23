@@ -6,13 +6,13 @@
             "Description": "Tableau Server portal will be reachable at this address (blank = no DNS)",
             "Type": "String"
         },
-        "ContentAdminPassword": {
+        "TableauServerAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
             "MinLength": "1",
             "NoEcho": "true",
             "Type": "String"
         },
-        "ContentAdminUser": {
+        "TableauServerAdminUser": {
             "Default": "admin",
             "Description": "The name of the initial Admin user for Tableau server",
             "MinLength": "1",
@@ -164,8 +164,8 @@
                         "default": "Configure Initial Tableau Admin User"
                     },
                     "Parameters": [
-                        "ContentAdminUser",
-                        "ContentAdminPassword"
+                        "TableauServerAdminUser",
+                        "TableauServerAdminPassword"
                     ]
                 },
                 {
@@ -193,11 +193,11 @@
                 "AWSPublicFQDN": {
                     "default": "Full DNS Name for Cluster"
                 },
-                "ContentAdminUser": {
-                    "default": "Portal Admin Username"
+                "TableauServerAdminUser": {
+                    "default": "Tableau Server administrator username"
                 },
-                "ContentAdminPassword": {
-                    "default": "Portal Admin Password"
+                "TableauServerAdminPassword": {
+                    "default": "Tableau Server administrator password"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
@@ -633,10 +633,10 @@
                             "c:\\tabsetup\\secrets.json": {
                                 "content": {
                                     "content_admin_user": {
-                                        "Ref": "ContentAdminUser"
+                                        "Ref": "TableauServerAdminUser"
                                     },
                                     "content_admin_pass": {
-                                        "Ref": "ContentAdminPassword"
+                                        "Ref": "TableauServerAdminPassword"
                                     }
                                 }
                             },

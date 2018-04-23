@@ -14,13 +14,13 @@
             "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 3 AZs MUST be used for this deployment",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
-        "ContentAdminPassword": {
+        "TableauServerAdminPassword": {
             "Description": "The password for the initial Admin user for Tableau server",
             "MinLength": "1",
             "NoEcho": "true",
             "Type": "String"
         },
-        "ContentAdminUser": {
+        "TableauServerAdminUser": {
             "Default": "admin",
             "Description": "The name of the initial Admin user for Tableau server",
             "MinLength": "1",
@@ -134,8 +134,8 @@
                         "default": "Configure Initial Tableau Admin User"
                     },
                     "Parameters": [
-                        "ContentAdminUser",
-                        "ContentAdminPassword"
+                        "TableauServerAdminUser",
+                        "TableauServerAdminPassword"
                     ]
                 },
                 {
@@ -178,11 +178,11 @@
                 "AWSPublicFQDN": {
                     "default": "Full DNS Name for Cluster"
                 },
-                "ContentAdminUser": {
-                    "default": "Portal Admin Username"
+                "TableauServerAdminUser": {
+                    "default": "Tableau Server administrator username"
                 },
-                "ContentAdminPassword": {
-                    "default": "Portal Admin Password"
+                "TableauServerAdminPassword": {
+                    "default": "Tableau Server administrator password"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
@@ -459,11 +459,11 @@
                     "AWSPublicFQDN": {
                         "Ref": "AWSPublicFQDN"
                     },
-                    "ContentAdminPassword": {
-                        "Ref": "ContentAdminPassword"
+                    "TableauServerAdminPassword": {
+                        "Ref": "TableauServerAdminPassword"
                     },
-                    "ContentAdminUser": {
-                        "Ref": "ContentAdminUser"
+                    "TableauServerAdminUser": {
+                        "Ref": "TableauServerAdminUser"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
