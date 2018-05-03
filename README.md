@@ -1,14 +1,27 @@
 # quickstart-tableau-server
+## Tableau Server on the AWS Cloud
 
-This Quick Start helps you deploy a fully functional Tableau Server environment on the AWS Cloud, following best practices from AWS and Tableau Software.
+This Quick Start helps you deploy a fully functional Tableau Server environment on the AWS Cloud, following best practices from AWS and Tableau Software. 
+
+This updated Quick Start now provides support for Linux, in addition to Microsoft Windows Server.
 
 Tableau Server is an online solution for sharing, distributing, and collaborating on business intelligence content created in Tableau. Tableau Server users can create workbooks and views, dashboards, and data sources in Tableau Desktop, and then publish this content to the server.
 
 ![Quick Start Tableau Server Design Architecture](https://d3ulk6ur3a3ha.cloudfront.net/partner-network/QuickStart/datasheets/tableau-server-architecture-on-aws-cluster.png)
 
-The Tableau Server standalone (single-node) deployment installs Tableau Server on an EC2 m4.4xlarge instance running Windows Server 2012 R2 with a 100-GiB EBS volume in the default VPC of the AWS Region specified in the AWS CloudFormation template.
+The Quick Start supports two standardized architectures and provides automatic deployment options for Tableau Server:
+- Standalone architecture. Installs Tableau Server on an Amazon EC2 m4.4xlarge instance running Microsoft Windows Server 2012 R2, CentOS 7 x86_64 HVM, or Ubuntu Server 16.04-LTS-HVM. This architecture is deployed into your default VPC.
+- Cluster architecture. Installs Tableau Server on at least three Amazon EC2 m4.4xlarge instances running Microsoft Windows Server 2012 R2, CentOS 7 x86_64 HVM, or Ubuntu Server 16.04-LTS-HVM. This option builds a new AWS environment consisting of the VPC, subnets, NAT gateways, security groups, bastion host (on an Amazon EC2 t2.micro instance), and other infrastructure components, and then deploys Tableau Server into a new or existing VPC. Optionally, you can use an SSL certificate with this stack for enhanced security. 
 
-The Tableau Server cluster (multi-node) deployment installs Tableau Server on three EC2 m4.4xlarge instances: a primary server and two worker servers. Each instance runs Windows Server 2012 R2 and is configured with a 100-GiB EBS volume. In addition, if you use the end-to-end (new VPC) deployment option, this stack also creates a bastion host on an EC2 t2.micro instance. Optionally, you can use an SSL certificate with this stack for enhanced security.
+This Quick Start provides the following deployment options for a cluster architecture: 
+- Deploy Tableau Server on Microsoft Windows Server into a new VPC 
+- Deploy Tableau Server on Microsoft Windows Server into an existing VPC 
+- Deploy Tableau Server on CentOS or Ubuntu Server into a new VPC 
+- Deploy Tableau Server on CentOS or Ubuntu Server into an existing VPC 
 
+For architectural details, best practices, step-by-step instructions, and customization options, see the 
+[deployment guide](https://fwd.aws/3yAWN).
 
-Deployment Guide: https://s3.amazonaws.com/quickstart-reference/tableau/server/latest/doc/tableau-server-on-the-aws-cloud.pdf
+To post feedback, submit feature ideas, or report bugs, use the **Issues** section of this GitHub repo.
+If you'd like to submit code for this Quick Start, please review the [AWS Quick Start Contributor's Kit](https://aws-quickstart.github.io/).
+
