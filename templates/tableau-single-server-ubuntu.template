@@ -293,7 +293,7 @@
         },
         "DefaultConfiguration": {
             "InstallationConfig": {
-                "TableauServerInstaller": "https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2018-1-1_amd64.deb",
+                "TableauServerInstaller": "https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server_amd64.deb",
                 "AutomatedInstaller": "https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer"
             },
             "MachineConfiguration": {
