@@ -1047,12 +1047,6 @@
                                         "\n",
                                         [
                                             "{\"configEntities\": {",
-                                            "    \"runAsUser\": {",
-                                            "        \"_type\": \"runAsUserType\",",
-                                            {
-                                                "Fn::Sub": "        \"name\": \"${Username}\""
-                                            },
-                                            "    },",
                                             "    \"gatewaySettings\": {",
                                             "        \"_type\": \"gatewaySettingsType\",",
                                             "        \"port\": 80,",
@@ -1082,7 +1076,7 @@
                                         "Ref": "RegEmail"
                                     },
                                     "company": {
-                                        "Fn::Sub": "${RegCompany};AWSQuickStart"
+                                        "Fn::Sub": "${RegCompany};AWSQuickStart-Linux"
                                     },
                                     "title": {
                                         "Ref": "RegTitle"
