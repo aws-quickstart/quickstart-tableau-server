@@ -246,49 +246,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1804_2-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-55a2322a.4"
+                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4"
             },
             "ap-northeast-1": {
-                "CENTOS7HVM": "ami-3185744e"
+                "CENTOS7HVM": "ami-8e8847f1"
             },
             "ap-northeast-2": {
-                "CENTOS7HVM": "ami-46963e28"
+                "CENTOS7HVM": "ami-bf9c36d1"
             },
             "ap-south-1": {
-                "CENTOS7HVM": "ami-48301d27"
+                "CENTOS7HVM": "ami-1780a878"
             },
             "ap-southeast-1": {
-                "CENTOS7HVM": "ami-da6151a6"
+                "CENTOS7HVM": "ami-8e0205f2"
             },
             "ap-southeast-2": {
-                "CENTOS7HVM": "ami-0d13c26f"
+                "CENTOS7HVM": "ami-d8c21dba"
             },
             "ca-central-1": {
-                "CENTOS7HVM": "ami-456aea21"
+                "CENTOS7HVM": "ami-e802818c"
             },
             "eu-central-1": {
-                "CENTOS7HVM": "ami-9a183671"
+                "CENTOS7HVM": "ami-dd3c0f36"
             },
             "eu-west-1": {
-                "CENTOS7HVM": "ami-4c457735"
+                "CENTOS7HVM": "ami-3548444c"
             },
             "eu-west-2": {
-                "CENTOS7HVM": "ami-4726cb20"
+                "CENTOS7HVM": "ami-00846a67"
             },
             "sa-east-1": {
-                "CENTOS7HVM": "ami-c2e6baae"
+                "CENTOS7HVM": "ami-cb5803a7"
             },
             "us-east-1": {
-                "CENTOS7HVM": "ami-d5bf2caa"
+                "CENTOS7HVM": "ami-9887c6e7"
             },
             "us-east-2": {
-                "CENTOS7HVM": "ami-77724e12"
+                "CENTOS7HVM": "ami-9c0638f9"
             },
             "us-west-1": {
-                "CENTOS7HVM": "ami-3b89905b"
+                "CENTOS7HVM": "ami-4826c22b"
             },
             "us-west-2": {
-                "CENTOS7HVM": "ami-5490ed2c"
+                "CENTOS7HVM": "ami-3ecc8f46"
             }
         },
         "DefaultConfiguration": {
