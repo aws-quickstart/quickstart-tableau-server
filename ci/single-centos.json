@@ -94,5 +94,9 @@
     {
         "ParameterKey": "Username",
         "ParameterValue": "tsmadmin"
+    },
+    {
+        "ParameterKey":"QSS3BucketName",
+        "ParameterValue":"$[taskcat_autobucket]"
     }
 ]
