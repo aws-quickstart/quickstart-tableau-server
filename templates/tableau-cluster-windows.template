@@ -1,643 +1,589 @@
 {
-    "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Three node cluster with instances placed as specified in parameters QS(5012)",
-    "Parameters": {
-        "AWSPublicFQDN": {
-            "Description": "Tableau Server portal will be reachable at this address (blank = no DNS)",
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "CloudFormation Template for TSM-based 3-node Tableau Server cluster on Windows",
+
+  "Parameters" : {
+    "KeyName" : {
+      "Description" : "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
+      "Type" : "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+    "ResourceAvailabilityZone" : {
+        "Description" : "The availability zone (AZ) in which our server and storage volume reside",
+        "Type": "AWS::EC2::AvailabilityZone::Name"
+    },
+    "SourceCidr" : {
+      "Description" : "CIDR from which you may connect to web interfacr or bastion host (e.g., 1.1.1.1/32)",
+      "Type" : "String",
+      "MinLength" : "9",
+      "MaxLength" : "18",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
+    },
+    "Username" : {
+        "Description" : "Tableau Services Manager (TSM) administrator username (cannot be Administrator)",
+        "Type": "String",
+        "AllowedPattern" : "[A-Za-z0-9]+",
+        "MaxLength" : "30"
+    },
+    "Password" : {
+        "Description" : "Tableau Services Manager (TSM) administrator password",
+        "Type": "String",
+        "NoEcho" : "true",
+        "AllowedPattern" : "^(?=[a-zA-Z0-9#@$?!]{8,}$)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9]).*",
+        "MinLength" : "8"
+    },
+    "TableauServerAdminUser" : {
+      "Description" : "The name of the initial Admin user for Tableau server",
+      "Type" : "String",
+      "MinLength" : "1"
+    },
+    "TableauServerAdminPassword" : {
+      "Description" : "The password for the initial Admin user for Tableau server",
+      "Type" : "String",
+      "MinLength" : "1",
+      "NoEcho" : "true"
+    },
+    "TableauServerLicenseKey" : {
+      "Description" : "License Key",
+      "Type" : "String",
+      "MinLength" : "1"
+    },
+	"AcceptEULA": {
+            "AllowedPattern": "Yes",
+            "AllowedValues": [
+                "Yes",
+                "No"
+            ],
+            "Description": "View the EULA at the Link: https://www.tableau.com/eula",
             "Type": "String"
+    },
+    "RegFirstName" : {
+      "Description" : "First Name",
+      "Type" : "String",
+      "MinLength" : "1"
+    },
+    "RegLastName" : {
+      "Description" : "Last Name",
+      "Type" : "String",
+      "MinLength" : "1"
+    },
+    "RegEmail" : {
+      "Description" : "Email",
+      "Type" : "String",
+      "MinLength" : "1"
+    },
+    "RegCompany" : {
+      "Description" : "Company",
+      "Type" : "String"
+    },
+    "RegTitle" : {
+      "Description" : "Title",
+      "Type" : "String"
+    },
+    "RegDepartment" : {
+      "Description" : "Department",
+      "Type" : "String"
+    },
+    "RegIndustry" : {
+      "Description" : "Industry",
+      "Type" : "String"
+    },
+    "RegPhone" : {
+      "Description" : "Phone",
+      "Type" : "String"
+    },
+    "RegCity" : {
+      "Description" : "City",
+      "Type" : "String"
+    },
+    "RegState" : {
+      "Description" : "State",
+      "Type" : "String"
+    },
+    "RegZip" : {
+      "Description" : "ZIP/Postal Code",
+      "Type" : "String"
+    },
+    "RegCountry" : {
+      "Description" : "Country",
+      "Type" : "String"
+    }
+  },
+
+  "Metadata" : {
+    "AWS::CloudFormation::Interface" : {
+      "ParameterGroups" : [
+        {
+            "Label" : { "default" : "AWS Environment" },
+            "Parameters" : ["KeyName","ResourceAvailabilityZone","SourceCidr"]
         },
-        "TableauServerAdminPassword": {
-            "Description": "The password for the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "NoEcho": "true",
-            "Type": "String"
+        {
+            "Label" : { "default" : "Configure Initial Tableau Admin User" },
+            "Parameters" : ["TableauServerAdminUser","TableauServerAdminPassword"]
+        },
+        {
+            "Label" : { "default" : " Configure Tableau Services Manager (TSM) administrator" },
+            "Parameters" : ["Username","Password"]
+        },
+        {
+            "Label" : { "default" : "Registration" },
+            "Parameters" : ["TableauServerLicenseKey","AcceptEULA","RegFirstName","RegLastName","RegEmail",
+                            "RegCompany","RegTitle","RegDepartment","RegIndustry",
+                            "RegPhone","RegCity","RegState","RegZip","RegCountry"]
+        }
+      ],
+      "ParameterLabels" : {
+        "KeyName": {
+            "default": "EC2 keypair"
+        },
+        "ResourceAvailabilityZone": {
+            "default": "Target AZ"
+        },
+        "SourceCidr": {
+            "default": "Source CIDR for access"
+        },
+        "Username" : {
+            "default" : "Tableau Services Manager (TSM) administrator username"
+        },
+        "Password" : {
+            "default" : "Tableau Services Manager (TSM) administrator password"
         },
         "TableauServerAdminUser": {
-            "Default": "admin",
-            "Description": "The name of the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "Type": "String"
+            "default": "Portal admin username"
         },
-        "KeyPairName": {
-            "ConstraintDescription": "The name of an existing EC2 Key Pair",
-            "Description": "Name of an existing EC2 Key Pair used to get the Administrator password for the instance",
-            "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "PrimaryIP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.2.11",
-            "Description": "Fixed IP for the primary server",
-            "Type": "String"
-        },
-        "PrimaryPublicSubnetID": {
-            "Description": "The ID of the public subnet in the Primary server's Availability Zone",
-            "Type": "AWS::EC2::Subnet::Id"
-        },
-        "PrimarySubnetID": {
-            "Description": "The ID of the subnet for the Primary server",
-            "Type": "AWS::EC2::Subnet::Id"
-        },
-        "RegCity": {
-            "Type": "String"
-        },
-        "RegCompany": {
-            "Type": "String"
-        },
-        "RegCountry": {
-            "Type": "String"
-        },
-        "RegDepartment": {
-            "Type": "String"
-        },
-        "RegEmail": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegFirstName": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegIndustry": {
-            "Type": "String"
-        },
-        "RegLastName": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegPhone": {
-            "Type": "String"
-        },
-        "RegState": {
-            "Type": "String"
-        },
-        "RegTitle": {
-            "Type": "String"
-        },
-        "RegZip": {
-            "Type": "String"
-        },
-        "SSLCertificateARN": {
-            "Default": "",
-            "Description": "The Amazon Resource Name for the existing SSL cert you wish to use; empty for none",
-            "Type": "String"
-        },
-        "SourceCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "CIDR from which you may connect to web interface",
-            "Type": "String"
+        "TableauServerAdminPassword": {
+            "default": "Portal admin password"
         },
         "TableauServerLicenseKey": {
-            "Description": "License Key",
-            "MinLength": "1",
-            "Type": "String"
+            "default": "Tableau Activation Key"
         },
-        "VPCID": {
-            "Description": "The ID of the VPC into which to deploy the cluster",
-            "Type": "AWS::EC2::VPC::Id"
+        "AcceptEULA": {
+		     "default": "Accept Tableau End User License Agreement"
+	    },
+        "RegFirstName": {
+            "default": "First Name"
         },
-        "Worker1IP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.4.11",
-            "Description": "Fixed IP for the worker1 server",
-            "Type": "String"
+        "RegLastName": {
+            "default": "Last name"
         },
-        "Worker1PublicSubnetID": {
-            "Description": "The ID of the public subnet in the Worker1 server's Availability Zone",
-            "Type": "AWS::EC2::Subnet::Id"
+        "RegEmail": {
+            "default": "Email Address"
         },
-        "Worker1SubnetID": {
-            "Description": "The ID of the subnet for the Worker1 server",
-            "Type": "AWS::EC2::Subnet::Id"
+        "RegCompany": {
+            "default": "Company"
         },
-        "Worker2IP": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
-            "ConstraintDescription": "IP address parameter must be in the form x.x.x.x",
-            "Default": "10.0.6.11",
-            "Description": "Fixed IP for the worker2 server",
-            "Type": "String"
+        "RegTitle": {
+            "default": "Title"
         },
-        "Worker2PublicSubnetID": {
-            "Description": "The ID of the public subnet in the Worker2 server's Availability Zone",
-            "Type": "AWS::EC2::Subnet::Id"
+        "RegDepartment": {
+            "default": "Department"
         },
-        "Worker2SubnetID": {
-            "Description": "The ID of the subnet for the Worker2 server",
-            "Type": "AWS::EC2::Subnet::Id"
+        "RegIndustry": {
+            "default": "Industry"
+        },
+        "RegPhone": {
+            "default": "Phone"
+        },
+        "RegCity": {
+            "default": "City"
+        },
+        "RegState": {
+            "default": "State"
+        },
+        "RegZip": {
+            "default": "Zip/Postal Code"
+        },
+        "RegCountry": {
+            "default": "Country"
         }
-    },
-    "Metadata": {
-        "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
-                    "Label": {
-                        "default": "Network Configuration"
-                    },
-                    "Parameters": [
-                        "SourceCIDR",
-                        "SSLCertificateARN",
-                        "AWSPublicFQDN",
-                        "VPCID",
-                        "PrimaryPublicSubnetID",
-                        "PrimarySubnetID",
-                        "Worker1PublicSubnetID",
-                        "Worker1SubnetID",
-                        "Worker2PublicSubnetID",
-                        "Worker2SubnetID"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Amazon EC2 Configuration"
-                    },
-                    "Parameters": [
-                        "KeyPairName",
-                        "PrimaryIP",
-                        "Worker1IP",
-                        "Worker2IP"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Configure Initial Tableau Admin User"
-                    },
-                    "Parameters": [
-                        "TableauServerAdminUser",
-                        "TableauServerAdminPassword"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Registration"
-                    },
-                    "Parameters": [
-                        "TableauServerLicenseKey",
-                        "RegFirstName",
-                        "RegLastName",
-                        "RegEmail",
-                        "RegCompany",
-                        "RegTitle",
-                        "RegDepartment",
-                        "RegIndustry",
-                        "RegPhone",
-                        "RegCity",
-                        "RegState",
-                        "RegZip",
-                        "RegCountry"
-                    ]
-                }
-            ],
-            "ParameterLabels": {
-                "AWSPublicFQDN": {
-                    "default": "Full DNS Name for Cluster"
-                },
-                "TableauServerAdminUser": {
-                    "default": "Tableau Server administrator username"
-                },
-                "TableauServerAdminPassword": {
-                    "default": "Tableau Server administrator password"
-                },
-                "KeyPairName": {
-                    "default": "Key Pair Name"
-                },
-                "PrimaryIP": {
-                    "default": "Primary Server IP"
-                },
-                "PrimaryPublicSubnetID": {
-                    "default": "Primary AZ Public Subnet ID"
-                },
-                "PrimarySubnetID": {
-                    "default": "Primary Server Subnet ID"
-                },
-                "Worker1IP": {
-                    "default": "Worker1 IP"
-                },
-                "Worker1PublicSubnetID": {
-                    "default": "Worker1 AZ Public Subnet ID"
-                },
-                "Worker1SubnetID": {
-                    "default": "Worker1 Server Subnet ID"
-                },
-                "Worker2IP": {
-                    "default": "Worker2 IP"
-                },
-                "Worker2PublicSubnetID": {
-                    "default": "Worker2 AZ Public Subnet ID"
-                },
-                "Worker2SubnetID": {
-                    "default": "Worker2 Server Subnet ID"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegLastName": {
-                    "default": "Last Name"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
-                },
-                "RegCompany": {
-                    "default": "Company"
-                },
-                "RegTitle": {
-                    "default": "Title"
-                },
-                "RegDepartment": {
-                    "default": "Department"
-                },
-                "RegIndustry": {
-                    "default": "Industry"
-                },
-                "RegPhone": {
-                    "default": "Phone"
-                },
-                "RegCity": {
-                    "default": "City"
-                },
-                "RegState": {
-                    "default": "State"
-                },
-                "RegZip": {
-                    "default": "Zip/Postal Code"
-                },
-                "RegCountry": {
-                    "default": "Country"
-                },
-                "SourceCIDR": {
-                    "default": "Source CIDR for Access"
-                },
-                "SSLCertificateARN": {
-                    "default": "SSL Certificate ARN (Requires matching DNS name)"
-                },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
-                },
-                "VPCID": {
-                    "default": "VPC ID"
-                }
-            }
+      }
+    }
+  },
+  "Mappings" : {
+    "AWSAMIRegionMap":{
+ "AMI":{
+    "WS2012R2":"Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.10.14"
+ },
+ "ap-south-1": {
+    "WS2012R2": "ami-0bd1dc65d74266ee2"
+ },
+ "eu-west-3": {
+    "WS2012R2": "ami-040ef025ec13d58bf"
+ },
+ "eu-west-2": {
+    "WS2012R2": "ami-0a7551990da17b8d6"
+ },
+ "eu-west-1": {
+    "WS2012R2": "ami-01dbaf1c50a36891d"
+ },
+ "ap-northeast-3": {
+    "WS2012R2": "ami-0b080b2ee57fa5e3d"
+ },
+ "ap-northeast-2": {
+    "WS2012R2": "ami-0b3a3970b73d5b63a"
+ },
+ "ap-northeast-1": {
+    "WS2012R2": "ami-0a45b66bda01c89c8"
+ },
+ "sa-east-1": {
+    "WS2012R2": "ami-01d74c2e93478e2f5"
+ },
+ "ca-central-1": {
+    "WS2012R2": "ami-0a27bbef221046aae"
+ },
+ "ap-southeast-1": {
+    "WS2012R2": "ami-0bf96f139bff648cc"
+ },
+ "ap-southeast-2": {
+    "WS2012R2": "ami-0664c039c4dea5193"
+ },
+ "eu-central-1": {
+    "WS2012R2": "ami-0d55859ee09a59138"
+ },
+ "us-east-1": {
+    "WS2012R2": "ami-0fba87d7f8c8744d4"
+ },
+ "us-east-2": {
+    "WS2012R2": "ami-0679e5ac84d15f15e"
+ },
+ "us-west-1": {
+    "WS2012R2": "ami-04370c2a300903acc"
+ },
+ "us-west-2": {
+    "WS2012R2": "ami-02e27664434db6def"
+ }
+        },
+    "DefaultConfiguration" : {
+        "InstallationConfig" : {
+            "InstallationBucket" : "tableau-quickstart",
+            "InstallationExecutable" : "TableauServer-64bit.exe"
+        },
+        "MachineConfiguration" : {
+            "BastionInstanceType" : "t2.micro",
+            "InstanceType" : "m4.4xlarge",
+            "VolumeSize" : 100,
+            "WindowsVersion" : "WS2012R2"
         }
-    },
-    "Conditions": {
-        "NoSSLCertficate": {
+    }
+  },
+  "Conditions" : {
+    "IsTrial": {
             "Fn::Equals": [
                 "",
                 {
-                    "Ref": "SSLCertificateARN"
+                    "Ref": "TableauServerLicenseKey"
                 }
             ]
-        },
-        "HasSSLCertificate": {
-            "Fn::Not": [
-                {
-                    "Condition": "NoSSLCertficate"
-                }
-            ]
-        },
-        "NoDNSEntry": {
-            "Fn::Equals": [
-                "",
-                {
-                    "Ref": "AWSPublicFQDN"
-                }
+    }
+  },
+  "Resources" : {
+    "ClusterVPC" : {
+        "Type" : "AWS::EC2::VPC",
+        "Properties" : {
+            "CidrBlock" : "10.0.0.0/16",
+            "EnableDnsSupport" : "true",
+            "EnableDnsHostnames" : "true",
+            "Tags" : [
+                {"Key" : "Name", "Value" : "ClusterVPC"}
             ]
         }
     },
-    "Mappings": {
-        "AWSAMIRegionMap": {
-            "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.10.14"
-            },
-            "ap-northeast-1": {
-                "WS2012R2": "ami-0a45b66bda01c89c8"
-            },
-            "ap-northeast-2": {
-                "WS2012R2": "ami-0b3a3970b73d5b63a"
-            },
-            "ap-south-1": {
-                "WS2012R2": "ami-0bd1dc65d74266ee2"
-            },
-            "ap-southeast-1": {
-                "WS2012R2": "ami-0bf96f139bff648cc"
-            },
-            "ap-southeast-2": {
-                "WS2012R2": "ami-0664c039c4dea5193"
-            },
-            "ca-central-1": {
-                "WS2012R2": "ami-0a27bbef221046aae"
-            },
-            "eu-central-1": {
-                "WS2012R2": "ami-0d55859ee09a59138"
-            },
-            "eu-west-1": {
-                "WS2012R2": "ami-01dbaf1c50a36891d"
-            },
-            "eu-west-2": {
-                "WS2012R2": "ami-0a7551990da17b8d6"
-            },
-            "sa-east-1": {
-                "WS2012R2": "ami-01d74c2e93478e2f5"
-            },
-            "us-east-1": {
-                "WS2012R2": "ami-0fba87d7f8c8744d4"
-            },
-            "us-east-2": {
-                "WS2012R2": "ami-0679e5ac84d15f15e"
-            },
-            "us-west-1": {
-                "WS2012R2": "ami-04370c2a300903acc"
-            },
-            "us-west-2": {
-                "WS2012R2": "ami-02e27664434db6def"
-            }
-        },
-        "DefaultConfiguration": {
-            "InstallationConfig": {
-                "InstallationBucket": "tableau-quickstart",
-                "InstallationExecutable": "Setup-Server-x64.exe",
-                "InstallationWorkerExecutable": "Setup-Worker-x64.exe"
-            },
-            "MachineConfiguration": {
-                "InstanceType": "m4.4xlarge",
-                "SystemVolumeSize": 50,
-                "DataVolumeSize": 100,
-                "WindowsVersion": "WS2012R2"
-            }
+    "ClusterInternetGateway" : {
+        "Type" : "AWS::EC2::InternetGateway",
+        "Properties" : {
+            "Tags" : [
+                {"Key" : "Name", "Value" : "ClusterInternetGateway"}
+            ]
         }
     },
-    "Resources": {
-        "LoadBalancerSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enable Web traffic",
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                "443",
-                                "80"
-                            ]
-                        },
-                        "ToPort": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                "443",
-                                "80"
-                            ]
-                        },
-                        "CidrIp": {
-                            "Ref": "SourceCIDR"
-                        }
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "LoadBalancerSecurityGroup"
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VPCID"
-                }
-            }
-        },
-        "ServerLoadBalancer": {
-            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-            "DependsOn": [
-                "LoadBalancerSecurityGroup"
+    "ClusterInternetGatewayAssociation" : {
+        "Type" : "AWS::EC2::VPCGatewayAttachment",
+        "Properties" : {
+            "InternetGatewayId" : { "Ref" : "ClusterInternetGateway"},
+            "VpcId" : { "Ref" : "ClusterVPC"}
+        }
+    },
+    "ClusterNATInternetGatewayEIP" : {
+        "DependsOn" : ["ClusterInternetGatewayAssociation"],
+        "Type" : "AWS::EC2::EIP",
+        "Properties" : {
+            "Domain" : "vpc"
+        }
+    },
+    "ClusterNATInternetGateway" : {
+        "DependsOn" : ["ClusterInternetGatewayAssociation", "ClusterNATInternetGatewayEIP"],
+        "Type" : "AWS::EC2::NatGateway",
+        "Properties" : {
+            "AllocationId" : { "Fn::GetAtt" : ["ClusterNATInternetGatewayEIP", "AllocationId"]},
+            "SubnetId" : { "Ref" : "ClusterPublicSubnet"}
+        }
+    },
+    "MainRouteTable" : {
+        "Type" : "AWS::EC2::RouteTable",
+        "Properties" : {
+            "VpcId" : { "Ref" : "ClusterVPC" },
+            "Tags" : [
+                {"Key" : "Name", "Value" : "MainRouteTable"}
+            ]
+        }
+    },
+    "MainRouteTableNonLocalEntry" : {
+        "Type" : "AWS::EC2::Route",
+        "Properties" : {
+            "DestinationCidrBlock" : "0.0.0.0/0",
+            "GatewayId" : { "Ref" : "ClusterInternetGateway"},
+            "RouteTableId" : { "Ref" : "MainRouteTable"}
+        }
+    },
+    "MainRouteTableAssociation" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+          "RouteTableId" : { "Ref" : "MainRouteTable"},
+          "SubnetId" : { "Ref" : "ClusterPublicSubnet" }
+        }
+    },
+    "PrivateRouteTable" : {
+        "Type" : "AWS::EC2::RouteTable",
+        "Properties" : {
+            "VpcId" : { "Ref" : "ClusterVPC" },
+            "Tags" : [
+                {"Key" : "Name", "Value" : "PrivateRouteTable"}
+            ]
+        }
+    },
+    "PrivateRouteTableNonLocalEntry" : {
+        "Type" : "AWS::EC2::Route",
+        "Properties" : {
+            "DestinationCidrBlock" : "0.0.0.0/0",
+            "NatGatewayId" : { "Ref" : "ClusterNATInternetGateway"},
+            "RouteTableId" : { "Ref" : "PrivateRouteTable"}
+        }
+    },
+    "PrivateRouteTableAssociation" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+          "RouteTableId" : { "Ref" : "PrivateRouteTable"},
+          "SubnetId" : { "Ref" : "ClusterPrivateSubnet" }
+        }
+    },
+    "ClusterPublicSubnet" :  {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+            "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
+            "CidrBlock" : "10.0.0.0/24",
+            "MapPublicIpOnLaunch" : "true",
+            "Tags" : [
+                {"Key" : "Name", "Value" : "cluster public subnet"}
             ],
-            "Properties": {
-                "Scheme": "internet-facing",
-                "Subnets": [
-                    {
-                        "Ref": "PrimaryPublicSubnetID"
-                    },
-                    {
-                        "Ref": "Worker1PublicSubnetID"
-                    },
-                    {
-                        "Ref": "Worker2PublicSubnetID"
-                    }
-                ],
-                "SecurityGroups": [
-                    {
-                        "Ref": "LoadBalancerSecurityGroup"
-                    }
-                ],
-                "Listeners": [
-                    {
-                        "Protocol": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                "HTTPS",
-                                "HTTP"
-                            ]
-                        },
-                        "LoadBalancerPort": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                "443",
-                                "80"
-                            ]
-                        },
-                        "InstanceProtocol": "HTTP",
-                        "InstancePort": "80",
-                        "SSLCertificateId": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                {
-                                    "Ref": "SSLCertificateARN"
-                                },
-                                {
-                                    "Ref": "AWS::NoValue"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-cfn-lb"
-                        }
-                    }
-                ]
+            "VpcId" : { "Ref" : "ClusterVPC" }
+        }
+    },
+    "ClusterPrivateSubnet" :  {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+            "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
+            "CidrBlock" : "10.0.1.0/24",
+            "MapPublicIpOnLaunch" : "false",
+            "Tags" : [
+                {"Key" : "Name", "Value" : "cluster private subnet"}
+            ],
+            "VpcId" : { "Ref" : "ClusterVPC" }
+        }
+    },
+    "BastionSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable RDP traffic to the bastion host",
+        "SecurityGroupIngress" : [
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "3389",
+            "ToPort" : "3389",
+            "CidrIp" : { "Ref" : "SourceCidr" }
+          }
+        ],
+        "Tags" : [
+            {"Key" : "Name", "Value" : "BastionSecurityGroup"}
+        ],
+        "VpcId" : { "Ref" : "ClusterVPC" }
+      }
+    },
+    "InternalSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable RDP and Web traffic from the bastion to private hosts, and all traffic between private hosts",
+        "SecurityGroupIngress" : [
+            {
+                "IpProtocol" : "tcp",
+                "FromPort" : "3389",
+                "ToPort" : "3389",
+                "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup" }
+            },
+            {
+                "IpProtocol" : "tcp",
+                "FromPort" : "80",
+                "ToPort" : "80",
+                "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup" }
+            },
+            {
+                "IpProtocol" : "tcp",
+                "FromPort" : "80",
+                "ToPort" : "80",
+                "SourceSecurityGroupId" : { "Ref" : "LoadBalancerSecurityGroup" }
+            },
+            {
+               "IpProtocol" : "tcp",
+               "FromPort" : "8850",
+               "ToPort" : "8850",
+               "SourceSecurityGroupId" : { "Ref" : "BastionSecurityGroup" }
+           },
+            {
+                "IpProtocol" : "-1",
+                "CidrIp" : "10.0.1.0/24"
             }
-        },
-        "LoadBalancerRegisterRole": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-                "AssumeRolePolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": [
-                                    "ec2.amazonaws.com"
-                                ]
+        ],
+        "Tags" : [
+            {"Key" : "Name", "Value" : "InternalSecurityGroup"}
+        ],
+        "VpcId": { "Ref" : "ClusterVPC" }
+      }
+    },
+    "LoadBalancerSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable Web traffic",
+        "SecurityGroupIngress" : [
+          {
+            "IpProtocol" : "tcp",
+            "FromPort" : "80",
+            "ToPort" : "80",
+            "CidrIp" : { "Ref" : "SourceCidr" }
+          }
+        ],
+        "Tags" : [
+            {"Key" : "Name", "Value" : "LoadBalancerSecurityGroup"}
+        ],
+        "VpcId" : { "Ref" : "ClusterVPC" }
+      }
+    },
+    "ServerLoadBalancer" : {
+        "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+        "DependsOn" : ["LoadBalancerSecurityGroup", "InitialHost"],
+        "Properties" : {
+            "Scheme" : "internet-facing",
+            "Instances" : [ { "Ref" : "InitialHost"},{ "Ref" : "Node2"},{ "Ref" : "Node3"} ],
+            "Subnets" : [  { "Ref" : "ClusterPublicSubnet"} ],
+            "SecurityGroups" : [ { "Ref" : "LoadBalancerSecurityGroup"} ],
+            "Listeners" : [
+                {
+                    "Protocol" : "HTTP",
+                    "LoadBalancerPort" : "80",
+                    "InstanceProtocol" : "HTTP",
+                    "InstancePort" : "80"
+                }
+            ],
+            "Tags": [
+                {
+                    "Key" : "Name",
+                    "Value" : {"Fn::Sub" : "${AWS::StackName}-cfn-lb"}
+                }
+            ]
+        }
+    },
+    "S3ReadOnlyRole" : {
+        "Type" : "AWS::IAM::Role",
+        "Properties": {
+            "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [{
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "ec2.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               }]
+            },
+            "Policies" : [
+                {
+                    "PolicyName" : "s3readonlyaccess",
+                    "PolicyDocument" : {
+                        "Statement": [
+                            {
+                              "Effect": "Allow",
+                              "Action": ["s3:GetObject"],
+                              "Resource": {"Fn::Join" : ["", ["arn:aws:s3:::",
+                                                        { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]},
+                                                        "/*" ]]}
                             },
-                            "Action": [
-                                "sts:AssumeRole"
-                            ]
-                        }
-                    ]
-                },
-                "Policies": [
-                    {
-                        "PolicyName": {
-                            "Fn::Sub": "${AWS::StackName}-load-balancer-register-role"
-                        },
-                        "PolicyDocument": {
-                            "Statement": [
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
-                                    ],
-                                    "Resource": [
-                                        {
-                                            "Fn::Sub": "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        },
-        "TableauWindowsServerInstanceProfile": {
-            "Type": "AWS::IAM::InstanceProfile",
-            "DependsOn": [
-                "LoadBalancerRegisterRole"
-            ],
-            "Properties": {
-                "Path": "/",
-                "Roles": [
-                    {
-                        "Ref": "LoadBalancerRegisterRole"
-                    }
-                ]
-            }
-        },
-        "WorkloadSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Enable traffic between hosts",
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "WorkloadSecurityGroup"
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VPCID"
-                }
-            }
-        },
-        "WorkloadSecurityGroupLoadBalancerIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn": [
-                "WorkloadSecurityGroup",
-                "LoadBalancerSecurityGroup"
-            ],
-            "Properties": {
-                "GroupId": {
-                    "Ref": "WorkloadSecurityGroup"
-                },
-                "IpProtocol": "-1",
-                "SourceSecurityGroupId": {
-                    "Ref": "LoadBalancerSecurityGroup"
-                }
-            }
-        },
-        "WorkloadSecurityGroupMutualIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn": [
-                "WorkloadSecurityGroup"
-            ],
-            "Properties": {
-                "GroupId": {
-                    "Ref": "WorkloadSecurityGroup"
-                },
-                "IpProtocol": "-1",
-                "SourceSecurityGroupId": {
-                    "Ref": "WorkloadSecurityGroup"
-                }
-            }
-        },
-        "PrimaryHost": {
-            "Type": "AWS::EC2::Instance",
-            "DependsOn": [
-                "TableauWorkerWaitCondition",
-                "ServerLoadBalancer"
-            ],
-            "Metadata": {
-                "AWS::CloudFormation::Init": {
-                    "config": {
-                        "packages": {
-                            "msi": {
-                                "python": "https://www.python.org/ftp/python/2.7.12/python-2.7.12.msi"
+                            {
+                              "Effect": "Allow",
+                              "Action": [ "s3:ListBucket"],
+                              "Resource": {"Fn::Join" : ["", ["arn:aws:s3:::", { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]}]]}
                             }
-                        },
-                        "files": {
-                            "c:\\tabsetup\\json2yml.py": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "\n",
-                                        [
-                                            "import sys",
-                                            "import yaml",
-                                            "import json",
-                                            "config_data = json.load(sys.stdin)",
-                                            "for k,v in config_data.items():",
-                                            "    if v.startswith('INTEGER:'):",
-                                            "        newvalue = v[len('INTEGER:'):]",
-                                            "        config_data[k] = int(newvalue)",
-                                            "    elif v.startswith('FLOAT:'):",
-                                            "        newvalue = v[len('FLOAT:'):]",
-                                            "        config_data[k] = float(newvalue)",
-                                            "    elif v.startswith('BOOLEAN:'):",
-                                            "        newvalue = v[len('BOOLEAN:'):]",
-                                            "        config_data[k] = json.loads(newvalue.lower())",
-                                            "yaml.safe_dump(config_data, sys.stdout, default_flow_style=False)",
-                                            ""
-                                        ]
-                                    ]
-                                }
-                            },
-                            "c:\\tabsetup\\ScriptedInstaller.py": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
-                                            ".s3.amazonaws.com/ScriptedInstaller.py"
-                                        ]
-                                    ]
-                                }
-                            },
+                          ]
+                    }
+                }
+            ]
+        }
+    },
+    "TableauWindowsServerInstanceProfile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "DependsOn" : ["S3ReadOnlyRole"],
+        "Properties": {
+            "Path":"/",
+            "Roles": [ { "Ref" : "S3ReadOnlyRole" } ]
+        }
+    },
+    "BastionHost" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : ["BastionSecurityGroup"],
+      "Properties": {
+        "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "BastionInstanceType"]},
+        "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+        "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
+        "SecurityGroupIds" : [ {"Ref" : "BastionSecurityGroup"} ],
+        "KeyName" : { "Ref" : "KeyName" },
+        "SubnetId" : { "Ref" : "ClusterPublicSubnet"},
+        "Tags": [
+            {
+                "Key" : "Name",
+                "Value" : {"Fn::Sub" : "${AWS::StackName}-bastion-host"}
+            }
+        ]
+      }
+    },
+    "InitialHost" : {
+        "Type" : "AWS::EC2::Instance",
+        "DependsOn" : ["InternalSecurityGroup", "ClusterNATInternetGateway"],
+        "Metadata" : {
+            "AWS::CloudFormation::Init" : {
+                "config" : {
+                    "files" : {
                             "c:\\tabsetup\\secrets.json": {
                                 "content": {
+                                   "local_admin_user": {
+                                        "Ref": "Username"
+                                    },
+                                    "local_admin_pass": {
+                                        "Ref": "Password"
+                                    },
                                     "content_admin_user": {
                                         "Ref": "TableauServerAdminUser"
                                     },
                                     "content_admin_pass": {
                                         "Ref": "TableauServerAdminPassword"
-                                    }
+                                    },
+                                    "product_keys" : [{
+                                        "Fn::If": [
+                                            "IsTrial",
+                                            "trial",
+                                            {
+                                                "Fn::Sub": "${TableauServerLicenseKey}"
+                                            }
+                                        ]
+                                    }]
                                 }
                             },
                             "c:\\tabsetup\\registration.json": {
@@ -658,7 +604,7 @@
                                                 {
                                                     "Ref": "RegCompany"
                                                 },
-                                                "AWSQuickStart-Win"
+                                                "AWSQuickStart-WinBeta"
                                             ]
                                         ]
                                     },
@@ -688,73 +634,7 @@
                                     }
                                 }
                             },
-                            "c:\\tabsetup\\config.json": {
-                                "content": {
-                                    "config.version": "INTEGER:16",
-                                    "install.component.samples": "BOOLEAN:true",
-                                    "wgserver.authenticate": "local",
-                                    "worker.hosts": {
-                                        "Fn::Sub": "${PrimaryIP}, ${Worker1IP}, ${Worker2IP}"
-                                    },
-                                    "pgsql.host": {
-                                        "Ref": "Worker1IP"
-                                    },
-                                    "pgsql0.host": {
-                                        "Ref": "Worker1IP"
-                                    },
-                                    "pgsql1.host": {
-                                        "Ref": "Worker2IP"
-                                    },
-                                    "gateway.public.host": {
-                                        "Fn::If": [
-                                            "NoDNSEntry",
-                                            {
-                                                "Fn::GetAtt": [
-                                                    "ServerLoadBalancer",
-                                                    "DNSName"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "AWSPublicFQDN"
-                                            }
-                                        ]
-                                    },
-                                    "worker0.gateway.enabled": "BOOLEAN:true",
-                                    "worker0.gateway.port": "INTEGER:80",
-                                    "worker0.vizportal.procs": "INTEGER:0",
-                                    "worker0.vizqlserver.procs": "INTEGER:0",
-                                    "worker0.cacheserver.procs": "INTEGER:0",
-                                    "worker0.searchserver.enabled": "BOOLEAN:true",
-                                    "worker0.backgrounder.procs": "INTEGER:0",
-                                    "worker0.dataserver.procs": "INTEGER:0",
-                                    "worker0.dataengine.procs": "INTEGER:0",
-                                    "worker0.filestore.enabled": "BOOLEAN:false",
-                                    "worker0.zookeeper.procs": "INTEGER:1",
-                                    "worker1.gateway.enabled": "BOOLEAN:true",
-                                    "worker1.gateway.port": "INTEGER:80",
-                                    "worker1.vizportal.procs": "INTEGER:2",
-                                    "worker1.vizqlserver.procs": "INTEGER:2",
-                                    "worker1.cacheserver.procs": "INTEGER:2",
-                                    "worker1.searchserver.enabled": "BOOLEAN:true",
-                                    "worker1.backgrounder.procs": "INTEGER:1",
-                                    "worker1.dataserver.procs": "INTEGER:1",
-                                    "worker1.dataengine.procs": "INTEGER:1",
-                                    "worker1.filestore.enabled": "BOOLEAN:true",
-                                    "worker1.zookeeper.procs": "INTEGER:1",
-                                    "worker2.gateway.enabled": "BOOLEAN:true",
-                                    "worker2.gateway.port": "INTEGER:80",
-                                    "worker2.vizportal.procs": "INTEGER:2",
-                                    "worker2.vizqlserver.procs": "INTEGER:2",
-                                    "worker2.cacheserver.procs": "INTEGER:2",
-                                    "worker2.searchserver.enabled": "BOOLEAN:true",
-                                    "worker2.backgrounder.procs": "INTEGER:1",
-                                    "worker2.dataserver.procs": "INTEGER:1",
-                                    "worker2.dataengine.procs": "INTEGER:1",
-                                    "worker2.filestore.enabled": "BOOLEAN:true",
-                                    "worker2.zookeeper.procs": "INTEGER:1"
-                                }
-                            },
-                            "c:\\tabsetup\\tableau-primary-installer.exe": {
+                            "c:\\tabsetup\\SilentInstaller.py": {
                                 "source": {
                                     "Fn::Join": [
                                         "",
@@ -767,8 +647,88 @@
                                                     "InstallationBucket"
                                                 ]
                                             },
-                                            ".s3.amazonaws.com/",
+                                            ".s3.amazonaws.com/SilentInstaller.py"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\config.json": {
+                                "content": {
+                                   "configEntities":{
+                                        "identityStore":{
+                                        "_type":"identityStoreType",
+                                        "type":"local"
+                                        }
+                                    },
+                                    "topologyVersion":{
+                                    }
+                                }
+                            },
+                            "c:\\tabsetup\\DeployTopology.cmd": {
+                                "content": {
+                                   "Fn::Join" : ["\n", [
+                                   "c: ",
+                                   "cd c:\\tableau\\packages\\bin.* ",
+                                   ":CheckForNodes ",
+                                   "call tsm.cmd login -u %1 -p %2 ",
+                                   "FOR /F \"tokens=*\" %%F IN ('tsm.cmd topology list-nodes ^| find /i \"node\" /c') do ( ",
+                                   "      SET Var=%%F   ",
+                                   ") ",
+                                   "ECHO Found %Var% nodes... ",
+                                   "IF /I %Var% GEQ 3 GOTO FoundIt ",
+                                   "call TIMEOUT /T 60 >nul ",
+                                   "GOTO CheckForNodes ",
+
+                                   ":FoundIt ",
+                                   "call tsm.cmd login -u %1 -p %2 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr clustercontroller -c 1 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr gateway -c 1 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr vizportal -c 2 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr vizqlserver -c 2 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr cacheserver -c 2 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr searchserver -c 1 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr backgrounder -c 1 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr dataserver -c 1 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr filestore -c 1 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr clustercontroller -c 1 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr gateway -c 1 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr vizportal -c 2 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr vizqlserver -c 2 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr cacheserver -c 2 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr searchserver -c 1 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr backgrounder -c 1 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr dataserver -c 1 ",
+                                   "call tsm.cmd topology set-process -n node3 -pr filestore -c 1 ",
+                                   "call tsm.cmd topology set-process -n node2 -pr pgsql -c 1 ",
+                                   "call tsm.cmd pending-changes apply --ignore-warnings --ignore-prompt",
+                                   "call tsm.cmd stop ",
+                                   "call tsm.cmd topology deploy-coordination-service -n node1,node2,node3 ",
+                                   "call TIMEOUT /T 180 ",
+                                   "call tsm.cmd topology cleanup-coordination-service -u %1 -p %2 ",
+                                   "call TIMEOUT /T 120 ",
+                                   "call tsm.cmd start -u %1 -p %2 ",
+                                   "ECHO Completed topology deployment "
+                                   ]
+                                ]}
+                            },
+                            "c:\\tabsetup\\python-3.6.4-amd64.exe": {
+                                "source": "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"
+                            },
+                            "c:\\tabsetup\\tableau-server-webapp-installer.exe": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
                                             {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                           ".s3.amazonaws.com/",
+                                           {
                                                 "Fn::FindInMap": [
                                                     "DefaultConfiguration",
                                                     "InstallationConfig",
@@ -778,607 +738,720 @@
                                         ]
                                     ]
                                 }
-                            },
-                            "c:\\tabsetup\\register-with-elb.py": {
-                                "content": {
+                            }
+                    },
+                    "commands" : {
+                        "1-disable-firewall" : {
+                            "cwd" : "c:\\Windows\\System32",
+                            "command" : "netsh advfirewall set allprofiles state off",
+                            "waitAfterCompletion" : "0"
+                        },
+                        "2-install-python": {
+                            "command": "c:\\tabsetup\\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "3-create-user": {
+                                "command": {
                                     "Fn::Join": [
-                                        "",
+                                        " ",
                                         [
-                                            "import urllib2\n",
-                                            "import boto3\n",
-                                            "fyle = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id')\n",
-                                            "my_instance_id = fyle.read()\n",
-                                            {
-                                                "Fn::Sub": "client = boto3.client('elb', region_name='${AWS::Region}')\n"
-                                            },
-                                            {
-                                                "Fn::Sub": "client.register_instances_with_load_balancer(LoadBalancerName='${ServerLoadBalancer}',"
-                                            },
-                                            {
-                                                "Fn::Sub": "Instances=[{'InstanceId': my_instance_id},{'InstanceId':'${WorkerHost1}'},{'InstanceId':'${WorkerHost2}'}]"
-                                            },
-                                            ")\n",
-                                            ""
+                                            "net",
+                                            "user",
+                                            {"Fn::Sub": "${Username}"},
+                                            {"Fn::Sub": "${Password}"},
+                                             "/add",
+                                             "/y"
                                         ]
                                     ]
-                                }
-                            }
-                        },
-                        "commands": {
-                            "1-disable-firewall": {
-                                "cwd": "c:\\Windows\\System32",
-                                "command": "netsh advfirewall set allprofiles state off",
-                                "waitAfterCompletion": "0"
-                            },
-                            "2-pip-install-libs": {
-                                "command": "c:\\Python27\\Scripts\\pip.exe install pyyaml boto3",
-                                "cwd": "c:\\Python27\\Scripts",
-                                "waitAfterCompletion": "0"
-                            },
-                            "3-convert-config": {
+                                 },
                                 "cwd": "c:\\tabsetup",
-                                "command": "type config.json | c:\\Python27\\python json2yml.py > config.yml",
+                                "waitAfterCompletion": "0"
+                        },
+                        "4-add-admin": {
+                                "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "localgroup",
+                                            "Administrators",
+                                            {"Fn::Sub": "${Username}"},
+                                             "/add",
+                                             "/y"
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
                                 "waitAfterCompletion": "0"
                             },
-                            "4-run-installer": {
+                            "5-run-installer": {
                                 "cwd": "c:\\tabsetup",
                                 "command": {
                                     "Fn::Join": [
                                         " ",
                                         [
-                                            "c:\\Python27\\python.exe",
-                                            "ScriptedInstaller.py",
+                                            "\"C:\\Program Files\\Python36\\python.exe\"",
+                                            "SilentInstaller.py",
                                             "install",
-                                            "--installerLog",
-                                            "C:\\tabsetup\\tabinstall.txt",
                                             "--secretsFile c:\\tabsetup\\secrets.json",
-                                            "--configFile c:\\tabsetup\\config.yml",
                                             "--registrationFile c:\\tabsetup\\registration.json",
-                                            "--installDir d:\\tableau",
-                                            "--licenseKey",
-                                            {
-                                                "Ref": "TableauServerLicenseKey"
-                                            },
-                                            "c:\\tabsetup\\tableau-primary-installer.exe",
-                                            " > c:\\tabsetup\\installer-output.txt 2>&1"
+                                            "--configFile c:\\tabsetup\\config.json",
+                                            "--installDir c:\\tableau",
+                                            "--nodeConfigurationDirectory c:\\tabsetup\\nodeConfiguration.json",
+                                            "c:\\tabsetup\\tableau-server-webapp-installer.exe",
+                                            " > c:\\tabsetup\\tsm_installer-output.txt 2>&1"
                                         ]
                                     ]
                                 },
                                 "waitAfterCompletion": "0"
                             },
-                            "5-cleanup-secrets": {
+                            "6-save-hostname": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "hostname > c:\\tabsetup\\hostname",
+                                "waitAfterCompletion": "0"
+                            },
+                            "7-cleanup-secrets": {
                                 "cwd": "c:\\tabsetup",
                                 "command": "del c:\\tabsetup\\secrets.json",
                                 "waitAfterCompletion": "0"
-                            },
-                            "6-register-with-load-balancer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": "c:\\Python27\\python register-with-elb.py > lb_register.log",
-                                "waitAfterCompletion": "0"
                             }
-                        }
                     }
                 }
             },
-            "Properties": {
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
-                },
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
-                },
-                "SecurityGroupIds": [
-                    {
-                        "Ref": "WorkloadSecurityGroup"
-                    }
-                ],
-                "IamInstanceProfile": {
-                    "Ref": "TableauWindowsServerInstanceProfile"
-                },
-                "KeyName": {
-                    "Ref": "KeyPairName"
-                },
-                "SubnetId": {
-                    "Ref": "PrimarySubnetID"
-                },
-                "PrivateIpAddress": {
-                    "Ref": "PrimaryIP"
-                },
-                "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "SystemVolumeSize"
-                                ]
-                            },
-                            "VolumeType": "gp2"
-                        }
-                    },
-                    {
-                        "DeviceName": "xvdc",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "DataVolumeSize"
-                                ]
-                            },
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "\n",
-                            [
-                                "<script>",
-                                {
-                                    "Fn::Sub": "cfn-init.exe -v -s ${AWS::StackId} -r PrimaryHost --region ${AWS::Region}"
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "cfn-signal.exe -e %errorlevel% ${WHUrl}",
-                                        {
-                                            "WHUrl": {
-                                                "Fn::Base64": {
-                                                    "Ref": "TableauPrimaryWaitHandle"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                },
-                                "</script>"
-                            ]
-                        ]
-                    }
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-primary"
-                        }
-                    }
-                ]
-            }
-        },
-        "WorkerHost1": {
-            "Type": "AWS::EC2::Instance",
-            "DependsOn": [],
-            "Metadata": {
-                "AWS::CloudFormation::Init": {
-                    "config": {
-                        "files": {
-                            "c:\\tabsetup\\tableau-worker-installer.exe": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
-                                            ".s3.amazonaws.com/",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationWorkerExecutable"
-                                                ]
-                                            }
-                                        ]
-                                    ]
-                                }
-                            }
-                        },
-                        "commands": {
-                            "1-disable-firewall": {
-                                "cwd": "c:\\Windows\\System32",
-                                "command": "netsh advfirewall set allprofiles state off",
-                                "waitAfterCompletion": "0"
-                            },
-                            "2-run-installer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
-                                            {
-                                                "Ref": "PrimaryIP"
-                                            },
-                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /DIR=d:\\tableau /LOG=c:\\tabsetup\\installerlog.txt",
-                                            " > c:\\tabsetup\\installer-output.txt 2>&1"
-                                        ]
-                                    ]
-                                },
-                                "waitAfterCompletion": "0"
-                            }
-                        }
-                    }
+            "AWS::CloudFormation::Authentication": {
+                "S3AccessRole" : {
+                    "type": "S3",
+                    "buckets": [ { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]}],
+                    "roleName": { "Ref": "S3ReadOnlyRole" }
                 }
-            },
-            "Properties": {
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
-                },
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
-                },
-                "SecurityGroupIds": [
-                    {
-                        "Ref": "WorkloadSecurityGroup"
-                    }
-                ],
-                "KeyName": {
-                    "Ref": "KeyPairName"
-                },
-                "SubnetId": {
-                    "Ref": "Worker1SubnetID"
-                },
-                "PrivateIpAddress": {
-                    "Ref": "Worker1IP"
-                },
-                "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "SystemVolumeSize"
-                                ]
-                            },
-                            "VolumeType": "gp2"
-                        }
-                    },
-                    {
-                        "DeviceName": "xvdc",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "DataVolumeSize"
-                                ]
-                            },
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "\n",
-                            [
-                                "<script>",
-                                {
-                                    "Fn::Sub": "cfn-init.exe -v -s ${AWS::StackId} -r WorkerHost1 --region ${AWS::Region}"
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "cfn-signal.exe -e %errorlevel% ${WHUrl}",
-                                        {
-                                            "WHUrl": {
-                                                "Fn::Base64": {
-                                                    "Ref": "TableauWorkerWaitHandle"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                },
-                                "</script>"
-                            ]
-                        ]
-                    }
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-worker-1"
-                        }
-                    }
-                ]
             }
         },
-        "WorkerHost2": {
-            "Type": "AWS::EC2::Instance",
-            "DependsOn": [],
-            "Metadata": {
-                "AWS::CloudFormation::Init": {
-                    "config": {
-                        "files": {
-                            "c:\\tabsetup\\tableau-worker-installer.exe": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
-                                            ".s3.amazonaws.com/",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationWorkerExecutable"
-                                                ]
-                                            }
-                                        ]
-                                    ]
-                                }
-                            }
-                        },
-                        "commands": {
-                            "1-disable-firewall": {
-                                "cwd": "c:\\Windows\\System32",
-                                "command": "netsh advfirewall set allprofiles state off",
-                                "waitAfterCompletion": "0"
-                            },
-                            "2-run-installer": {
-                                "cwd": "c:\\tabsetup",
-                                "command": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "c:\\tabsetup\\tableau-worker-installer.exe /PRIMARYIP=\"",
-                                            {
-                                                "Ref": "PrimaryIP"
-                                            },
-                                            "\" /VERYSILENT /SUPPRESSMSGBOXES /ACCEPTEULA /DIR=d:\\tableau /LOG=c:\\tabsetup\\installerlog.txt",
-                                            " > c:\\tabsetup\\installer-output.txt 2>&1"
-                                        ]
-                                    ]
-                                },
-                                "waitAfterCompletion": "0"
-                            }
-                        }
-                    }
+        "Properties": {
+            "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "InstanceType"]},
+            "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+            "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
+            "SecurityGroupIds" : [ {"Ref" : "InternalSecurityGroup"} ],
+            "IamInstanceProfile" : { "Ref" : "TableauWindowsServerInstanceProfile" },
+            "KeyName" : { "Ref" : "KeyName" },
+            "SubnetId" : { "Ref" : "ClusterPrivateSubnet"},
+            "PrivateIpAddress" : "10.0.1.11",
+            "BlockDeviceMappings" : [
+               {
+                "DeviceName" : "/dev/sda1",
+                "Ebs" : { "VolumeSize" : "100" }
+               }
+            ],
+            "UserData" : { "Fn::Base64" : { "Fn::Join" : ["\n", [
+                "<script>",
+                { "Fn::Sub" : "cfn-init.exe -v -s ${AWS::StackId} -r InitialHost --region ${AWS::Region}"},
+                { "Fn::Sub" : ["cfn-signal.exe -e %errorlevel% ${WHUrl}",
+                    {
+                        "WHUrl" : { "Fn::Base64" : { "Ref" : "TableauInitialWaitHandle"}}
+                    }]
+                },
+                { "Fn::Sub" : "C:\\tabsetup\\DeployTopology.cmd ${Username} ${Password} > c:\\tabsetup\\tsm_topology-output.txt 2>&1"},
+                { "Fn::Sub" : "del c:\\tabsetup\\*.json"},
+                { "Fn::Sub" : "del c:\\tabsetup\\*.cmd"},
+                 "</script>"
+            ]]}},
+            "Tags": [
+                {
+                    "Key" : "Name",
+                    "Value" : {"Fn::Sub" : "${AWS::StackName}-node1"}
                 }
-            },
-            "Properties": {
-                "InstanceType": {
-                    "Fn::FindInMap": [
-                        "DefaultConfiguration",
-                        "MachineConfiguration",
-                        "InstanceType"
-                    ]
-                },
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "DefaultConfiguration",
-                                "MachineConfiguration",
-                                "WindowsVersion"
-                            ]
-                        }
-                    ]
-                },
-                "SecurityGroupIds": [
-                    {
-                        "Ref": "WorkloadSecurityGroup"
-                    }
-                ],
-                "KeyName": {
-                    "Ref": "KeyPairName"
-                },
-                "SubnetId": {
-                    "Ref": "Worker2SubnetID"
-                },
-                "PrivateIpAddress": {
-                    "Ref": "Worker2IP"
-                },
-                "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "SystemVolumeSize"
-                                ]
-                            },
-                            "VolumeType": "gp2"
-                        }
-                    },
-                    {
-                        "DeviceName": "xvdc",
-                        "Ebs": {
-                            "VolumeSize": {
-                                "Fn::FindInMap": [
-                                    "DefaultConfiguration",
-                                    "MachineConfiguration",
-                                    "DataVolumeSize"
-                                ]
-                            },
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "\n",
-                            [
-                                "<script>",
-                                {
-                                    "Fn::Sub": "cfn-init.exe -v -s ${AWS::StackId} -r WorkerHost2 --region ${AWS::Region}"
-                                },
-                                {
-                                    "Fn::Sub": [
-                                        "cfn-signal.exe -e %errorlevel% ${WHUrl}",
-                                        {
-                                            "WHUrl": {
-                                                "Fn::Base64": {
-                                                    "Ref": "TableauWorkerWaitHandle"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                },
-                                "</script>"
-                            ]
-                        ]
-                    }
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-worker-2"
-                        }
-                    }
-                ]
-            }
-        },
-        "TableauWorkerWaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-        "TableauWorkerWaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": {
-                    "Ref": "TableauWorkerWaitHandle"
-                },
-                "Count": "2",
-                "Timeout": "1800"
-            }
-        },
-        "TableauPrimaryWaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-        "TableauPrimaryWaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "Properties": {
-                "Handle": {
-                    "Ref": "TableauPrimaryWaitHandle"
-                },
-                "Count": "1",
-                "Timeout": "5400"
-            }
+            ]
         }
     },
-    "Outputs": {
-        "LoadBalancerID": {
-            "Description": "Load Balancer ID",
-            "Value": {
-                "Ref": "ServerLoadBalancer"
+    "Node2" : {
+        "Type" : "AWS::EC2::Instance",
+        "DependsOn" : ["InternalSecurityGroup", "ClusterNATInternetGateway", "TableauInitialWaitCondition"],
+        "Metadata" : {
+            "AWS::CloudFormation::Init" : {
+                "config" : {
+                    "files" : {
+                        "c:\\tabsetup\\secrets.json": {
+                                "content": {
+                                   "local_admin_user": {
+                                        "Ref": "Username"
+                                    },
+                                    "local_admin_pass": {
+                                        "Ref": "Password"
+                                    },
+                                    "content_admin_user": {
+                                        "Ref": "TableauServerAdminUser"
+                                    },
+                                    "content_admin_pass": {
+                                        "Ref": "TableauServerAdminPassword"
+                                    },
+                                    "product_keys" : [{
+                                        "Fn::If": [
+                                            "IsTrial",
+                                            "trial",
+                                            {
+                                                "Fn::Sub": "${TableauServerLicenseKey}"
+                                            }
+                                        ]
+                                    }]
+                                }
+                            },
+                            "c:\\tabsetup\\SilentInstaller.py": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                            ".s3.amazonaws.com/SilentInstaller.py"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\AddHostname.cmd": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                            ".s3.amazonaws.com/AddHostname.cmd"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\config.json": {
+                                "content": {
+                                   "configEntities":{
+                                        "identityStore":{
+                                        "_type":"identityStoreType",
+                                        "type":"local"
+                                        }
+                                    },
+                                    "topologyVersion":{
+                                    }
+                                }
+                            },
+                            "c:\\tabsetup\\python-3.6.4-amd64.exe": {
+                                "source": "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"
+                            },
+                            "c:\\tabsetup\\tableau-server-webapp-installer.exe": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                           ".s3.amazonaws.com/",
+                                           {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationExecutable"
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                }
+                            }
+                    },
+                    "commands" : {
+                      "1-disable-firewall" : {
+                        "cwd" : "c:\\Windows\\System32",
+                        "command" : "netsh advfirewall set allprofiles state off",
+                        "waitAfterCompletion" : "0"
+                      },
+                      "2-install-python": {
+                            "command": "c:\\tabsetup\\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                      },
+                      "3-create-user": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "user",
+                                            {"Fn::Sub": "${Username}"},
+                                            {"Fn::Sub": "${Password}"},
+                                             "/add",
+                                             "/y"
+                                        ]
+                                    ]
+                                 },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                      },
+                      "4-add-admin": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "localgroup",
+                                            "Administrators",
+                                            {"Fn::Sub": "${Username}"},
+                                             "/add",
+                                             "/y"
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "5-get-share": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "use",
+                                            "M:",
+                                            "\\\\10.0.1.11\\c$\\tabsetup",
+                                            {"Fn::Sub": "${Password}"},
+                                            {"Fn::Sub": "/user:10.0.1.11\\${Username}"}
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "6-save-hostname": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "hostname > c:\\tabsetup\\hostname",
+                                "waitAfterCompletion": "0"
+                        },
+                        "7-add-hostname": {
+                            "command": "c:\\tabsetup\\AddHostname.cmd 10.0.1.11",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "8-run-installer": {
+                                "cwd": "c:\\tabsetup",
+                                "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "\"C:\\Program Files\\Python36\\python.exe\"",
+                                            "SilentInstaller.py",
+                                            "installWorker",
+                                            "--secretsFile c:\\tabsetup\\secrets.json",
+                                            "--nodeConfigurationFile \\\\10.0.1.11\\c$\\tabsetup\\nodeConfiguration.json",
+                                            "--installDir c:\\tableau",
+                                            "c:\\tabsetup\\tableau-server-webapp-installer.exe",
+                                            " > c:\\tabsetup\\tsm_installer-output.txt 2>&1"
+                                        ]
+                                    ]
+                            },
+                                "waitAfterCompletion": "0"
+                        },
+                        "9-cleanup-secrets": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "del c:\\tabsetup\\secrets.json",
+                                "waitAfterCompletion": "0"
+                        }
+                    }
+                }
+            },
+            "AWS::CloudFormation::Authentication": {
+                "S3AccessRole" : {
+                    "type": "S3",
+                    "buckets": [ { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]} ],
+                    "roleName": { "Ref": "S3ReadOnlyRole" }
+                }
             }
         },
-        "LoadBalancerDNSName": {
-            "Description": "Direct DNS name of load balancer",
-            "Value": {
-                "Fn::GetAtt": [
-                    "ServerLoadBalancer",
-                    "DNSName"
-                ]
+        "Properties": {
+            "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "InstanceType"]},
+            "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+            "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
+            "SecurityGroupIds" : [ {"Ref" : "InternalSecurityGroup"} ],
+            "IamInstanceProfile" : { "Ref" : "TableauWindowsServerInstanceProfile" },
+            "KeyName" : { "Ref" : "KeyName" },
+            "SubnetId" : { "Ref" : "ClusterPrivateSubnet"},
+            "PrivateIpAddress" : "10.0.1.12",
+            "BlockDeviceMappings" : [
+               {
+                "DeviceName" : "/dev/sda1",
+                "Ebs" : { "VolumeSize" : "100" }
+               }
+            ],
+            "UserData" : { "Fn::Base64" : { "Fn::Join" : ["\n", [
+                "<script>",
+                { "Fn::Sub" : "cfn-init.exe -v -s ${AWS::StackId} -r Node2 --region ${AWS::Region}"},
+                { "Fn::Sub" : ["cfn-signal.exe -e %errorlevel% ${WHUrl}",
+                    {
+                        "WHUrl" : { "Fn::Base64" : { "Ref" : "TableauWorkerWaitHandle"}}
+                    }]
+                },
+                { "Fn::Sub" : "del c:\\tabsetup\\*.cmd"},
+                 "</script>"
+            ]]}},
+            "Tags": [
+                {
+                    "Key" : "Name",
+                    "Value" : {"Fn::Sub" : "${AWS::StackName}-node2"}
+                }
+            ]
+        }
+    },
+    "Node3" : {
+        "Type" : "AWS::EC2::Instance",
+        "DependsOn" : ["InternalSecurityGroup", "ClusterNATInternetGateway", "TableauInitialWaitCondition"],
+        "Metadata" : {
+            "AWS::CloudFormation::Init" : {
+                "config" : {
+                    "files" : {
+                            "c:\\tabsetup\\secrets.json": {
+                                "content": {
+                                   "local_admin_user": {
+                                        "Ref": "Username"
+                                    },
+                                    "local_admin_pass": {
+                                        "Ref": "Password"
+                                    },
+                                    "content_admin_user": {
+                                        "Ref": "TableauServerAdminUser"
+                                    },
+                                    "content_admin_pass": {
+                                        "Ref": "TableauServerAdminPassword"
+                                    },
+                                    "product_keys" : [{
+                                        "Fn::If": [
+                                            "IsTrial",
+                                            "trial",
+                                            {
+                                                "Fn::Sub": "${TableauServerLicenseKey}"
+                                            }
+                                        ]
+                                    }]
+                                }
+                            },
+                            "c:\\tabsetup\\SilentInstaller.py": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                            ".s3.amazonaws.com/SilentInstaller.py"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\AddHostname.cmd": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                            ".s3.amazonaws.com/AddHostname.cmd"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\config.json": {
+                                "content": {
+                                   "configEntities":{
+                                        "identityStore":{
+                                        "_type":"identityStoreType",
+                                        "type":"local"
+                                        }
+                                    },
+                                    "topologyVersion":{
+                                    }
+                                }
+                            },
+                            "c:\\tabsetup\\python-3.6.4-amd64.exe": {
+                                "source": "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"
+                            },
+                            "c:\\tabsetup\\tableau-server-webapp-installer.exe": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                           ".s3.amazonaws.com/",
+                                           {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationExecutable"
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                }
+                            }
+                    },
+                    "commands" : {
+                       "1-disable-firewall" : {
+                        "cwd" : "c:\\Windows\\System32",
+                        "command" : "netsh advfirewall set allprofiles state off",
+                        "waitAfterCompletion" : "0"
+                      },
+                      "2-install-python": {
+                            "command": "c:\\tabsetup\\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                      },
+                      "3-create-user": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "user",
+                                            {"Fn::Sub": "${Username}"},
+                                            {"Fn::Sub": "${Password}"},
+                                             "/add",
+                                             "/y"
+                                        ]
+                                    ]
+                                 },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                      },
+                      "4-add-admin": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "localgroup",
+                                            "Administrators",
+                                            {"Fn::Sub": "${Username}"},
+                                             "/add",
+                                             "/y"
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "5.0-get-share": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "use",
+                                            "M:",
+                                            "\\\\10.0.1.11\\c$",
+                                            {"Fn::Sub": "${Password}"},
+                                            {"Fn::Sub": "/user:10.0.1.11\\${Username}"}
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "5.1-save-hostname": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "hostname > c:\\tabsetup\\hostname",
+                                "waitAfterCompletion": "0"
+                        },
+                        "5.2-add-hostname": {
+                            "command": "c:\\tabsetup\\AddHostname.cmd 10.0.1.11",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "6-run-installer": {
+                                "cwd": "c:\\tabsetup",
+                                "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "\"C:\\Program Files\\Python36\\python.exe\"",
+                                            "SilentInstaller.py",
+                                            "installWorker",
+                                            "--secretsFile c:\\tabsetup\\secrets.json",
+                                            "--nodeConfigurationFile \\\\10.0.1.11\\c$\\tabsetup\\nodeConfiguration.json",
+                                            "--installDir c:\\tableau",
+                                            "c:\\tabsetup\\tableau-server-webapp-installer.exe",
+                                            " > c:\\tabsetup\\tsm_installer-output.txt 2>&1"
+                                        ]
+                                    ]
+                            },
+                                "waitAfterCompletion": "0"
+                        },
+                        "7.0-get-share2": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "use",
+                                            "N:",
+                                            "\\\\10.0.1.12\\c$",
+                                            {"Fn::Sub": "${Password}"},
+                                            {"Fn::Sub": "/user:10.0.1.12\\${Username}"}
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "7.1-add-hostname2": {
+                            "command": "c:\\tabsetup\\AddHostname.cmd 10.0.1.12",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "7.2-get-share3": {
+                            "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "use",
+                                            "O:",
+                                            "\\\\10.0.1.13\\c$",
+                                            {"Fn::Sub": "${Password}"},
+                                            {"Fn::Sub": "/user:10.0.1.13\\${Username}"}
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "7.3-add-hostname3": {
+                            "command": "c:\\tabsetup\\AddHostname.cmd 10.0.1.13",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "8.0-cleanup-secrets": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "del c:\\tabsetup\\secrets.json",
+                                "waitAfterCompletion": "0"
+                        },
+                        "8.1-copy-hostfile-first": {
+                            "command": "copy /Y %windir%\\System32\\drivers\\etc\\hosts \\\\10.0.1.11\\C$\\Windows\\System32\\drivers\\etc\\hosts",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        },
+                        "8.2-copy-hostfile-second": {
+                            "command": "copy /Y %windir%\\System32\\drivers\\etc\\hosts \\\\10.0.1.12\\C$\\Windows\\System32\\drivers\\etc\\hosts",
+                            "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                        }
+                   }
+                }
+            },
+            "AWS::CloudFormation::Authentication": {
+                "S3AccessRole" : {
+                    "type": "S3",
+                    "buckets": [ { "Fn::FindInMap" : [ "DefaultConfiguration", "InstallationConfig", "InstallationBucket"]} ],
+                    "roleName": { "Ref": "S3ReadOnlyRole" }
+                }
             }
         },
-        "LoadBalancerCanonicalHostedZoneNameID": {
-            "Description": "The Route53 ZoneID of the domain that handles the Amazon-assigned name of the load balancer",
-            "Value": {
-                "Fn::GetAtt": [
-                    "ServerLoadBalancer",
-                    "CanonicalHostedZoneNameID"
-                ]
-            }
-        },
-        "PrimaryInstanceID": {
-            "Description": "Instance ID of Primary Server",
-            "Value": {
-                "Ref": "PrimaryHost"
-            }
-        },
-        "PrimarySubnetID": {
-            "Description": "Subnet ID of Primary Server",
-            "Value": {
-                "Ref": "PrimarySubnetID"
-            }
-        },
-        "Worker1InstanceID": {
-            "Description": "Instance ID of Worker1 Server",
-            "Value": {
-                "Ref": "WorkerHost1"
-            }
-        },
-        "Worker1SubnetID": {
-            "Description": "Subnet ID of Primary Server",
-            "Value": {
-                "Ref": "Worker1SubnetID"
-            }
-        },
-        "Worker2InstanceID": {
-            "Description": "Instance ID of Worker2 Server",
-            "Value": {
-                "Ref": "WorkerHost2"
-            }
-        },
-        "Worker2SubnetID": {
-            "Description": "Subnet ID of Primary Server",
-            "Value": {
-                "Ref": "Worker2SubnetID"
-            }
-        },
-        "SecurityGroup": {
-            "Description": "The security group the instances belong to",
-            "Value": {
-                "Ref": "WorkloadSecurityGroup"
-            }
+        "Properties": {
+            "InstanceType" : { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "InstanceType"]},
+            "ImageId" : { "Fn::FindInMap" : [ "AWSAMIRegionMap", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "DefaultConfiguration", "MachineConfiguration", "WindowsVersion"]} ]},
+            "AvailabilityZone" : { "Ref" : "ResourceAvailabilityZone" },
+            "SecurityGroupIds" : [ {"Ref" : "InternalSecurityGroup"} ],
+            "IamInstanceProfile" : { "Ref" : "TableauWindowsServerInstanceProfile" },
+            "KeyName" : { "Ref" : "KeyName" },
+            "SubnetId" : { "Ref" : "ClusterPrivateSubnet"},
+            "PrivateIpAddress" : "10.0.1.13",
+            "BlockDeviceMappings" : [
+               {
+                "DeviceName" : "/dev/sda1",
+                "Ebs" : { "VolumeSize" : "100" }
+               }
+            ],
+            "UserData" : { "Fn::Base64" : { "Fn::Join" : ["\n", [
+                "<script>",
+                { "Fn::Sub" : "cfn-init.exe -v -s ${AWS::StackId} -r Node3 --region ${AWS::Region}"},
+                { "Fn::Sub" : ["cfn-signal.exe -e %errorlevel% ${WHUrl}",
+                    {
+                        "WHUrl" : { "Fn::Base64" : { "Ref" : "TableauWorkerWaitHandle"}}
+                    }]
+                },
+                { "Fn::Sub" : "del c:\\tabsetup\\*.cmd"},
+                 "</script>"
+            ]]}},
+            "Tags": [
+                {
+                    "Key" : "Name",
+                    "Value" : {"Fn::Sub" : "${AWS::StackName}-node3"}
+                }
+            ]
+        }
+    },
+    "TableauWorkerWaitHandle" : {
+        "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "TableauWorkerWaitCondition" : {
+        "Type" : "AWS::CloudFormation::WaitCondition",
+        "Properties" : {
+            "Handle" : { "Ref" : "TableauWorkerWaitHandle" },
+            "Count" : "2",
+            "Timeout" : "9000"
+        }
+    },
+    "TableauInitialWaitHandle" : {
+        "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "TableauInitialWaitCondition" : {
+        "Type" : "AWS::CloudFormation::WaitCondition",
+        "Properties" : {
+            "Handle" : { "Ref" : "TableauInitialWaitHandle" },
+            "Count" : "1",
+            "Timeout" : "5400"
         }
     }
+  },
+  "Outputs" : {
+    "BastionIpAddress" : {
+        "Description" : "Public IP Address of bastion host",
+        "Value" : { "Fn::GetAtt" : [ "BastionHost", "PublicIp"]}
+    },
+    "BastionDNSName" : {
+        "Description" : "Public DNS name of bastion host",
+        "Value" : { "Fn::GetAtt" : [ "BastionHost", "PublicDnsName"]}
+    },
+    "LoadBalancerDirectDNSName" : {
+        "Description" : "Direct DNS name of load balancer",
+        "Value" : { "Fn::GetAtt" : ["ServerLoadBalancer", "DNSName"] }
+    }
+  }
 }
