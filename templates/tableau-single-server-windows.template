@@ -20,11 +20,6 @@
             ],
             "ConstraintDescription" : "must be a valid EC2 instance type."
         },
-        "Turnfirewalloff" : {
-            "Type" : "String",
-            "Default" : "No",
-            "AllowedValues" : [ "No", "Yes"]
-        },
         "KeyPairName": {
             "ConstraintDescription": "The name of an existing EC2 KeyPair.",
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
@@ -34,18 +29,6 @@
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
             "Description": "The CIDR address from which you will connect to the instance",
-            "Type": "String"
-        },
-        "TSMAdminCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "The CIDR address from which you will connect to the TSM Web UI",
-            "Type": "String"
-        },
-        "RDPAdminCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "The CIDR address from which you will remote  into the instance",
             "Type": "String"
         },
         "Username" : {
@@ -159,7 +142,7 @@
             "ParameterGroups" : [
                 {
                     "Label" : { "default":"AWS Environment and Machine Configuration" },
-                    "Parameters" : [ "InstanceType", "KeyPairName", "SourceCIDR","TSMAdminCIDR","RDPAdminCIDR","ExistingSecurityGroup", "IPAddress" ]
+                    "Parameters" : [ "InstanceType", "KeyPairName", "SourceCIDR", "ExistingSecurityGroup", "IPAddress" ]
                 },
                 {
                     "Label" : { "default" : "Secrets" },
@@ -176,11 +159,8 @@
 
             "ParameterLabels" : {
                 "InstanceType" : { "default" : "Tableau Amazon EC2 instance type" },
-                "Turnfirewalloff": {"default" :"Disable Firewall for Public Networks"},
                 "KeyPairName" : { "default" : "Key Pair Name" },
                 "SourceCIDR" : { "default" : "Source CIDR for Access" },
-                "TSMAdminCIDR" : { "default" : "TSMAdminCIDR CIDR for Access" },
-                "RDPAdminCIDR" : { "default" : "RDPAdminCIDR CIDR for Access" },
                 "ExistingSecurityGroup": { "default": "Existing Security Group" },
                 "IPAddress": { "default": "EIP address for the node" },
                 "Username" : { "default" : "Tableau Services Manager (TSM) administrator username" },
@@ -309,20 +289,6 @@
                     "Condition" : "NoElasticIP"
                 }
             ]
-        },
-        "DisableFirewall_Yes": {
-            "Fn::Equals": [
-                {
-                    "Ref" : "Turnfirewalloff"
-                }, "Yes"
-            ]
-        },
-        "DisableFirewall_No" : {
-            "Fn::Equals": [
-                {
-                    "Ref" : "Turnfirewalloff"
-                }, "No"
-            ]
         }
     },
     "Resources": {
@@ -330,12 +296,12 @@
             "Type": "AWS::EC2::SecurityGroup",
             "Condition": "NoServerSecurityGroup",
             "Properties": {
-                "GroupDescription": "Enable RDP",
+                "GroupDescription": "Enable HTTP access via port 80 and HTTPS access on port 8850, and RDP access on Port 3389 from the provided network CIDR",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": "3389",
+                        "ToPort": "3389",
                         "CidrIp": {
                             "Ref": "SourceCIDR"
                         }
@@ -345,15 +311,15 @@
                         "FromPort": "8850",
                         "ToPort": "8850",
                         "CidrIp": {
-                            "Ref": "TSMAdminCIDR"
+                            "Ref": "SourceCIDR"
                         }
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "3389",
-                        "ToPort": "3389",
+                        "FromPort": "80",
+                        "ToPort": "80",
                         "CidrIp": {
-                            "Ref": "RDPAdminCIDR"
+                            "Ref": "SourceCIDR"
                         }
                     }
                 ]
@@ -416,7 +382,7 @@
                                                 {
                                                     "Ref": "RegCompany"
                                                 },
-                                                "AWSQuickStart-WinBeta"
+                                                "AWSQuickStart-Win"
                                             ]
                                         ]
                                     },
@@ -459,25 +425,7 @@
                                                     "InstallationBucket"
                                                 ]
                                             },
-                                            ".s3-us-west-2.amazonaws.com/SilentInstaller.py"
-                                        ]
-                                    ]
-                                }
-                            },
-                            "c:\\tabsetup\\manageFirewallPorts.py": {
-                                "source": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "https://",
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "DefaultConfiguration",
-                                                    "InstallationConfig",
-                                                    "InstallationBucket"
-                                                ]
-                                            },
-                                            ".s3-us-west-2.amazonaws.com/manageFirewallPorts.py"
+                                            ".s3.amazonaws.com/SilentInstaller.py"
                                         ]
                                     ]
                                 }
@@ -510,7 +458,7 @@
                                                     "InstallationBucket"
                                                 ]
                                             },
-                                           ".s3-us-west-2.amazonaws.com/",
+                                           ".s3.amazonaws.com/",
                                            {
                                                 "Fn::FindInMap": [
                                                     "DefaultConfiguration",
@@ -524,6 +472,11 @@
                             }
                         },
                         "commands": {
+                          "0-disable-firewall": {
+                              "cwd": "c:\\Windows\\System32",
+                              "command": "netsh advfirewall set allprofiles state off",
+                              "waitAfterCompletion": "0"
+                          },
                             "1-install-python": {
                                 "command": "c:\\tabsetup\\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1",
                                 "cwd": "c:\\tabsetup",
@@ -587,40 +540,6 @@
                                 "cwd": "c:\\tabsetup",
                                 "command": "del c:\\tabsetup\\secrets.json",
                                 "waitAfterCompletion": "0"
-                            },
-                            "6-configure-firewall": {
-                               "cwd": "c:\\tabsetup",
-                               "command": {
-                                          "Fn::If":
-                                          ["DisableFirewall_Yes",
-                                            {
-                                              "Fn::Join": [
-                                                            " ",
-                                                               [
-                                                                   "\"C:\\Program Files\\Python36\\python.exe\"",
-                                                                   "manageFirewallPorts.py",
-                                                                   "install",
-                                                                   "--configFile c:\\tabsetup\\config.json",
-                                                                   "--enablePublicFwRule",
-                                                                   " > c:\\tabsetup\\tsm_installer-firewall-config.txt 2>&1"
-                                                               ]
-                                                          ]
-                                            },
-                                            {
-                                              "Fn::Join": [
-                                                            " ",
-                                                                [
-                                                                    "\"C:\\Program Files\\Python36\\python.exe\"",
-                                                                    "manageFirewallPorts.py",
-                                                                    "install",
-                                                                    "--configFile c:\\tabsetup\\config.json",
-                                                                    " > c:\\tabsetup\\tsm_installer-firewall-config.txt 2>&1"
-                                                                ]
-                                                            ]
-                                            }
-                                          ]
-                               },
-                               "waitAfterCompletion": "0"
                             }
                         }
                     }
