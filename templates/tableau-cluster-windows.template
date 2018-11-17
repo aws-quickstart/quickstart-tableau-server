@@ -13,7 +13,7 @@
         "Description" : "The availability zone (AZ) in which our server and storage volume reside",
         "Type": "AWS::EC2::AvailabilityZone::Name"
     },
-    "SourceCidr" : {
+    "SourceCIDR" : {
       "Description" : "CIDR from which you may connect to web interfacr or bastion host (e.g., 1.1.1.1/32)",
       "Type" : "String",
       "MinLength" : "9",
@@ -117,7 +117,7 @@
       "ParameterGroups" : [
         {
             "Label" : { "default" : "AWS Environment" },
-            "Parameters" : ["KeyName","ResourceAvailabilityZone","SourceCidr"]
+            "Parameters" : ["KeyName","ResourceAvailabilityZone","SourceCIDR"]
         },
         {
             "Label" : { "default" : "Configure Initial Tableau Admin User" },
@@ -141,7 +141,7 @@
         "ResourceAvailabilityZone": {
             "default": "Target AZ"
         },
-        "SourceCidr": {
+        "SourceCIDR": {
             "default": "Source CIDR for access"
         },
         "Username" : {
@@ -401,7 +401,7 @@
             "IpProtocol" : "tcp",
             "FromPort" : "3389",
             "ToPort" : "3389",
-            "CidrIp" : { "Ref" : "SourceCidr" }
+            "CidrIp" : { "Ref" : "SourceCIDR" }
           }
         ],
         "Tags" : [
@@ -459,7 +459,7 @@
             "IpProtocol" : "tcp",
             "FromPort" : "80",
             "ToPort" : "80",
-            "CidrIp" : { "Ref" : "SourceCidr" }
+            "CidrIp" : { "Ref" : "SourceCIDR" }
           }
         ],
         "Tags" : [
