@@ -664,6 +664,24 @@
                 ]
             }
         },
+        "TableauServicesManagerURL": {
+            "Description": "URL for the TSM Web UI",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Fn::GetAtt": [
+                                "TableauServer",
+                                "PublicIp"
+                            ]
+                        },
+                        ":8850/"
+                    ]
+                ]
+            }
+        },
         "TableauServerURL": {
             "Description": "URL for the Tableau Server",
             "Value": {

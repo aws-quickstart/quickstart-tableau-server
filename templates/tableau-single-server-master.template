@@ -170,15 +170,20 @@
             "Type": "String"
         },
         "InstanceType": {
-            "AllowedValues": [
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "m4.10xlarge",
-                "m5.4xlarge",
-                "m5.12xlarge"
+            "AllowedValues":
+            [
+               "m4.2xlarge",
+               "m4.4xlarge",
+               "m4.10xlarge",
+               "m5.4xlarge",
+               "m5.12xlarge",
+               "c5.4xlarge",
+               "c4.4xlarge",
+               "c5d.4xlarge",
+               "r5d.4xlarge"
             ],
             "ConstraintDescription": "must be a valid EC2 instance type.",
-            "Default": "m4.4xlarge",
+            "Default": "m5.4xlarge",
             "Description": "Amazon EC2 instance type",
             "Type": "String"
         },
@@ -188,7 +193,7 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "Password": {
-            "Description": "(Linux only) Tableau Services Manager (TSM) administrator password",
+            "Description": "Tableau Services Manager (TSM) administrator password",
             "NoEcho": "true",
             "Type": "String"
         },
@@ -280,7 +285,7 @@
         },
         "Username": {
             "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]*$",
-            "Description": "(Linux only) Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
+            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
         }
@@ -329,15 +334,7 @@
                 },
                 "Parameters": {
                     "AcceptEULA": {
-                        "Fn::If": [
-                            "InfaOnWindows",
-                            {
-                                "Ref": "AWS::NoValue"
-                            },
-                            {
-                                "Ref": "AcceptEULA"
-                            }
-                        ]
+                        "Ref": "AcceptEULA"
                     },
                     "ExistingSecurityGroup": {
                         "Ref": "ExistingSecurityGroup"
@@ -352,15 +349,7 @@
                         "Ref": "KeyPairName"
                     },
                     "Password": {
-                        "Fn::If": [
-                            "InfaOnWindows",
-                            {
-                                "Ref": "AWS::NoValue"
-                            },
-                            {
-                                "Ref": "Password"
-                            }
-                        ]
+                        "Ref": "Password"
                     },
                     "RegCity": {
                         "Ref": "RegCity"
@@ -411,15 +400,7 @@
                         "Ref": "TableauServerLicenseKey"
                     },
                     "Username": {
-                        "Fn::If": [
-                            "InfaOnWindows",
-                            {
-                                "Ref": "AWS::NoValue"
-                            },
-                            {
-                                "Ref": "Username"
-                            }
-                        ]
+                        "Ref": "Username"
                     }
                 }
             }
@@ -441,6 +422,15 @@
                 "Fn::GetAtt": [
                     "WorkloadStack",
                     "Outputs.PublicIPAddress"
+                ]
+            }
+        },
+        "TableauServicesManagerURL": {
+        "Description": "URL for the TSM Web UI",
+        "Value": {
+                "Fn::GetAtt": [
+                    "WorkloadStack",
+                    "Outputs.TableauServicesManagerURL"
                 ]
             }
         },
