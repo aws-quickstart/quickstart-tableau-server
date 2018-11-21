@@ -188,7 +188,7 @@
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "Password": {
-            "Description": "(Linux only) Tableau Services Manager (TSM) administrator password",
+            "Description": "Tableau Services Manager (TSM) administrator password",
             "NoEcho": "true",
             "Type": "String"
         },
@@ -280,7 +280,7 @@
         },
         "Username": {
             "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]*$",
-            "Description": "(Linux only) Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
+            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
         }
