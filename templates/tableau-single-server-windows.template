@@ -1,6 +1,53 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "CloudFormation Template for TSM-based Tableau Server on Windows",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups" : [
+                {
+                    "Label" : { "default":"AWS Environment and Machine Configuration" },
+                    "Parameters" : [ "InstanceType", "KeyPairName", "SourceCIDR", "ExistingSecurityGroup", "IPAddress" ]
+                },
+                {
+                    "Label" : { "default" : "Secrets" },
+                    "Parameters" : [ "Username", "Password", "TableauServerAdminUser", "TableauServerAdminPassword" ]
+                },
+                {
+                    "Label" : { "default" : "Registration" },
+                    "Parameters" : ["TableauServerLicenseKey",
+                                    "RegFirstName","RegLastName","RegEmail",
+                                    "RegCompany","RegTitle","RegDepartment","RegIndustry",
+                                    "RegPhone","RegCity","RegState","RegZip","RegCountry"]
+                }
+            ],
+
+            "ParameterLabels" : {
+                "InstanceType" : { "default" : "Tableau Amazon EC2 instance type" },
+                "KeyPairName" : { "default" : "Key Pair Name" },
+                "SourceCIDR" : { "default" : "Source CIDR for Access" },
+                "ExistingSecurityGroup": { "default": "Existing Security Group" },
+                "IPAddress": { "default": "EIP address for the node" },
+                "Username" : { "default" : "Tableau Services Manager (TSM) administrator username" },
+                "Password" : { "default" : "Tableau Services Manager (TSM) administrator password" },
+                "TableauServerAdminUser": { "default": "Tableau Server administrator username" },
+                "TableauServerAdminPassword": { "default": "Tableau Server administrator password" },
+                "TableauServerLicenseKey": { "default": "Tableau Activation Key" },
+                "AcceptEULA": { "default": "Accept Tableau End User License Agreement" },
+                "RegFirstName": { "default": "First Name" },
+                "RegLastName": { "default": "Last name" },
+                "RegEmail": { "default": "Email Address" },
+                "RegCompany": { "default": "Company" },
+                "RegTitle": { "default": "Title" },
+                "RegDepartment": { "default": "Department" },
+                "RegIndustry": { "default": "Industry" },
+                "RegPhone": { "default": "Phone" },
+                "RegCity": { "default": "City" },
+                "RegState": { "default": "State" },
+                "RegZip": { "default": "Zip/Postal Code" },
+                "RegCountry": { "default": "Country" }
+            }
+        }
+    },
     "Parameters": {
         "InstanceType" : {
             "Description" : "Amazon EC2 instance type",
@@ -137,54 +184,6 @@
             "Type" : "String"
         }
     },
-    "Metadata": {
-        "AWS::CloudFormation::Interface": {
-            "ParameterGroups" : [
-                {
-                    "Label" : { "default":"AWS Environment and Machine Configuration" },
-                    "Parameters" : [ "InstanceType", "KeyPairName", "SourceCIDR", "ExistingSecurityGroup", "IPAddress" ]
-                },
-                {
-                    "Label" : { "default" : "Secrets" },
-                    "Parameters" : [ "Username", "Password", "TableauServerAdminUser", "TableauServerAdminPassword" ]
-                },
-                {
-                    "Label" : { "default" : "Registration" },
-                    "Parameters" : ["TableauServerLicenseKey",
-                                    "RegFirstName","RegLastName","RegEmail",
-                                    "RegCompany","RegTitle","RegDepartment","RegIndustry",
-                                    "RegPhone","RegCity","RegState","RegZip","RegCountry"]
-                }
-            ],
-
-            "ParameterLabels" : {
-                "InstanceType" : { "default" : "Tableau Amazon EC2 instance type" },
-                "KeyPairName" : { "default" : "Key Pair Name" },
-                "SourceCIDR" : { "default" : "Source CIDR for Access" },
-                "ExistingSecurityGroup": { "default": "Existing Security Group" },
-                "IPAddress": { "default": "EIP address for the node" },
-                "Username" : { "default" : "Tableau Services Manager (TSM) administrator username" },
-                "Password" : { "default" : "Tableau Services Manager (TSM) administrator password" },
-                "TableauServerAdminUser": { "default": "Tableau Server administrator username" },
-                "TableauServerAdminPassword": { "default": "Tableau Server administrator password" },
-                "TableauServerLicenseKey": { "default": "Tableau Activation Key" },
-                "AcceptEULA": { "default": "Accept Tableau End User License Agreement" },
-                "RegFirstName": { "default": "First Name" },
-                "RegLastName": { "default": "Last name" },
-                "RegEmail": { "default": "Email Address" },
-                "RegCompany": { "default": "Company" },
-                "RegTitle": { "default": "Title" },
-                "RegDepartment": { "default": "Department" },
-                "RegIndustry": { "default": "Industry" },
-                "RegPhone": { "default": "Phone" },
-                "RegCity": { "default": "City" },
-                "RegState": { "default": "State" },
-                "RegZip": { "default": "Zip/Postal Code" },
-                "RegCountry": { "default": "Country" }
-            }
-        }
-    },
-
     "Mappings": {
       "AWSAMIRegionMap":{
          "AMI":{
