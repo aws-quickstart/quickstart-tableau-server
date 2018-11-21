@@ -1018,7 +1018,7 @@
                                                     "        tsm topology set-process -n \"$p\" -pr filestore -c 1 -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    done",
                                                     "    tsm topology set-process -n node2 -pr pgsql -c 1 -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
-                                                    "    tsm pending-changes apply --restart -iw -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
+                                                    "    tsm pending-changes apply --ignore-prompt -iw -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    tsm stop -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    tsm topology deploy-coordination-service -n node1,node2,node3  -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    sleep 120",
