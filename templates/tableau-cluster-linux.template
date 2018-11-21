@@ -337,63 +337,63 @@
         "AWSAMIRegionMap": {
             "AMI": {
                 "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181012"
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181114"
             },
             "ap-northeast-1": {
                 "CENTOS7HVM": "ami-8e8847f1",
-                "US1604HVM": "ami-06317ca3b39714f7e"
+                "US1604HVM": "ami-032f516e93380b8e6"
             },
             "ap-northeast-2": {
                 "CENTOS7HVM": "ami-bf9c36d1",
-                "US1604HVM": "ami-0035936492be04cff"
+                "US1604HVM": "ami-0eee4dcc71fced4cf"
             },
             "ap-south-1": {
                 "CENTOS7HVM": "ami-1780a878",
-                "US1604HVM": "ami-0c6c52d7cf1004825"
+                "US1604HVM": "ami-087242ff3b0361455"
             },
             "ap-southeast-1": {
                 "CENTOS7HVM": "ami-8e0205f2",
-                "US1604HVM": "ami-0d97809b54a5f01ba"
+                "US1604HVM": "ami-08a266948a3b971cb"
             },
             "ap-southeast-2": {
                 "CENTOS7HVM": "ami-d8c21dba",
-                "US1604HVM": "ami-05162512c82cb460f"
+                "US1604HVM": "ami-090e07f7fc8bcfc3a"
             },
             "ca-central-1": {
                 "CENTOS7HVM": "ami-e802818c",
-                "US1604HVM": "ami-0a5443ed7b0a45901"
+                "US1604HVM": "ami-02d6a1670b736f1bb"
             },
             "eu-central-1": {
                 "CENTOS7HVM": "ami-dd3c0f36",
-                "US1604HVM": "ami-0dd0be70cc0d493b7"
+                "US1604HVM": "ami-0cfc1cd9ab351357c"
             },
             "eu-west-1": {
                 "CENTOS7HVM": "ami-3548444c",
-                "US1604HVM": "ami-00b36349b3dba2ec3"
+                "US1604HVM": "ami-09f0b8b3e41191524"
             },
             "eu-west-2": {
                 "CENTOS7HVM": "ami-00846a67",
-                "US1604HVM": "ami-06f77073d7dc4c48a"
+                "US1604HVM": "ami-0f60b09eab2ef8366"
             },
             "sa-east-1": {
                 "CENTOS7HVM": "ami-cb5803a7",
-                "US1604HVM": "ami-0f7c76bfc85e5b4ea"
+                "US1604HVM": "ami-0bd96edd7698f259e"
             },
             "us-east-1": {
                 "CENTOS7HVM": "ami-9887c6e7",
-                "US1604HVM": "ami-0735ea082a1534cac"
+                "US1604HVM": "ami-0f9cf087c1f27d9b1"
             },
             "us-east-2": {
                 "CENTOS7HVM": "ami-9c0638f9",
-                "US1604HVM": "ami-04c305e118636bc7d"
+                "US1604HVM": "ami-0653e888ec96eab9b"
             },
             "us-west-1": {
                 "CENTOS7HVM": "ami-4826c22b",
-                "US1604HVM": "ami-0f5113ce7686689e9"
+                "US1604HVM": "ami-08945b3352c7bf9c0"
             },
             "us-west-2": {
                 "CENTOS7HVM": "ami-3ecc8f46",
-                "US1604HVM": "ami-01e0cf6e025c036e4"
+                "US1604HVM": "ami-076e276d85f524150"
             }
         },
         "LinuxAMINameMap": {
@@ -1018,7 +1018,7 @@
                                                     "        tsm topology set-process -n \"$p\" -pr filestore -c 1 -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    done",
                                                     "    tsm topology set-process -n node2 -pr pgsql -c 1 -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
-                                                    "    tsm pending-changes apply --restart -iw -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
+                                                    "    tsm pending-changes apply --ignore-prompt -iw -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    tsm stop -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    tsm topology deploy-coordination-service -n node1,node2,node3  -u \"$tsm_admin_user\" -p \"$tsm_admin_pass\"",
                                                     "    sleep 120",
