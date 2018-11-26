@@ -25,7 +25,7 @@
     },
     {
         "ParameterKey": "Password",
-        "ParameterValue": ""
+        "ParameterValue": "$[alfred_genpass_28]"
     },
     {
         "ParameterKey": "RegCity",
@@ -93,7 +93,7 @@
     },
     {
         "ParameterKey": "Username",
-        "ParameterValue": ""
+        "ParameterValue": "tsmadmin"
     },
     {
         "ParameterKey":"QSS3BucketName",
