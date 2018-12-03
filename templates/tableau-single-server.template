@@ -9,7 +9,6 @@
             "default": "AWS Environment and Machine Configuration"
           },
           "Parameters": [
-            "AvailabilityZones",
             "InstanceType",
             "KeyPairName",
             "AMIOS",
@@ -58,9 +57,6 @@
         }
       ],
       "ParameterLabels": {
-        "AvailabilityZones": {
-          "default": "Availability Zones"
-        },
         "AcceptEULA": {
           "default": "Accept Tableau End User License Agreement"
         },
@@ -143,10 +139,6 @@
     }
   },
   "Parameters": {
-    "AvailabilityZones": {
-      "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 3 AZs MUST be used for this deployment",
-      "Type": "List<AWS::EC2::AvailabilityZone::Name>"
-    },
     "AMIOS": {
       "AllowedValues": [
         "Windows",
@@ -309,97 +301,9 @@
       ]
     }
   },
-  "Mappings": {
-    "DefaultConfiguration": {
-      "MachineConfiguration": {
-        "BastionInstanceType": "t2.micro"
-      },
-      "NetworkConfiguration": {
-        "VPCCIDR": "10.0.0.0/16",
-        "PublicSubnet1CIDR": "10.0.1.0/24",
-        "PrivateSubnet1CIDR": "10.0.2.0/24",
-        "PublicSubnet2CIDR": "10.0.3.0/24",
-        "PrivateSubnet2CIDR": "10.0.4.0/24",
-        "PublicSubnet3CIDR": "10.0.5.0/24",
-        "PrivateSubnet3CIDR": "10.0.6.0/24"
-      }
-    }
-  },
   "Resources": {
-    "VPCStack": {
-      "Type": "AWS::CloudFormation::Stack",
-      "Properties": {
-        "TemplateURL": {
-          "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template"
-        },
-        "Parameters": {
-          "AvailabilityZones": {
-            "Fn::Join": [
-              ",",
-              {
-                "Ref": "AvailabilityZones"
-              }
-            ]
-          },
-          "KeyPairName": {
-            "Ref": "KeyPairName"
-          },
-          "NumberOfAZs": "3",
-          "PrivateSubnet1ACIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PrivateSubnet1CIDR"
-            ]
-          },
-          "PrivateSubnet2ACIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PrivateSubnet2CIDR"
-            ]
-          },
-          "PrivateSubnet3ACIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PrivateSubnet3CIDR"
-            ]
-          },
-          "PublicSubnet1CIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PublicSubnet1CIDR"
-            ]
-          },
-          "PublicSubnet2CIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PublicSubnet2CIDR"
-            ]
-          },
-          "PublicSubnet3CIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PublicSubnet3CIDR"
-            ]
-          },
-          "VPCCIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "VPCCIDR"
-            ]
-          }
-        }
-      }
-    },
     "WorkloadStack": {
       "Type": "AWS::CloudFormation::Stack",
-      "DependsOn": ["VPCStack"],
       "Properties": {
         "TemplateURL": {
           "Fn::Sub": [
@@ -422,38 +326,6 @@
           ]
         },
         "Parameters": {
-          "PrivateSubnetIds": {
-            "Fn::Join": [
-              ",",
-              [
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PrivateSubnet1AID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PrivateSubnet2AID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PrivateSubnet3AID"]
-                }
-              ]
-            ]
-          },
-          "PublicSubnetIds": {
-            "Fn::Join": [
-              ",",
-              [
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PublicSubnet1ID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PublicSubnet2ID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PublicSubnet3ID"]
-                }
-              ]
-            ]
-          },
           "AcceptEULA": {
             "Ref": "AcceptEULA"
           },
@@ -522,21 +394,12 @@
           },
           "Username": {
             "Ref": "Username"
-          },
-          "VPCId": {
-            "Fn::GetAtt": ["VPCStack", "Outputs.VPCID"]
           }
         }
       }
     }
   },
   "Outputs": {
-    "VPCID": {
-      "Description": "VPC ID",
-      "Value": {
-        "Fn::GetAtt": ["VPCStack", "Outputs.VPCID"]
-      }
-    },
     "InstanceID": {
       "Description": "EC2 InstanceID of the instance running Tableau Server",
       "Value": {
