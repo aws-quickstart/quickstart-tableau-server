@@ -10,13 +10,10 @@
           },
           "Parameters": [
             "VPCId",
-            "PrivateSubnetIds",
             "PublicSubnetIds",
             "InstanceType",
             "KeyPairName",
-            "SourceCIDR",
-            "ExistingSecurityGroup",
-            "IPAddress"
+            "SourceCIDR"
           ]
         },
         {
@@ -56,12 +53,6 @@
         "AcceptEULA": {
           "default": "Accept Tableau End User License Agreement"
         },
-        "ExistingSecurityGroup": {
-          "default": "Existing Security Group"
-        },
-        "IPAddress": {
-          "default": "EIP address for the node"
-        },
         "InstanceType": {
           "default": "Tableau Amazon EC2 instance type"
         },
@@ -70,9 +61,6 @@
         },
         "Password": {
           "default": "Tableau Services Manager (TSM) administrator password"
-        },
-        "PrivateSubnetIds": {
-          "default": "Target Private Subnets"
         },
         "PublicSubnetIds": {
           "default": "Target Public Subnets"
@@ -141,14 +129,6 @@
       "Description": "View the EULA at the Link: https://www.tableau.com/eula",
       "Type": "String"
     },
-    "ExistingSecurityGroup": {
-      "Description": "Provide an existing security group or leave blank for creating a new one",
-      "Type": "String"
-    },
-    "IPAddress": {
-      "Description": "Provide an EIP for the node (blank = no EIP)",
-      "Type": "String"
-    },
     "InstanceType": {
       "AllowedValues": [
         "m4.2xlarge",
@@ -172,10 +152,6 @@
       "MinLength": "6",
       "NoEcho": "true",
       "Type": "String"
-    },
-    "PrivateSubnetIds": {
-      "Description": "The private subnets to use",
-      "Type": "List<AWS::EC2::Subnet::Id>"
     },
     "PublicSubnetIds": {
       "Description": "The public subnets to use",
@@ -331,36 +307,6 @@
           "Ref": "TableauServerLicenseKey"
         }
       ]
-    },
-    "NoServerSecurityGroup": {
-      "Fn::Equals": [
-        "",
-        {
-          "Ref": "ExistingSecurityGroup"
-        }
-      ]
-    },
-    "HasServerSecurityGroup": {
-      "Fn::Not": [
-        {
-          "Condition": "NoServerSecurityGroup"
-        }
-      ]
-    },
-    "NoElasticIP": {
-      "Fn::Equals": [
-        "",
-        {
-          "Ref": "IPAddress"
-        }
-      ]
-    },
-    "HasElasticIP": {
-      "Fn::Not": [
-        {
-          "Condition": "NoElasticIP"
-        }
-      ]
     }
   },
   "Resources": {
@@ -488,13 +434,21 @@
         }
       },
       "Properties": {
+        "SecurityGroupIds": [
+          {
+            "Ref": "ServerSecurityGroup"
+          }
+        ],
         "SubnetId": {
           "Fn::Select": [
             "0",
             {
-              "Ref": "PrivateSubnetIds"
+              "Ref": "PublicSubnetIds"
             }
           ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
         },
         "ImageId": {
           "Fn::FindInMap": [
@@ -510,27 +464,6 @@
               ]
             }
           ]
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "SecurityGroupIds": {
-          "Fn::If": [
-            "HasServerSecurityGroup",
-            [
-              {
-                "Ref": "ExistingSecurityGroup"
-              }
-            ],
-            [
-              {
-                "Ref": "ServerSecurityGroup"
-              }
-            ]
-          ]
-        },
-        "KeyName": {
-          "Ref": "KeyPairName"
         },
         "BlockDeviceMappings": [
           {
@@ -548,6 +481,9 @@
           }
         ],
         "EbsOptimized": true,
+        "KeyName": {
+          "Ref": "KeyPairName"
+        },
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
@@ -631,28 +567,14 @@
     },
     "EIP": {
       "Type": "AWS::EC2::EIP",
-      "Condition": "NoElasticIP",
       "Properties": {
         "InstanceId": {
           "Ref": "TableauServer"
-        }
-      }
-    },
-    "IPAssoc": {
-      "Type": "AWS::EC2::EIPAssociation",
-      "Condition": "HasElasticIP",
-      "Properties": {
-        "InstanceId": {
-          "Ref": "TableauServer"
-        },
-        "EIP": {
-          "Ref": "IPAddress"
         }
       }
     },
     "ServerSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
-      "Condition": "NoServerSecurityGroup",
       "Properties": {
         "VpcId": {
           "Ref": "VPCId"

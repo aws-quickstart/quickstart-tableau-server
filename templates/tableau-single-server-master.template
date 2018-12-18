@@ -9,13 +9,14 @@
             "default": "AWS Environment and Machine Configuration"
           },
           "Parameters": [
-            "AvailabilityZones",
-            "InstanceType",
             "KeyPairName",
-            "AMIOS",
+            "AvailabilityZones",
+            "PublicSubnet1CIDR",
+            "PublicSubnet2CIDR",
+            "VPCCIDR",
             "SourceCIDR",
-            "ExistingSecurityGroup",
-            "IPAddress"
+            "InstanceType",
+            "AMIOS"
           ]
         },
         {
@@ -67,12 +68,6 @@
         "AMIOS": {
           "default": "AMI Operating System"
         },
-        "ExistingSecurityGroup": {
-          "default": "Existing Security Group"
-        },
-        "IPAddress": {
-          "default": "EIP address for the node"
-        },
         "InstanceType": {
           "default": "Tableau Amazon EC2 instance type"
         },
@@ -81,6 +76,12 @@
         },
         "Password": {
           "default": "Tableau Services Manager (TSM) administrator password"
+        },
+        "PublicSubnet1CIDR": {
+          "default": "Public Subnet 1 CIDR"
+        },
+        "PublicSubnet2CIDR": {
+          "default": "Public Subnet 2 CIDR"
         },
         "QSS3BucketName": {
           "default": "Quick Start S3 Bucket Name"
@@ -138,13 +139,16 @@
         },
         "Username": {
           "default": "Tableau Services Manager (TSM) administrator username"
+        },
+        "VPCCIDR": {
+          "default": "VPC CIDR"
         }
       }
     }
   },
   "Parameters": {
     "AvailabilityZones": {
-      "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 3 AZs MUST be used for this deployment",
+      "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 2 AZs will be used for this deployment",
       "Type": "List<AWS::EC2::AvailabilityZone::Name>"
     },
     "AMIOS": {
@@ -161,14 +165,6 @@
       "AllowedPattern": "Yes",
       "AllowedValues": ["Yes", "No"],
       "Description": "View the EULA at the Link: https://www.tableau.com/eula",
-      "Type": "String"
-    },
-    "ExistingSecurityGroup": {
-      "Description": "Provide an existing security group or leave blank for creating a new one",
-      "Type": "String"
-    },
-    "IPAddress": {
-      "Description": "Provide an EIP for the node (blank = no EIP)",
       "Type": "String"
     },
     "InstanceType": {
@@ -196,6 +192,18 @@
     "Password": {
       "Description": "Tableau Services Manager (TSM) administrator password",
       "NoEcho": "true",
+      "Type": "String"
+    },
+    "PublicSubnet1CIDR": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "10.0.128.0/20",
+      "Description": "CIDR Block for the Public DMZ Subnet located in AZ1",
+      "Type": "String"
+    },
+    "PublicSubnet2CIDR": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "10.0.144.0/20",
+      "Description": "CIDR Block for the Public DMZ Subnet located in AZ2",
       "Type": "String"
     },
     "QSS3BucketName": {
@@ -289,6 +297,12 @@
       "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
       "MaxLength": "30",
       "Type": "String"
+    },
+    "VPCCIDR": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "10.0.0.0/16",
+      "Description": "CIDR Block for the VPC",
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -307,22 +321,6 @@
         },
         "CentOS-7-HVM"
       ]
-    }
-  },
-  "Mappings": {
-    "DefaultConfiguration": {
-      "MachineConfiguration": {
-        "BastionInstanceType": "t2.micro"
-      },
-      "NetworkConfiguration": {
-        "VPCCIDR": "10.0.0.0/16",
-        "PublicSubnet1CIDR": "10.0.1.0/24",
-        "PrivateSubnet1CIDR": "10.0.2.0/24",
-        "PublicSubnet2CIDR": "10.0.3.0/24",
-        "PrivateSubnet2CIDR": "10.0.4.0/24",
-        "PublicSubnet3CIDR": "10.0.5.0/24",
-        "PrivateSubnet3CIDR": "10.0.6.0/24"
-      }
     }
   },
   "Resources": {
@@ -344,55 +342,16 @@
           "KeyPairName": {
             "Ref": "KeyPairName"
           },
-          "NumberOfAZs": "3",
-          "PrivateSubnet1ACIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PrivateSubnet1CIDR"
-            ]
-          },
-          "PrivateSubnet2ACIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PrivateSubnet2CIDR"
-            ]
-          },
-          "PrivateSubnet3ACIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PrivateSubnet3CIDR"
-            ]
-          },
+          "NATInstanceType": "t2.small",
+          "NumberOfAZs": "2",
           "PublicSubnet1CIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PublicSubnet1CIDR"
-            ]
+            "Ref": "PublicSubnet1CIDR"
           },
           "PublicSubnet2CIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PublicSubnet2CIDR"
-            ]
-          },
-          "PublicSubnet3CIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "PublicSubnet3CIDR"
-            ]
+            "Ref": "PublicSubnet2CIDR"
           },
           "VPCCIDR": {
-            "Fn::FindInMap": [
-              "DefaultConfiguration",
-              "NetworkConfiguration",
-              "VPCCIDR"
-            ]
+            "Ref": "VPCCIDR"
           }
         }
       }
@@ -422,22 +381,6 @@
           ]
         },
         "Parameters": {
-          "PrivateSubnetIds": {
-            "Fn::Join": [
-              ",",
-              [
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PrivateSubnet1AID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PrivateSubnet2AID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PrivateSubnet3AID"]
-                }
-              ]
-            ]
-          },
           "PublicSubnetIds": {
             "Fn::Join": [
               ",",
@@ -447,21 +390,12 @@
                 },
                 {
                   "Fn::GetAtt": ["VPCStack", "Outputs.PublicSubnet2ID"]
-                },
-                {
-                  "Fn::GetAtt": ["VPCStack", "Outputs.PublicSubnet3ID"]
                 }
               ]
             ]
           },
           "AcceptEULA": {
             "Ref": "AcceptEULA"
-          },
-          "ExistingSecurityGroup": {
-            "Ref": "ExistingSecurityGroup"
-          },
-          "IPAddress": {
-            "Ref": "IPAddress"
           },
           "InstanceType": {
             "Ref": "InstanceType"
@@ -524,7 +458,10 @@
             "Ref": "Username"
           },
           "VPCId": {
-            "Fn::GetAtt": ["VPCStack", "Outputs.VPCID"]
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.VPCID"
+            ]
           }
         }
       }
