@@ -10,7 +10,7 @@
                     },
                     "Parameters": [
                         "VPCId",
-                        "PublicSubnetIds",
+                        "PublicSubnetId",
                         "InstanceType",
                         "KeyPairName",
                         "SourceCIDR"
@@ -62,8 +62,8 @@
                 "Password": {
                     "default": "Tableau Services Manager (TSM) administrator password"
                 },
-                "PublicSubnetIds": {
-                    "default": "Target Public Subnets"
+                "PublicSubnetId": {
+                    "default": "Target Public Subnet"
                 },
                 "RegCity": {
                     "default": "City"
@@ -156,9 +156,9 @@
             "NoEcho": "true",
             "Type": "String"
         },
-        "PublicSubnetIds": {
-            "Description": "The public subnets to use",
-            "Type": "List<AWS::EC2::Subnet::Id>"
+        "PublicSubnetId": {
+            "Description": "The public subnet to use",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
             "Description": "City",
@@ -442,12 +442,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Fn::Select": [
-                        "0",
-                        {
-                            "Ref": "PublicSubnetIds"
-                        }
-                    ]
+                            "Ref": "PublicSubnetId"
                 },
                 "InstanceType": {
                     "Ref": "InstanceType"
