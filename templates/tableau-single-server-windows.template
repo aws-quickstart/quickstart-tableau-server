@@ -540,7 +540,7 @@
                     }
                 ],
                 "SubnetId": {
-                            "Ref": "PublicSubnetId"
+                    "Ref": "PublicSubnetId"
                 },
                 "InstanceType": {
                     "Ref": "InstanceType"
