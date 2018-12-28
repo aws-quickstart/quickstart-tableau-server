@@ -10,10 +10,8 @@
                     },
                     "Parameters": [
                         "KeyPairName",
-                        "AvailabilityZones",
-                        "PublicSubnet1CIDR",
-                        "PublicSubnet2CIDR",
-                        "VPCCIDR",
+                        "VPCID",
+                        "PublicSubnetID",
                         "SourceCIDR",
                         "InstanceType",
                         "AMIOS"
@@ -62,9 +60,6 @@
                 }
             ],
             "ParameterLabels": {
-                "AvailabilityZones": {
-                    "default": "Availability Zones"
-                },
                 "AcceptEULA": {
                     "default": "Accept Tableau End User License Agreement"
                 },
@@ -80,11 +75,8 @@
                 "Password": {
                     "default": "Tableau Services Manager (TSM) administrator password"
                 },
-                "PublicSubnet1CIDR": {
-                    "default": "Public Subnet 1 CIDR"
-                },
-                "PublicSubnet2CIDR": {
-                    "default": "Public Subnet 2 CIDR"
+                "PublicSubnetID": {
+                    "default": "Public Subnet ID"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -143,17 +135,13 @@
                 "Username": {
                     "default": "Tableau Services Manager (TSM) administrator username"
                 },
-                "VPCCIDR": {
-                    "default": "VPC CIDR"
+                "VPCID": {
+                    "default": "VPC where you will deploy the server"
                 }
             }
         }
     },
     "Parameters": {
-        "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 2 AZs will be used for this deployment",
-            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
-        },
         "AMIOS": {
             "AllowedValues": [
                 "Windows",
@@ -200,17 +188,9 @@
             "NoEcho": "true",
             "Type": "String"
         },
-        "PublicSubnet1CIDR": {
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
-            "Default": "10.0.128.0/20",
-            "Description": "CIDR Block for the Public DMZ Subnet located in AZ1",
-            "Type": "String"
-        },
-        "PublicSubnet2CIDR": {
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
-            "Default": "10.0.144.0/20",
-            "Description": "CIDR Block for the Public DMZ Subnet located in AZ2",
-            "Type": "String"
+        "PublicSubnetID": {
+            "Description": "The ID of the public subnet in the Primary server's Availability Zone",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
@@ -304,11 +284,9 @@
             "MaxLength": "30",
             "Type": "String"
         },
-        "VPCCIDR": {
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
-            "Default": "10.0.0.0/16",
-            "Description": "CIDR Block for the VPC",
-            "Type": "String"
+        "VPCID": {
+            "Description": "List of  available VPCs to choose from.",
+            "Type": "AWS::EC2::VPC::Id"
         }
     },
     "Conditions": {
@@ -330,53 +308,35 @@
         }
     },
     "Resources": {
-        "VPCStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template"
-                },
-                "Parameters": {
-                    "AvailabilityZones": {
-                        "Fn::Join": [
-                            ",",
-                            {
-                                "Ref": "AvailabilityZones"
-                            }
-                        ]
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "NATInstanceType": "t2.small",
-                    "NumberOfAZs": "2",
-                    "PublicSubnet1CIDR": {
-                        "Ref": "PublicSubnet1CIDR"
-                    },
-                    "PublicSubnet2CIDR": {
-                        "Ref": "PublicSubnet2CIDR"
-                    },
-                    "VPCCIDR": {
-                        "Ref": "VPCCIDR"
-                    }
-                }
-            }
-        },
         "WorkloadStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DependsOn": [
-                "VPCStack"
-            ],
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/tableau-single-server.template"
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/${QSTableauWorkloadTemplate}",
+                        {
+                            "QSTableauWorkloadTemplate": {
+                                "Fn::If": [
+                                    "InfaOnWindows",
+                                    "tableau-single-server-windows.template",
+                                    {
+                                        "Fn::If": [
+                                            "InfaOnCentos",
+                                            "tableau-single-server-centos.template",
+                                            "tableau-single-server-ubuntu.template"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
                 },
                 "Parameters": {
+                    "PublicSubnetId": {
+                        "Ref": "PublicSubnetID"
+                    },
                     "AcceptEULA": {
                         "Ref": "AcceptEULA"
-                    },
-                    "AMIOS": {
-                        "Ref": "AMIOS"
                     },
                     "InstanceType": {
                         "Ref": "InstanceType"
@@ -386,18 +346,6 @@
                     },
                     "Password": {
                         "Ref": "Password"
-                    },
-                    "PublicSubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet1ID"
-                        ]
-                    },
-                    "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
-                    },
-                    "QSS3KeyPrefix": {
-                        "Ref": "QSS3KeyPrefix"
                     },
                     "RegCity": {
                         "Ref": "RegCity"
@@ -450,26 +398,14 @@
                     "Username": {
                         "Ref": "Username"
                     },
-                    "VPCID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.VPCID"
-                        ]
+                    "VPCId": {
+                        "Ref": "VPCID"
                     }
                 }
             }
         }
     },
     "Outputs": {
-        "VPCID": {
-            "Description": "VPC ID",
-            "Value": {
-                "Fn::GetAtt": [
-                    "VPCStack",
-                    "Outputs.VPCID"
-                ]
-            }
-        },
         "InstanceID": {
             "Description": "EC2 InstanceID of the instance running Tableau Server",
             "Value": {

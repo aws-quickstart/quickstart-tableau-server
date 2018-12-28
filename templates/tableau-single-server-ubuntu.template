@@ -9,11 +9,11 @@
                         "default": "AWS Environment and Machine Configuration"
                     },
                     "Parameters": [
+                        "VPCId",
+                        "PublicSubnetId",
                         "InstanceType",
                         "KeyPairName",
-                        "SourceCIDR",
-                        "ExistingSecurityGroup",
-                        "IPAddress"
+                        "SourceCIDR"
                     ]
                 },
                 {
@@ -53,12 +53,6 @@
                 "AcceptEULA": {
                     "default": "Accept Tableau End User License Agreement"
                 },
-                "ExistingSecurityGroup": {
-                    "default": "Existing Security Group"
-                },
-                "IPAddress": {
-                    "default": "EIP address for the node"
-                },
                 "InstanceType": {
                     "default": "Tableau Amazon EC2 instance type"
                 },
@@ -67,6 +61,9 @@
                 },
                 "Password": {
                     "default": "Tableau Services Manager (TSM) administrator password"
+                },
+                "PublicSubnetId": {
+                    "default": "Target Public Subnet"
                 },
                 "RegCity": {
                     "default": "City"
@@ -118,6 +115,9 @@
                 },
                 "Username": {
                     "default": "Tableau Services Manager (TSM) administrator username"
+                },
+                "VPCId": {
+                    "default": "Target VPC"
                 }
             }
         }
@@ -130,14 +130,6 @@
                 "No"
             ],
             "Description": "View the EULA at the Link: https://www.tableau.com/eula",
-            "Type": "String"
-        },
-        "ExistingSecurityGroup": {
-            "Description": "Provide an existing security group or leave blank for creating a new one",
-            "Type": "String"
-        },
-        "IPAddress": {
-            "Description": "Provide an EIP for the node (blank = no EIP)",
             "Type": "String"
         },
         "InstanceType": {
@@ -163,6 +155,10 @@
             "MinLength": "6",
             "NoEcho": "true",
             "Type": "String"
+        },
+        "PublicSubnetId": {
+            "Description": "The public subnet to use",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
             "Description": "City",
@@ -241,6 +237,10 @@
             "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
             "MaxLength": "30",
             "Type": "String"
+        },
+        "VPCId": {
+            "Description": "The ID of the VPC into which to deploy the cluster",
+            "Type": "AWS::EC2::VPC::Id"
         }
     },
     "Mappings": {
@@ -308,36 +308,6 @@
                 "",
                 {
                     "Ref": "TableauServerLicenseKey"
-                }
-            ]
-        },
-        "NoServerSecurityGroup": {
-            "Fn::Equals": [
-                "",
-                {
-                    "Ref": "ExistingSecurityGroup"
-                }
-            ]
-        },
-        "HasServerSecurityGroup": {
-            "Fn::Not": [
-                {
-                    "Condition": "NoServerSecurityGroup"
-                }
-            ]
-        },
-        "NoElasticIP": {
-            "Fn::Equals": [
-                "",
-                {
-                    "Ref": "IPAddress"
-                }
-            ]
-        },
-        "HasElasticIP": {
-            "Fn::Not": [
-                {
-                    "Condition": "NoElasticIP"
                 }
             ]
         }
@@ -466,6 +436,17 @@
                 }
             },
             "Properties": {
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "ServerSecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PublicSubnetId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
@@ -480,27 +461,6 @@
                             ]
                         }
                     ]
-                },
-                "InstanceType": {
-                    "Ref": "InstanceType"
-                },
-                "SecurityGroupIds": {
-                    "Fn::If": [
-                        "HasServerSecurityGroup",
-                        [
-                            {
-                                "Ref": "ExistingSecurityGroup"
-                            }
-                        ],
-                        [
-                            {
-                                "Ref": "ServerSecurityGroup"
-                            }
-                        ]
-                    ]
-                },
-                "KeyName": {
-                    "Ref": "KeyPairName"
                 },
                 "BlockDeviceMappings": [
                     {
@@ -518,6 +478,9 @@
                     }
                 ],
                 "EbsOptimized": true,
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -602,22 +565,20 @@
                 }
             }
         },
-        "IPAssoc": {
-            "Type": "AWS::EC2::EIPAssociation",
-            "Condition": "HasElasticIP",
+        "EIP": {
+            "Type": "AWS::EC2::EIP",
             "Properties": {
                 "InstanceId": {
                     "Ref": "TableauServer"
-                },
-                "EIP": {
-                    "Ref": "IPAddress"
                 }
             }
         },
         "ServerSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
-            "Condition": "NoServerSecurityGroup",
             "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
                 "GroupDescription": "Enable HTTP access via port 80 and HTTPS access on port 8850, and SSH access from the provided network CIDR",
                 "SecurityGroupIngress": [
                     {
