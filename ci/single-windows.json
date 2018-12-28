@@ -1,5 +1,9 @@
 [
     {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[taskcat_genaz_2]"
+    },
+    {
         "ParameterKey": "AMIOS",
         "ParameterValue": "Windows"
     },
@@ -8,12 +12,8 @@
         "ParameterValue": "Yes"
     },
     {
-        "ParameterKey": "ExistingSecurityGroup",
-        "ParameterValue": ""
-    },
-    {
-        "ParameterKey": "IPAddress",
-        "ParameterValue": ""
+        "ParameterKey": "AMIOS",
+        "ParameterValue": "CentOS-7-HVM"
     },
     {
         "ParameterKey": "InstanceType",
@@ -25,7 +25,23 @@
     },
     {
         "ParameterKey": "Password",
-        "ParameterValue": "$[alfred_genpass_28]"
+        "ParameterValue": "$[alfred_genpass_32]"
+    },
+    {
+        "ParameterKey": "PublicSubnet1CIDR",
+        "ParameterValue": "10.0.128.0/20"
+    },
+    {
+        "ParameterKey": "PublicSubnet2CIDR",
+        "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "$[taskcat_autobucket]"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "quickstart-tableau-server/"
     },
     {
         "ParameterKey": "RegCity",
@@ -77,7 +93,7 @@
     },
     {
         "ParameterKey": "SourceCIDR",
-        "ParameterValue": "10.0.0.0/16"
+        "ParameterValue": "0.0.0.0/0"
     },
     {
         "ParameterKey": "TableauServerAdminPassword",
@@ -96,7 +112,7 @@
         "ParameterValue": "tsmadmin"
     },
     {
-        "ParameterKey":"QSS3BucketName",
-        "ParameterValue":"$[taskcat_autobucket]"
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.0.0.0/16"
     }
 ]
