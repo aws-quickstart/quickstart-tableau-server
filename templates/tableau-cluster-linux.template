@@ -784,6 +784,50 @@
                 "Timeout": "2100"
             }
         },
+        "LoadBalancerListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "Certificates": {
+                    "Fn::If": [
+                        "HasSSLCertificate",
+                        [
+                            {
+                                "Ref": "SSLCertificateARN"
+                            }
+                        ],
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "DefaultActions": [
+                    {
+                        "TargetGroupArn": {
+                            "Ref": "LoadBalancerTargetGroup"
+                        },
+                        "Type": "forward"
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "ServerLoadBalancer"
+                },
+                "Port": {
+                    "Fn::If": [
+                        "HasSSLCertificate",
+                        "443",
+                        "80"
+                    ]
+                },
+                "Protocol": {
+                    "Fn::If": [
+                        "HasSSLCertificate",
+                        "HTTPS",
+                        "HTTP"
+                    ]
+                },
+                "SslPolicy": "ELBSecurityPolicy-2016-08"
+            }
+        },
         "LoadBalancerSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -821,13 +865,51 @@
                 }
             }
         },
+        "LoadBalancerTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "Properties": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-cfn-lb-targetgroup"
+                },
+                "Port": "80",
+                "Protocol": "HTTP",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-cfn-lb-targetgroup"
+                        }
+                    }
+                ],
+                "Targets": [
+                    {
+                        "Id": {
+                            "Ref": "PrimaryServer"
+                        },
+                        "Port": "80"
+                    }
+                ],
+                "TargetType": "instance",
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            }
+        },
         "ServerLoadBalancer": {
-            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
             "DependsOn": [
                 "LoadBalancerSecurityGroup"
             ],
             "Properties": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-cfn-lb"
+                },
                 "Scheme": "internet-facing",
+                "SecurityGroups": [
+                    {
+                        "Ref": "LoadBalancerSecurityGroup"
+                    }
+                ],
                 "Subnets": {
                     "Fn::Split": [
                         ",",
@@ -841,47 +923,6 @@
                         }
                     ]
                 },
-                "SecurityGroups": [
-                    {
-                        "Ref": "LoadBalancerSecurityGroup"
-                    }
-                ],
-                "Listeners": [
-                    {
-                        "Protocol": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                "HTTPS",
-                                "HTTP"
-                            ]
-                        },
-                        "LoadBalancerPort": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                "443",
-                                "80"
-                            ]
-                        },
-                        "InstanceProtocol": "HTTP",
-                        "InstancePort": "80",
-                        "SSLCertificateId": {
-                            "Fn::If": [
-                                "HasSSLCertificate",
-                                {
-                                    "Ref": "SSLCertificateARN"
-                                },
-                                {
-                                    "Ref": "AWS::NoValue"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "Instances": [
-                    {
-                        "Ref": "PrimaryServer"
-                    }
-                ],
                 "Tags": [
                     {
                         "Key": "Name",
@@ -889,7 +930,8 @@
                             "Fn::Sub": "${AWS::StackName}-cfn-lb"
                         }
                     }
-                ]
+                ],
+                "Type": "application"
             }
         },
         "DNSNameEntry": {
@@ -1377,9 +1419,9 @@
                 "MaxSize": {
                     "Ref": "WorkerCount"
                 },
-                "LoadBalancerNames": [
+                "TargetGroupARNs": [
                     {
-                        "Ref": "ServerLoadBalancer"
+                        "Ref": "LoadBalancerTargetGroup"
                     }
                 ]
             }
