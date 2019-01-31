@@ -627,9 +627,7 @@
     "EIP": {
       "Type": "AWS::EC2::EIP",
       "Properties": {
-        "InstanceId": {
-          "Ref": "TableauWindowsServer"
-        }
+        "Domain": "vpc"
       }
     },
     "EIPAssociation": {
