@@ -1,736 +1,739 @@
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "CloudFormation Template for TSM-based Tableau Server on Windows",
-  "Metadata": {
-    "AWS::CloudFormation::Interface": {
-      "ParameterGroups": [
-        {
-          "Label": {
-            "default": "AWS Environment and Machine Configuration"
-          },
-          "Parameters": [
-            "VPCId",
-            "PublicSubnetId",
-            "InstanceType",
-            "KeyPairName",
-            "SourceCIDR"
-          ]
-        },
-        {
-          "Label": {
-            "default": "Secrets"
-          },
-          "Parameters": [
-            "Username",
-            "Password",
-            "TableauServerAdminUser",
-            "TableauServerAdminPassword"
-          ]
-        },
-        {
-          "Label": {
-            "default": "Registration"
-          },
-          "Parameters": [
-            "AcceptEULA",
-            "TableauServerLicenseKey",
-            "RegFirstName",
-            "RegLastName",
-            "RegEmail",
-            "RegCompany",
-            "RegTitle",
-            "RegDepartment",
-            "RegIndustry",
-            "RegPhone",
-            "RegCity",
-            "RegState",
-            "RegZip",
-            "RegCountry"
-          ]
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation Template for TSM-based Tableau Server on Windows",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "AWS Environment and Machine Configuration"
+                    },
+                    "Parameters": [
+                        "VPCId",
+                        "PublicSubnetId",
+                        "InstanceType",
+                        "KeyPairName",
+                        "SourceCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Secrets"
+                    },
+                    "Parameters": [
+                        "Username",
+                        "Password",
+                        "TableauServerAdminUser",
+                        "TableauServerAdminPassword"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Registration"
+                    },
+                    "Parameters": [
+                        "AcceptEULA",
+                        "TableauServerLicenseKey",
+                        "RegFirstName",
+                        "RegLastName",
+                        "RegEmail",
+                        "RegCompany",
+                        "RegTitle",
+                        "RegDepartment",
+                        "RegIndustry",
+                        "RegPhone",
+                        "RegCity",
+                        "RegState",
+                        "RegZip",
+                        "RegCountry"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "AcceptEULA": {
+                    "default": "Accept Tableau End User License Agreement"
+                },
+                "InstanceType": {
+                    "default": "Tableau Amazon EC2 instance type"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
+                },
+                "Password": {
+                    "default": "Tableau Services Manager (TSM) administrator password"
+                },
+                "PublicSubnetId": {
+                    "default": "Target Public Subnet"
+                },
+                "RegCity": {
+                    "default": "City"
+                },
+                "RegCompany": {
+                    "default": "Company"
+                },
+                "RegCountry": {
+                    "default": "Country"
+                },
+                "RegDepartment": {
+                    "default": "Department"
+                },
+                "RegEmail": {
+                    "default": "Email Address"
+                },
+                "RegFirstName": {
+                    "default": "First Name"
+                },
+                "RegIndustry": {
+                    "default": "Industry"
+                },
+                "RegLastName": {
+                    "default": "Last Name"
+                },
+                "RegPhone": {
+                    "default": "Phone"
+                },
+                "RegState": {
+                    "default": "State"
+                },
+                "RegTitle": {
+                    "default": "Title"
+                },
+                "RegZip": {
+                    "default": "Zip/Postal Code"
+                },
+                "SourceCIDR": {
+                    "default": "Source CIDR for Access"
+                },
+                "TableauServerAdminPassword": {
+                    "default": "Tableau Server administrator password"
+                },
+                "TableauServerAdminUser": {
+                    "default": "Tableau Server administrator username"
+                },
+                "TableauServerLicenseKey": {
+                    "default": "Tableau Activation Key"
+                },
+                "Username": {
+                    "default": "Tableau Services Manager (TSM) administrator username"
+                },
+                "VPCId": {
+                    "default": "Target VPC"
+                }
+            }
         }
-      ],
-      "ParameterLabels": {
+    },
+    "Parameters": {
         "AcceptEULA": {
-          "default": "Accept Tableau End User License Agreement"
+            "AllowedPattern": "Yes",
+            "AllowedValues": [
+                "Yes",
+                "No"
+            ],
+            "Description": "View the EULA at the Link: https://www.tableau.com/eula",
+            "Type": "String"
         },
         "InstanceType": {
-          "default": "Tableau Amazon EC2 instance type"
+            "AllowedValues": [
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "m5.4xlarge",
+                "m5.12xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type.",
+            "Default": "m4.4xlarge",
+            "Description": "Amazon EC2 instance type",
+            "Type": "String"
         },
         "KeyPairName": {
-          "default": "Key Pair Name"
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "Password": {
-          "default": "Tableau Services Manager (TSM) administrator password"
+            "Description": "Tableau Services Manager (TSM) administrator password",
+            "MinLength": "6",
+            "NoEcho": "true",
+            "Type": "String"
         },
         "PublicSubnetId": {
-          "default": "Target Public Subnet"
+            "Description": "The public subnet to use",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "RegCity": {
-          "default": "City"
+            "Description": "City",
+            "Type": "String"
         },
         "RegCompany": {
-          "default": "Company"
+            "Description": "Company",
+            "Type": "String"
         },
         "RegCountry": {
-          "default": "Country"
+            "Description": "Country",
+            "Type": "String"
         },
         "RegDepartment": {
-          "default": "Department"
+            "Description": "Department",
+            "Type": "String"
         },
         "RegEmail": {
-          "default": "Email Address"
+            "Description": "Email",
+            "MinLength": "1",
+            "Type": "String"
         },
         "RegFirstName": {
-          "default": "First Name"
+            "Description": "First Name",
+            "MinLength": "1",
+            "Type": "String"
         },
         "RegIndustry": {
-          "default": "Industry"
+            "Description": "Industry",
+            "Type": "String"
         },
         "RegLastName": {
-          "default": "Last Name"
+            "Description": "Last Name",
+            "MinLength": "1",
+            "Type": "String"
         },
         "RegPhone": {
-          "default": "Phone"
+            "Description": "Phone",
+            "Type": "String"
         },
         "RegState": {
-          "default": "State"
+            "Description": "State",
+            "Type": "String"
         },
         "RegTitle": {
-          "default": "Title"
+            "Description": "Title",
+            "Type": "String"
         },
         "RegZip": {
-          "default": "Zip/Postal Code"
+            "Description": "ZIP/Postal Code",
+            "Type": "String"
         },
         "SourceCIDR": {
-          "default": "Source CIDR for Access"
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "The CIDR address from which you will connect to the instance",
+            "Type": "String"
         },
         "TableauServerAdminPassword": {
-          "default": "Tableau Server administrator password"
+            "Description": "The password of the initial administrator for Tableau Server",
+            "MinLength": "1",
+            "NoEcho": "true",
+            "Type": "String"
         },
         "TableauServerAdminUser": {
-          "default": "Tableau Server administrator username"
+            "Description": "The name of the initial administrator for Tableau Server",
+            "MinLength": "1",
+            "Type": "String"
         },
         "TableauServerLicenseKey": {
-          "default": "Tableau Activation Key"
+            "Description": "License Key (leave blank for trial)",
+            "Type": "String"
         },
         "Username": {
-          "default": "Tableau Services Manager (TSM) administrator username"
+            "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$",
+            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
+            "MaxLength": "30",
+            "Type": "String"
         },
         "VPCId": {
-          "default": "Target VPC"
+            "Description": "The ID of the VPC into which to deploy the cluster",
+            "Type": "AWS::EC2::VPC::Id"
         }
-      }
-    }
-  },
-  "Parameters": {
-    "AcceptEULA": {
-      "AllowedPattern": "Yes",
-      "AllowedValues": ["Yes", "No"],
-      "Description": "View the EULA at the Link: https://www.tableau.com/eula",
-      "Type": "String"
     },
-    "InstanceType": {
-      "AllowedValues": [
-        "m4.2xlarge",
-        "m4.4xlarge",
-        "m4.10xlarge",
-        "m5.4xlarge",
-        "m5.12xlarge"
-      ],
-      "ConstraintDescription": "must be a valid EC2 instance type.",
-      "Default": "m4.4xlarge",
-      "Description": "Amazon EC2 instance type",
-      "Type": "String"
-    },
-    "KeyPairName": {
-      "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
-      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
-      "Type": "AWS::EC2::KeyPair::KeyName"
-    },
-    "Password": {
-      "Description": "Tableau Services Manager (TSM) administrator password",
-      "MinLength": "6",
-      "NoEcho": "true",
-      "Type": "String"
-    },
-    "PublicSubnetId": {
-      "Description": "The public subnet to use",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "RegCity": {
-      "Description": "City",
-      "Type": "String"
-    },
-    "RegCompany": {
-      "Description": "Company",
-      "Type": "String"
-    },
-    "RegCountry": {
-      "Description": "Country",
-      "Type": "String"
-    },
-    "RegDepartment": {
-      "Description": "Department",
-      "Type": "String"
-    },
-    "RegEmail": {
-      "Description": "Email",
-      "MinLength": "1",
-      "Type": "String"
-    },
-    "RegFirstName": {
-      "Description": "First Name",
-      "MinLength": "1",
-      "Type": "String"
-    },
-    "RegIndustry": {
-      "Description": "Industry",
-      "Type": "String"
-    },
-    "RegLastName": {
-      "Description": "Last Name",
-      "MinLength": "1",
-      "Type": "String"
-    },
-    "RegPhone": {
-      "Description": "Phone",
-      "Type": "String"
-    },
-    "RegState": {
-      "Description": "State",
-      "Type": "String"
-    },
-    "RegTitle": {
-      "Description": "Title",
-      "Type": "String"
-    },
-    "RegZip": {
-      "Description": "ZIP/Postal Code",
-      "Type": "String"
-    },
-    "SourceCIDR": {
-      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-      "Description": "The CIDR address from which you will connect to the instance",
-      "Type": "String"
-    },
-    "TableauServerAdminPassword": {
-      "Description": "The password of the initial administrator for Tableau Server",
-      "MinLength": "1",
-      "NoEcho": "true",
-      "Type": "String"
-    },
-    "TableauServerAdminUser": {
-      "Description": "The name of the initial administrator for Tableau Server",
-      "MinLength": "1",
-      "Type": "String"
-    },
-    "TableauServerLicenseKey": {
-      "Description": "License Key (leave blank for trial)",
-      "Type": "String"
-    },
-    "Username": {
-      "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$",
-      "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
-      "MaxLength": "30",
-      "Type": "String"
-    },
-    "VPCId": {
-      "Description": "The ID of the VPC into which to deploy the cluster",
-      "Type": "AWS::EC2::VPC::Id"
-    }
-  },
-  "Mappings": {
-    "AWSAMIRegionMap": {
-      "AMI": {
-        "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.12.12"
-      },
-      "ap-northeast-1": {
-        "WS2012R2": "ami-0e8e51f50c1d7d1b6"
-      },
-      "ap-northeast-2": {
-        "WS2012R2": "ami-00dc8ef56b733f3dc"
-      },
-      "ap-south-1": {
-        "WS2012R2": "ami-03291442a55ad02c1"
-      },
-      "ap-southeast-1": {
-        "WS2012R2": "ami-059b411d0e166914e"
-      },
-      "ap-southeast-2": {
-        "WS2012R2": "ami-0d5ee30b3c177dc50"
-      },
-      "ca-central-1": {
-        "WS2012R2": "ami-067f74c12478608c0"
-      },
-      "eu-central-1": {
-        "WS2012R2": "ami-07338b9e99ae289ac"
-      },
-      "eu-west-1": {
-        "WS2012R2": "ami-08d5e9721f152cfc1"
-      },
-      "eu-west-2": {
-        "WS2012R2": "ami-0254182a5a5fba789"
-      },
-      "sa-east-1": {
-        "WS2012R2": "ami-098c1f48dc672ab2b"
-      },
-      "us-east-1": {
-        "WS2012R2": "ami-085ea1972627f58fd"
-      },
-      "us-east-2": {
-        "WS2012R2": "ami-0a562b81f2dd5ffe6"
-      },
-      "us-west-1": {
-        "WS2012R2": "ami-0aee96900bc0502fd"
-      },
-      "us-west-2": {
-        "WS2012R2": "ami-03833dcc7d9010c5a"
-      }
-    },
-    "DefaultConfiguration": {
-      "InstallationConfig": {
-        "InstallationBucket": "tableau-quickstart",
-        "InstallationExecutable": "TableauServer-64bit.exe"
-      },
-      "MachineConfiguration": {
-        "SystemVolumeSize": 50,
-        "DataVolumeSize": 100,
-        "WindowsVersion": "WS2012R2"
-      }
-    }
-  },
-  "Conditions": {
-    "IsTrial": {
-      "Fn::Equals": [
-        "",
-        {
-          "Ref": "TableauServerLicenseKey"
-        }
-      ]
-    }
-  },
-  "Resources": {
-    "TableauWindowsServer": {
-      "Type": "AWS::EC2::Instance",
-      "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "config": {
-            "files": {
-              "c:\\tabsetup\\secrets.json": {
-                "content": {
-                  "local_admin_user": {
-                    "Ref": "Username"
-                  },
-                  "local_admin_pass": {
-                    "Ref": "Password"
-                  },
-                  "content_admin_user": {
-                    "Ref": "TableauServerAdminUser"
-                  },
-                  "content_admin_pass": {
-                    "Ref": "TableauServerAdminPassword"
-                  },
-                  "product_keys": [
-                    {
-                      "Fn::If": [
-                        "IsTrial",
-                        "trial",
-                        {
-                          "Fn::Sub": "${TableauServerLicenseKey}"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              "c:\\tabsetup\\registration.json": {
-                "content": {
-                  "first_name": {
-                    "Ref": "RegFirstName"
-                  },
-                  "last_name": {
-                    "Ref": "RegLastName"
-                  },
-                  "email": {
-                    "Ref": "RegEmail"
-                  },
-                  "company": {
-                    "Fn::Join": [
-                      ";",
-                      [
-                        {
-                          "Ref": "RegCompany"
-                        },
-                        "AWSQuickStart-Win"
-                      ]
-                    ]
-                  },
-                  "title": {
-                    "Ref": "RegTitle"
-                  },
-                  "department": {
-                    "Ref": "RegDepartment"
-                  },
-                  "industry": {
-                    "Ref": "RegIndustry"
-                  },
-                  "phone": {
-                    "Ref": "RegPhone"
-                  },
-                  "city": {
-                    "Ref": "RegCity"
-                  },
-                  "state": {
-                    "Ref": "RegState"
-                  },
-                  "zip": {
-                    "Ref": "RegZip"
-                  },
-                  "country": {
-                    "Ref": "RegCountry"
-                  }
-                }
-              },
-              "c:\\tabsetup\\SilentInstaller.py": {
-                "source": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "https://",
-                      {
-                        "Fn::FindInMap": [
-                          "DefaultConfiguration",
-                          "InstallationConfig",
-                          "InstallationBucket"
-                        ]
-                      },
-                      ".s3.amazonaws.com/SilentInstaller.py"
-                    ]
-                  ]
-                }
-              },
-              "c:\\tabsetup\\config.json": {
-                "content": {
-                  "configEntities": {
-                    "identityStore": {
-                      "_type": "identityStoreType",
-                      "type": "local"
-                    }
-                  },
-                  "topologyVersion": {}
-                }
-              },
-              "c:\\tabsetup\\python-3.6.4-amd64.exe": {
-                "source": "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"
-              },
-              "c:\\tabsetup\\tableau-server-webapp-installer.exe": {
-                "source": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "https://",
-                      {
-                        "Fn::FindInMap": [
-                          "DefaultConfiguration",
-                          "InstallationConfig",
-                          "InstallationBucket"
-                        ]
-                      },
-                      ".s3.amazonaws.com/",
-                      {
-                        "Fn::FindInMap": [
-                          "DefaultConfiguration",
-                          "InstallationConfig",
-                          "InstallationExecutable"
-                        ]
-                      }
-                    ]
-                  ]
-                }
-              }
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.12.13"
             },
-            "commands": {
-              "0-disable-firewall": {
-                "cwd": "c:\\Windows\\System32",
-                "command": "netsh advfirewall set allprofiles state off",
-                "waitAfterCompletion": "0"
-              },
-              "1-install-python": {
-                "command": "c:\\tabsetup\\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1",
-                "cwd": "c:\\tabsetup",
-                "waitAfterCompletion": "0"
-              },
-              "2-create-user": {
-                "command": {
-                  "Fn::Join": [
-                    " ",
-                    [
-                      "net",
-                      "user",
-                      {
-                        "Fn::Sub": "${Username}"
-                      },
-                      {
-                        "Fn::Sub": "${Password}"
-                      },
-                      "/add",
-                      "/y"
-                    ]
-                  ]
-                },
-                "cwd": "c:\\tabsetup",
-                "waitAfterCompletion": "0"
-              },
-              "3-add-admin": {
-                "command": {
-                  "Fn::Join": [
-                    " ",
-                    [
-                      "net",
-                      "localgroup",
-                      "Administrators",
-                      {
-                        "Fn::Sub": "${Username}"
-                      },
-                      "/add",
-                      "/y"
-                    ]
-                  ]
-                },
-                "cwd": "c:\\tabsetup",
-                "waitAfterCompletion": "0"
-              },
-              "4-run-installer": {
-                "cwd": "c:\\tabsetup",
-                "command": {
-                  "Fn::Join": [
-                    " ",
-                    [
-                      "\"C:\\Program Files\\Python36\\python.exe\"",
-                      "SilentInstaller.py",
-                      "install",
-                      "--secretsFile c:\\tabsetup\\secrets.json",
-                      "--registrationFile c:\\tabsetup\\registration.json",
-                      "--configFile c:\\tabsetup\\config.json",
-                      "--installDir d:\\tableau",
-                      "c:\\tabsetup\\tableau-server-webapp-installer.exe",
-                      " > c:\\tabsetup\\tsm_installer-output.txt 2>&1"
-                    ]
-                  ]
-                },
-                "waitAfterCompletion": "0"
-              },
-              "5-cleanup-secrets": {
-                "cwd": "c:\\tabsetup",
-                "command": "del c:\\tabsetup\\secrets.json",
-                "waitAfterCompletion": "0"
-              }
-            }
-          }
-        }
-      },
-      "Properties": {
-        "SecurityGroupIds": [
-          {
-            "Ref": "ServerSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "PublicSubnetId"
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
+            "ap-northeast-1": {
+                "WS2012R2": "ami-01a36b3a16228aabc"
             },
-            {
-              "Fn::FindInMap": [
-                "DefaultConfiguration",
-                "MachineConfiguration",
-                "WindowsVersion"
-              ]
+            "ap-northeast-2": {
+                "WS2012R2": "ami-028139f205d2daa74"
+            },
+            "ap-south-1": {
+                "WS2012R2": "ami-0fa27628302568cf8"
+            },
+            "ap-southeast-1": {
+                "WS2012R2": "ami-0634a2a4e5f335566"
+            },
+            "ap-southeast-2": {
+                "WS2012R2": "ami-0af54fcc300d51d81"
+            },
+            "ca-central-1": {
+                "WS2012R2": "ami-0a828787cebefec3a"
+            },
+            "eu-central-1": {
+                "WS2012R2": "ami-0a6b3fad1e65fbba5"
+            },
+            "eu-west-1": {
+                "WS2012R2": "ami-05697bc3b1b84a9a6"
+            },
+            "eu-west-2": {
+                "WS2012R2": "ami-041f490cbeaf309e1"
+            },
+            "sa-east-1": {
+                "WS2012R2": "ami-0203e28b0bd45659f"
+            },
+            "us-east-1": {
+                "WS2012R2": "ami-02cb4450ba80eb057"
+            },
+            "us-east-2": {
+                "WS2012R2": "ami-0335db37835305b27"
+            },
+            "us-west-1": {
+                "WS2012R2": "ami-0b6ac87fe08b48203"
+            },
+            "us-west-2": {
+                "WS2012R2": "ami-01d5bff29ab3fb41e"
             }
-          ]
         },
-        "BlockDeviceMappings": [
-          {
-            "DeviceName": "/dev/sda1",
-            "Ebs": {
-              "VolumeType": "gp2",
-              "VolumeSize": {
-                "Fn::FindInMap": [
-                  "DefaultConfiguration",
-                  "MachineConfiguration",
-                  "SystemVolumeSize"
-                ]
-              }
+        "DefaultConfiguration": {
+            "InstallationConfig": {
+                "InstallationBucket": "tableau-quickstart",
+                "InstallationExecutable": "TableauServer-64bit.exe"
+            },
+            "MachineConfiguration": {
+                "SystemVolumeSize": 50,
+                "DataVolumeSize": 100,
+                "WindowsVersion": "WS2012R2"
             }
-          },
-          {
-            "DeviceName": "xvdc",
-            "Ebs": {
-              "VolumeSize": {
-                "Fn::FindInMap": [
-                  "DefaultConfiguration",
-                  "MachineConfiguration",
-                  "DataVolumeSize"
-                ]
-              },
-              "VolumeType": "gp2"
-            }
-          }
-        ],
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "\n",
-              [
-                "<script>",
+        }
+    },
+    "Conditions": {
+        "IsTrial": {
+            "Fn::Equals": [
+                "",
                 {
-                  "Fn::Sub": "cfn-init.exe -v -s ${AWS::StackId} -r TableauWindowsServer --region ${AWS::Region}"
-                },
-                {
-                  "Fn::Sub": [
-                    "cfn-signal.exe -e %errorlevel% ${WHUrl}",
-                    {
-                      "WHUrl": {
-                        "Fn::Base64": {
-                          "Ref": "TableauServerWaitHandle"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "</script>"
-              ]
+                    "Ref": "TableauServerLicenseKey"
+                }
             ]
-          }
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName}-cfn-tableau-server"
-            }
-          }
-        ]
-      }
-    },
-    "EIP": {
-      "Type": "AWS::EC2::EIP",
-      "Properties": {
-        "Domain": "vpc"
-      }
-    },
-    "EIPAssociation": {
-      "Type": "AWS::EC2::EIPAssociation",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": ["EIP", "AllocationId"]
-        },
-        "InstanceId": {
-          "Ref": "TableauServer"
         }
-      }
     },
-    "ServerSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPCId"
-        },
-        "GroupDescription": "Enable HTTP access via port 80 and HTTPS access on port 8850, and RDP access on Port 3389 from the provided network CIDR",
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "3389",
-            "ToPort": "3389",
-            "CidrIp": {
-              "Ref": "SourceCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "8850",
-            "ToPort": "8850",
-            "CidrIp": {
-              "Ref": "SourceCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "CidrIp": {
-              "Ref": "SourceCIDR"
-            }
-          }
-        ]
-      }
-    },
-    "TableauServerWaitHandle": {
-      "Type": "AWS::CloudFormation::WaitConditionHandle"
-    },
-    "TableauServerWaitCondition": {
-      "Type": "AWS::CloudFormation::WaitCondition",
-      "Properties": {
-        "Handle": {
-          "Ref": "TableauServerWaitHandle"
-        },
-        "Timeout": "3600"
-      }
-    }
-  },
-  "Outputs": {
-    "InstanceID": {
-      "Description": "EC2 InstanceID of the instance running Tableau Server",
-      "Value": {
-        "Ref": "TableauWindowsServer"
-      }
-    },
-    "PublicIPAddress": {
-      "Description": "Public IP Address of instance running Tableau Server",
-      "Value": {
-        "Fn::GetAtt": ["TableauWindowsServer", "PublicIp"]
-      }
-    },
-    "TableauServicesManagerURL": {
-      "Description": "URL for the TSM Web UI",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Fn::GetAtt": ["TableauWindowsServer", "PublicIp"]
+    "Resources": {
+        "TableauWindowsServer": {
+            "Type": "AWS::EC2::Instance",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "c:\\tabsetup\\secrets.json": {
+                                "content": {
+                                    "local_admin_user": {
+                                        "Ref": "Username"
+                                    },
+                                    "local_admin_pass": {
+                                        "Ref": "Password"
+                                    },
+                                    "content_admin_user": {
+                                        "Ref": "TableauServerAdminUser"
+                                    },
+                                    "content_admin_pass": {
+                                        "Ref": "TableauServerAdminPassword"
+                                    },
+                                    "product_keys": [
+                                        {
+                                            "Fn::If": [
+                                                "IsTrial",
+                                                "trial",
+                                                {
+                                                    "Fn::Sub": "${TableauServerLicenseKey}"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\registration.json": {
+                                "content": {
+                                    "first_name": {
+                                        "Ref": "RegFirstName"
+                                    },
+                                    "last_name": {
+                                        "Ref": "RegLastName"
+                                    },
+                                    "email": {
+                                        "Ref": "RegEmail"
+                                    },
+                                    "company": {
+                                        "Fn::Join": [
+                                            ";",
+                                            [
+                                                {
+                                                    "Ref": "RegCompany"
+                                                },
+                                                "AWSQuickStart-Win"
+                                            ]
+                                        ]
+                                    },
+                                    "title": {
+                                        "Ref": "RegTitle"
+                                    },
+                                    "department": {
+                                        "Ref": "RegDepartment"
+                                    },
+                                    "industry": {
+                                        "Ref": "RegIndustry"
+                                    },
+                                    "phone": {
+                                        "Ref": "RegPhone"
+                                    },
+                                    "city": {
+                                        "Ref": "RegCity"
+                                    },
+                                    "state": {
+                                        "Ref": "RegState"
+                                    },
+                                    "zip": {
+                                        "Ref": "RegZip"
+                                    },
+                                    "country": {
+                                        "Ref": "RegCountry"
+                                    }
+                                }
+                            },
+                            "c:\\tabsetup\\SilentInstaller.py": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                            ".s3.amazonaws.com/SilentInstaller.py"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\tabsetup\\config.json": {
+                                "content": {
+                                    "configEntities": {
+                                        "identityStore": {
+                                            "_type": "identityStoreType",
+                                            "type": "local"
+                                        }
+                                    },
+                                    "topologyVersion": {}
+                                }
+                            },
+                            "c:\\tabsetup\\python-3.6.4-amd64.exe": {
+                                "source": "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"
+                            },
+                            "c:\\tabsetup\\tableau-server-webapp-installer.exe": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "https://",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationBucket"
+                                                ]
+                                            },
+                                            ".s3.amazonaws.com/",
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "DefaultConfiguration",
+                                                    "InstallationConfig",
+                                                    "InstallationExecutable"
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                }
+                            }
+                        },
+                        "commands": {
+                            "0-disable-firewall": {
+                                "cwd": "c:\\Windows\\System32",
+                                "command": "netsh advfirewall set allprofiles state off",
+                                "waitAfterCompletion": "0"
+                            },
+                            "1-install-python": {
+                                "command": "c:\\tabsetup\\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1",
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                            },
+                            "2-create-user": {
+                                "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "user",
+                                            {
+                                                "Fn::Sub": "${Username}"
+                                            },
+                                            {
+                                                "Fn::Sub": "${Password}"
+                                            },
+                                            "/add",
+                                            "/y"
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                            },
+                            "3-add-admin": {
+                                "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "net",
+                                            "localgroup",
+                                            "Administrators",
+                                            {
+                                                "Fn::Sub": "${Username}"
+                                            },
+                                            "/add",
+                                            "/y"
+                                        ]
+                                    ]
+                                },
+                                "cwd": "c:\\tabsetup",
+                                "waitAfterCompletion": "0"
+                            },
+                            "4-run-installer": {
+                                "cwd": "c:\\tabsetup",
+                                "command": {
+                                    "Fn::Join": [
+                                        " ",
+                                        [
+                                            "\"C:\\Program Files\\Python36\\python.exe\"",
+                                            "SilentInstaller.py",
+                                            "install",
+                                            "--secretsFile c:\\tabsetup\\secrets.json",
+                                            "--registrationFile c:\\tabsetup\\registration.json",
+                                            "--configFile c:\\tabsetup\\config.json",
+                                            "--installDir d:\\tableau",
+                                            "c:\\tabsetup\\tableau-server-webapp-installer.exe",
+                                            " > c:\\tabsetup\\tsm_installer-output.txt 2>&1"
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            },
+                            "5-cleanup-secrets": {
+                                "cwd": "c:\\tabsetup",
+                                "command": "del c:\\tabsetup\\secrets.json",
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    }
+                }
             },
-            ":8850/"
-          ]
-        ]
-      }
+            "Properties": {
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "ServerSecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PublicSubnetId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "DefaultConfiguration",
+                                "MachineConfiguration",
+                                "WindowsVersion"
+                            ]
+                        }
+                    ]
+                },
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeType": "gp2",
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "SystemVolumeSize"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "xvdc",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Fn::FindInMap": [
+                                    "DefaultConfiguration",
+                                    "MachineConfiguration",
+                                    "DataVolumeSize"
+                                ]
+                            },
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "\n",
+                            [
+                                "<script>",
+                                {
+                                    "Fn::Sub": "cfn-init.exe -v -s ${AWS::StackId} -r TableauWindowsServer --region ${AWS::Region}"
+                                },
+                                {
+                                    "Fn::Sub": [
+                                        "cfn-signal.exe -e %errorlevel% ${WHUrl}",
+                                        {
+                                            "WHUrl": {
+                                                "Fn::Base64": {
+                                                    "Ref": "TableauServerWaitHandle"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                "</script>"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-cfn-tableau-server"
+                        }
+                    }
+                ]
+            }
+        },
+        "EIP": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "InstanceId": {
+                    "Ref": "TableauWindowsServer"
+                }
+            }
+        },
+        "ServerSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCId"
+                },
+                "GroupDescription": "Enable HTTP access via port 80 and HTTPS access on port 8850, and RDP access on Port 3389 from the provided network CIDR",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3389",
+                        "ToPort": "3389",
+                        "CidrIp": {
+                            "Ref": "SourceCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8850",
+                        "ToPort": "8850",
+                        "CidrIp": {
+                            "Ref": "SourceCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": {
+                            "Ref": "SourceCIDR"
+                        }
+                    }
+                ]
+            }
+        },
+        "TableauServerWaitHandle": {
+            "Type": "AWS::CloudFormation::WaitConditionHandle"
+        },
+        "TableauServerWaitCondition": {
+            "Type": "AWS::CloudFormation::WaitCondition",
+            "Properties": {
+                "Handle": {
+                    "Ref": "TableauServerWaitHandle"
+                },
+                "Timeout": "3600"
+            }
+        }
     },
-    "TableauServerURL": {
-      "Description": "Public DNS name of instance running Tableau Server",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "http://",
-            {
-              "Fn::GetAtt": ["TableauWindowsServer", "PublicDnsName"]
-            },
-            "/"
-          ]
-        ]
-      }
+    "Outputs": {
+        "InstanceID": {
+            "Description": "EC2 InstanceID of the instance running Tableau Server",
+            "Value": {
+                "Ref": "TableauWindowsServer"
+            }
+        },
+        "PublicIPAddress": {
+            "Description": "Public IP Address of instance running Tableau Server",
+            "Value": {
+                "Fn::GetAtt": [
+                    "TableauWindowsServer",
+                    "PublicIp"
+                ]
+            }
+        },
+        "TableauServicesManagerURL": {
+            "Description": "URL for the TSM Web UI",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Fn::GetAtt": [
+                                "TableauWindowsServer",
+                                "PublicIp"
+                            ]
+                        },
+                        ":8850/"
+                    ]
+                ]
+            }
+        },
+        "TableauServerURL": {
+            "Description": "Public DNS name of instance running Tableau Server",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "http://",
+                        {
+                            "Fn::GetAtt": [
+                                "TableauWindowsServer",
+                                "PublicDnsName"
+                            ]
+                        },
+                        "/"
+                    ]
+                ]
+            }
+        }
     }
-  }
 }

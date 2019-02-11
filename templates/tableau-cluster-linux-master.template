@@ -645,8 +645,8 @@
                     ]
                 },
                 "IpProtocol": "tcp",
-                "FromPort": "3389",
-                "ToPort": "3389",
+                "FromPort": 3389,
+                "ToPort": 3389,
                 "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
                         "BastionHost",
@@ -669,8 +669,8 @@
                     ]
                 },
                 "IpProtocol": "tcp",
-                "FromPort": "80",
-                "ToPort": "80",
+                "FromPort": 80,
+                "ToPort": 80,
                 "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
                         "BastionHost",
