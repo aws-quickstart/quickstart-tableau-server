@@ -336,64 +336,64 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181223"
+                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-05713873c6794f575.4",
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190204.3"
             },
             "ap-northeast-1": {
-                "CENTOS7HVM": "ami-8e8847f1",
-                "US1604HVM": "ami-0d5e82481c5fd4ad5"
+                "CENTOS7HVM": "ami-045f38c93733dd48d",
+                "US1604HVM": "ami-073bca96b05146436"
             },
             "ap-northeast-2": {
-                "CENTOS7HVM": "ami-bf9c36d1",
-                "US1604HVM": "ami-0507b772e2c9b8c15"
+                "CENTOS7HVM": "ami-06cf2a72dadf92410",
+                "US1604HVM": "ami-0ef1fbc0151cd29e5"
             },
             "ap-south-1": {
-                "CENTOS7HVM": "ami-1780a878",
-                "US1604HVM": "ami-0c8810f694cbe10ba"
+                "CENTOS7HVM": "ami-02e60be79e78fef21",
+                "US1604HVM": "ami-089474469fff05a34"
             },
             "ap-southeast-1": {
-                "CENTOS7HVM": "ami-8e0205f2",
-                "US1604HVM": "ami-09f2be3a5a5867258"
+                "CENTOS7HVM": "ami-0b4dd9d65556cac22",
+                "US1604HVM": "ami-04237968005ab920d"
             },
             "ap-southeast-2": {
-                "CENTOS7HVM": "ami-d8c21dba",
-                "US1604HVM": "ami-04978aa3dd8b62cc8"
+                "CENTOS7HVM": "ami-08bd00d7713a39e7d",
+                "US1604HVM": "ami-08daff5c1fda6076a"
             },
             "ca-central-1": {
-                "CENTOS7HVM": "ami-e802818c",
-                "US1604HVM": "ami-0a851426a8a56bf4b"
+                "CENTOS7HVM": "ami-033e6106180a626d0",
+                "US1604HVM": "ami-0f40a88e159e23de0"
             },
             "eu-central-1": {
-                "CENTOS7HVM": "ami-dd3c0f36",
-                "US1604HVM": "ami-00f3256a9deda4e1b"
+                "CENTOS7HVM": "ami-04cf43aca3e6f3de3",
+                "US1604HVM": "ami-035a9525f5a67b61f"
             },
             "eu-west-1": {
-                "CENTOS7HVM": "ami-3548444c",
-                "US1604HVM": "ami-0233bae36f499afe8"
+                "CENTOS7HVM": "ami-0ff760d16d9497662",
+                "US1604HVM": "ami-0bc11fa490cf2ead7"
             },
             "eu-west-2": {
-                "CENTOS7HVM": "ami-00846a67",
-                "US1604HVM": "ami-03c015fc0026bf4fc"
+                "CENTOS7HVM": "ami-0eab3a90fc693af19",
+                "US1604HVM": "ami-03adfef3297970241"
             },
             "sa-east-1": {
-                "CENTOS7HVM": "ami-cb5803a7",
-                "US1604HVM": "ami-08a4ba9038d7e8565"
+                "CENTOS7HVM": "ami-0b8d86d4bf91850af",
+                "US1604HVM": "ami-0141e0fdc496a87a3"
             },
             "us-east-1": {
-                "CENTOS7HVM": "ami-9887c6e7",
-                "US1604HVM": "ami-03a935aafa6b52b97"
+                "CENTOS7HVM": "ami-02eac2c0129f6376b",
+                "US1604HVM": "ami-004d038b7950c224c"
             },
             "us-east-2": {
-                "CENTOS7HVM": "ami-9c0638f9",
-                "US1604HVM": "ami-00c5e3f4a8dd369e8"
+                "CENTOS7HVM": "ami-0f2b4fc905b0bd1f1",
+                "US1604HVM": "ami-0800e99ee8301b917"
             },
             "us-west-1": {
-                "CENTOS7HVM": "ami-4826c22b",
-                "US1604HVM": "ami-0689ca7fe00282a37"
+                "CENTOS7HVM": "ami-074e2d6769f445be5",
+                "US1604HVM": "ami-03659409b9c7d0c5f"
             },
             "us-west-2": {
-                "CENTOS7HVM": "ami-3ecc8f46",
-                "US1604HVM": "ami-0dbd6cabe4749f197"
+                "CENTOS7HVM": "ami-01ed306a12b7d1c96",
+                "US1604HVM": "ami-0f26d4c9992650142"
             }
         },
         "LinuxAMINameMap": {
