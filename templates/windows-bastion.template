@@ -1,201 +1,211 @@
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Bastion host, useful to access private instances created inside a VPC",
-  "Parameters": {
-    "InstanceType": {
-      "Default": "t2.micro",
-      "Description": "The AWS Instance Type to use for our bastion host",
-      "Type": "String"
-    },
-    "KeyPairName": {
-      "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
-      "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
-      "Type": "AWS::EC2::KeyPair::KeyName"
-    },
-    "SourceCIDR": {
-      "Default": "69.25.143.0/24",
-      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-      "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
-      "Type": "String"
-    },
-    "SubnetId": {
-      "Description": "The Id of the subnet for the bastion host",
-      "Type": "AWS::EC2::Subnet::Id",
-      "MinLength": "1"
-    },
-    "VPCID": {
-      "Description": "ID of the VPC (e.g., vpc-0343606e)",
-      "Type": "AWS::EC2::VPC::Id"
-    }
-  },
-  "Metadata": {
-    "AWS::CloudFormation::Interface": {
-      "ParameterGroups": [
-        {
-          "Label": {
-            "default": "Bastion Networking Information"
-          },
-          "Parameters": ["SourceCIDR", "SubnetId", "VPCID"]
-        },
-        {
-          "Label": {
-            "default": "Bastion Machine Information"
-          },
-          "Parameters": ["InstanceType", "KeyPairName"]
-        }
-      ],
-      "ParameterLabels": {
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Bastion host, useful to access private instances created inside a VPC",
+    "Parameters": {
         "InstanceType": {
-          "default": "The instance type for the bastion"
+            "Default": "t2.micro",
+            "Description": "The AWS Instance Type to use for our bastion host",
+            "Type": "String"
         },
         "KeyPairName": {
-          "default": "The KeyPair used to connect to the bastion"
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair used to get the Administrator password for the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "SourceCIDR": {
-          "default": "CIDR describing who can connect to the bastion"
+            "Default": "69.25.143.0/24",
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
+            "Type": "String"
         },
         "SubnetId": {
-          "default": "The subnet on which to place the bastion"
+            "Description": "The Id of the subnet for the bastion host",
+            "Type": "AWS::EC2::Subnet::Id",
+            "MinLength": "1"
         },
         "VPCID": {
-          "default": "The VPC id in which to create the bastion"
+            "Description": "ID of the VPC (e.g., vpc-0343606e)",
+            "Type": "AWS::EC2::VPC::Id"
         }
-      }
-    }
-  },
-  "Mappings": {
-    "AWSAMIRegionMap": {
-      "AMI": {
-        "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.12.12"
-      },
-      "ap-northeast-1": {
-        "WS2012R2": "ami-0e8e51f50c1d7d1b6"
-      },
-      "ap-northeast-2": {
-        "WS2012R2": "ami-00dc8ef56b733f3dc"
-      },
-      "ap-south-1": {
-        "WS2012R2": "ami-03291442a55ad02c1"
-      },
-      "ap-southeast-1": {
-        "WS2012R2": "ami-059b411d0e166914e"
-      },
-      "ap-southeast-2": {
-        "WS2012R2": "ami-0d5ee30b3c177dc50"
-      },
-      "ca-central-1": {
-        "WS2012R2": "ami-067f74c12478608c0"
-      },
-      "eu-central-1": {
-        "WS2012R2": "ami-07338b9e99ae289ac"
-      },
-      "eu-west-1": {
-        "WS2012R2": "ami-08d5e9721f152cfc1"
-      },
-      "eu-west-2": {
-        "WS2012R2": "ami-0254182a5a5fba789"
-      },
-      "sa-east-1": {
-        "WS2012R2": "ami-098c1f48dc672ab2b"
-      },
-      "us-east-1": {
-        "WS2012R2": "ami-085ea1972627f58fd"
-      },
-      "us-east-2": {
-        "WS2012R2": "ami-0a562b81f2dd5ffe6"
-      },
-      "us-west-1": {
-        "WS2012R2": "ami-0aee96900bc0502fd"
-      },
-      "us-west-2": {
-        "WS2012R2": "ami-03833dcc7d9010c5a"
-      }
-    }
-  },
-  "Resources": {
-    "BastionSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Enable RDP traffic to the bastion host",
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": 3389,
-            "ToPort": 3389,
-            "CidrIp": {
-              "Ref": "SourceCIDR"
-            }
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName}-BastionSecurityGroup"
-            }
-          }
-        ],
-        "VpcId": {
-          "Ref": "VPCID"
-        }
-      }
     },
-    "BastionHost": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Bastion Networking Information"
+                    },
+                    "Parameters": [
+                        "SourceCIDR",
+                        "SubnetId",
+                        "VPCID"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Bastion Machine Information"
+                    },
+                    "Parameters": [
+                        "InstanceType",
+                        "KeyPairName"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "InstanceType": {
+                    "default": "The instance type for the bastion"
+                },
+                "KeyPairName": {
+                    "default": "The KeyPair used to connect to the bastion"
+                },
+                "SourceCIDR": {
+                    "default": "CIDR describing who can connect to the bastion"
+                },
+                "SubnetId": {
+                    "default": "The subnet on which to place the bastion"
+                },
+                "VPCID": {
+                    "default": "The VPC id in which to create the bastion"
+                }
+            }
+        }
+    },
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.12.13"
             },
-            "WS2012R2"
-          ]
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "BastionSecurityGroup"
-          }
-        ],
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "SubnetId": {
-          "Ref": "SubnetId"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName}-bastion-host"
+            "ap-northeast-1": {
+                "WS2012R2": "ami-01a36b3a16228aabc"
+            },
+            "ap-northeast-2": {
+                "WS2012R2": "ami-028139f205d2daa74"
+            },
+            "ap-south-1": {
+                "WS2012R2": "ami-0fa27628302568cf8"
+            },
+            "ap-southeast-1": {
+                "WS2012R2": "ami-0634a2a4e5f335566"
+            },
+            "ap-southeast-2": {
+                "WS2012R2": "ami-0af54fcc300d51d81"
+            },
+            "ca-central-1": {
+                "WS2012R2": "ami-0a828787cebefec3a"
+            },
+            "eu-central-1": {
+                "WS2012R2": "ami-0a6b3fad1e65fbba5"
+            },
+            "eu-west-1": {
+                "WS2012R2": "ami-05697bc3b1b84a9a6"
+            },
+            "eu-west-2": {
+                "WS2012R2": "ami-041f490cbeaf309e1"
+            },
+            "sa-east-1": {
+                "WS2012R2": "ami-0203e28b0bd45659f"
+            },
+            "us-east-1": {
+                "WS2012R2": "ami-02cb4450ba80eb057"
+            },
+            "us-east-2": {
+                "WS2012R2": "ami-0335db37835305b27"
+            },
+            "us-west-1": {
+                "WS2012R2": "ami-0b6ac87fe08b48203"
+            },
+            "us-west-2": {
+                "WS2012R2": "ami-01d5bff29ab3fb41e"
             }
-          }
-        ]
-      }
-    }
-  },
-  "Outputs": {
-    "BastionInstance": {
-      "Description": "The bastion EC2 instance",
-      "Value": {
-        "Ref": "BastionHost"
-      }
+        }
     },
-    "BastionDNSName": {
-      "Description": "Public DNS name of bastion host",
-      "Value": {
-        "Fn::GetAtt": ["BastionHost", "PublicDnsName"]
-      }
+    "Resources": {
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable RDP traffic to the bastion host",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 3389,
+                        "ToPort": 3389,
+                        "CidrIp": {
+                            "Ref": "SourceCIDR"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-BastionSecurityGroup"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPCID"
+                }
+            }
+        },
+        "BastionHost": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "WS2012R2"
+                    ]
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "BastionSecurityGroup"
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "SubnetId": {
+                    "Ref": "SubnetId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}-bastion-host"
+                        }
+                    }
+                ]
+            }
+        }
     },
-    "SecurityGroup": {
-      "Description": "Baston Security Group",
-      "Value": {
-        "Ref": "BastionSecurityGroup"
-      }
+    "Outputs": {
+        "BastionInstance": {
+            "Description": "The bastion EC2 instance",
+            "Value": {
+                "Ref": "BastionHost"
+            }
+        },
+        "BastionDNSName": {
+            "Description": "Public DNS name of bastion host",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BastionHost",
+                    "PublicDnsName"
+                ]
+            }
+        },
+        "SecurityGroup": {
+            "Description": "Baston Security Group",
+            "Value": {
+                "Ref": "BastionSecurityGroup"
+            }
+        }
     }
-  }
 }
