@@ -630,7 +630,7 @@
                     ]
                 },
                 "Runtime": "nodejs8.10",
-                "Timeout": "30"
+                "Timeout": 30
             }
         },
         "LambdaExecutionRole": {
@@ -794,15 +794,15 @@
                         "FromPort": {
                             "Fn::If": [
                                 "HasSSLCertificate",
-                                "443",
-                                "80"
+                                443,
+                                80
                             ]
                         },
                         "ToPort": {
                             "Fn::If": [
                                 "HasSSLCertificate",
-                                "443",
-                                "80"
+                                443,
+                                80
                             ]
                         },
                         "CidrIp": {
@@ -858,12 +858,12 @@
                         "LoadBalancerPort": {
                             "Fn::If": [
                                 "HasSSLCertificate",
-                                "443",
-                                "80"
+                                443,
+                                80
                             ]
                         },
                         "InstanceProtocol": "HTTP",
-                        "InstancePort": "80",
+                        "InstancePort": 80,
                         "SSLCertificateId": {
                             "Fn::If": [
                                 "HasSSLCertificate",
@@ -1301,8 +1301,8 @@
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": 80,
+                        "ToPort": 80,
                         "CidrIp": {
                             "Ref": "SourceCIDR"
                         }
