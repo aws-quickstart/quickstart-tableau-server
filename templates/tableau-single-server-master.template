@@ -1,510 +1,482 @@
 {
-    "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS CloudFormation Template: Single-node Tableau Server running on Windows, CentOS, or Ubuntu.",
-    "Metadata": {
-        "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
-                    "Label": {
-                        "default": "AWS Environment and Machine Configuration"
-                    },
-                    "Parameters": [
-                        "KeyPairName",
-                        "AvailabilityZones",
-                        "PublicSubnet1CIDR",
-                        "PublicSubnet2CIDR",
-                        "VPCCIDR",
-                        "SourceCIDR",
-                        "InstanceType",
-                        "AMIOS"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Secrets"
-                    },
-                    "Parameters": [
-                        "Username",
-                        "Password",
-                        "TableauServerAdminUser",
-                        "TableauServerAdminPassword"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Registration"
-                    },
-                    "Parameters": [
-                        "AcceptEULA",
-                        "TableauServerLicenseKey",
-                        "RegFirstName",
-                        "RegLastName",
-                        "RegEmail",
-                        "RegCompany",
-                        "RegTitle",
-                        "RegDepartment",
-                        "RegIndustry",
-                        "RegPhone",
-                        "RegCity",
-                        "RegState",
-                        "RegZip",
-                        "RegCountry"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "AWS Quick Start Configuration"
-                    },
-                    "Parameters": [
-                        "QSS3BucketName",
-                        "QSS3KeyPrefix"
-                    ]
-                }
-            ],
-            "ParameterLabels": {
-                "AvailabilityZones": {
-                    "default": "Availability Zones"
-                },
-                "AcceptEULA": {
-                    "default": "Accept Tableau End User License Agreement"
-                },
-                "AMIOS": {
-                    "default": "AMI Operating System"
-                },
-                "InstanceType": {
-                    "default": "Tableau Amazon EC2 instance type"
-                },
-                "KeyPairName": {
-                    "default": "Key Pair Name"
-                },
-                "Password": {
-                    "default": "Tableau Services Manager (TSM) administrator password"
-                },
-                "PublicSubnet1CIDR": {
-                    "default": "Public Subnet 1 CIDR"
-                },
-                "PublicSubnet2CIDR": {
-                    "default": "Public Subnet 2 CIDR"
-                },
-                "QSS3BucketName": {
-                    "default": "Quick Start S3 Bucket Name"
-                },
-                "QSS3KeyPrefix": {
-                    "default": "Quick Start S3 Key Prefix"
-                },
-                "RegCity": {
-                    "default": "City"
-                },
-                "RegCompany": {
-                    "default": "Company"
-                },
-                "RegCountry": {
-                    "default": "Country"
-                },
-                "RegDepartment": {
-                    "default": "Department"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegIndustry": {
-                    "default": "Industry"
-                },
-                "RegLastName": {
-                    "default": "Last Name"
-                },
-                "RegPhone": {
-                    "default": "Phone"
-                },
-                "RegState": {
-                    "default": "State"
-                },
-                "RegTitle": {
-                    "default": "Title"
-                },
-                "RegZip": {
-                    "default": "Zip/Postal Code"
-                },
-                "SourceCIDR": {
-                    "default": "Source CIDR for Access"
-                },
-                "TableauServerAdminPassword": {
-                    "default": "Tableau Server administrator password"
-                },
-                "TableauServerAdminUser": {
-                    "default": "Tableau Server administrator username"
-                },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
-                },
-                "Username": {
-                    "default": "Tableau Services Manager (TSM) administrator username"
-                },
-                "VPCCIDR": {
-                    "default": "VPC CIDR"
-                }
-            }
-        }
-    },
-    "Parameters": {
-        "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 2 AZs will be used for this deployment",
-            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation Template: Single-node Tableau Server running on Windows, CentOS, or Ubuntu.",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "AWS Environment and Machine Configuration"
+          },
+          "Parameters": [
+            "KeyPairName",
+            "AvailabilityZones",
+            "PublicSubnet1CIDR",
+            "PublicSubnet2CIDR",
+            "VPCCIDR",
+            "SourceCIDR",
+            "InstanceType",
+            "AMIOS"
+          ]
         },
-        "AMIOS": {
-            "AllowedValues": [
-                "Windows",
-                "CentOS-7-HVM",
-                "Ubuntu-Server-16.04-LTS-HVM"
-            ],
-            "Default": "CentOS-7-HVM",
-            "Description": "Operating System on which Tableau Server will be deployed",
-            "Type": "String"
+        {
+          "Label": {
+            "default": "Secrets"
+          },
+          "Parameters": [
+            "Username",
+            "Password",
+            "TableauServerAdminUser",
+            "TableauServerAdminPassword"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Registration"
+          },
+          "Parameters": [
+            "AcceptEULA",
+            "TableauServerLicenseKey",
+            "RegFirstName",
+            "RegLastName",
+            "RegEmail",
+            "RegCompany",
+            "RegTitle",
+            "RegDepartment",
+            "RegIndustry",
+            "RegPhone",
+            "RegCity",
+            "RegState",
+            "RegZip",
+            "RegCountry"
+          ]
+        },
+        {
+          "Label": {
+            "default": "AWS Quick Start Configuration"
+          },
+          "Parameters": ["QSS3BucketName", "QSS3KeyPrefix"]
+        }
+      ],
+      "ParameterLabels": {
+        "AvailabilityZones": {
+          "default": "Availability Zones"
         },
         "AcceptEULA": {
-            "AllowedPattern": "Yes",
-            "AllowedValues": [
-                "Yes",
-                "No"
-            ],
-            "Description": "View the EULA at the Link: https://www.tableau.com/eula",
-            "Type": "String"
+          "default": "Accept Tableau End User License Agreement"
+        },
+        "AMIOS": {
+          "default": "AMI Operating System"
         },
         "InstanceType": {
-            "AllowedValues": [
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "m4.10xlarge",
-                "m5.4xlarge",
-                "m5.12xlarge",
-                "c5.4xlarge",
-                "c4.4xlarge",
-                "c5d.4xlarge",
-                "r5d.4xlarge"
-            ],
-            "ConstraintDescription": "must be a valid EC2 instance type.",
-            "Default": "m5.4xlarge",
-            "Description": "Amazon EC2 instance type",
-            "Type": "String"
+          "default": "Tableau Amazon EC2 instance type"
         },
         "KeyPairName": {
-            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
-            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
-            "Type": "AWS::EC2::KeyPair::KeyName"
+          "default": "Key Pair Name"
         },
         "Password": {
-            "Description": "Tableau Services Manager (TSM) administrator password",
-            "NoEcho": "true",
-            "Type": "String"
+          "default": "Tableau Services Manager (TSM) administrator password"
         },
         "PublicSubnet1CIDR": {
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
-            "Default": "10.0.128.0/20",
-            "Description": "CIDR Block for the Public DMZ Subnet located in AZ1",
-            "Type": "String"
+          "default": "Public Subnet 1 CIDR"
         },
         "PublicSubnet2CIDR": {
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
-            "Default": "10.0.144.0/20",
-            "Description": "CIDR Block for the Public DMZ Subnet located in AZ2",
-            "Type": "String"
+          "default": "Public Subnet 2 CIDR"
         },
         "QSS3BucketName": {
-            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
-            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "aws-quickstart",
-            "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Type": "String"
+          "default": "Quick Start S3 Bucket Name"
         },
         "QSS3KeyPrefix": {
-            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
-            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Default": "quickstart-tableau-server/",
-            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Type": "String"
+          "default": "Quick Start S3 Key Prefix"
         },
         "RegCity": {
-            "Description": "City",
-            "Type": "String"
+          "default": "City"
         },
         "RegCompany": {
-            "Description": "Company",
-            "Type": "String"
+          "default": "Company"
         },
         "RegCountry": {
-            "Description": "Country",
-            "Type": "String"
+          "default": "Country"
         },
         "RegDepartment": {
-            "Description": "Department",
-            "Type": "String"
+          "default": "Department"
         },
         "RegEmail": {
-            "Description": "Email",
-            "MinLength": "1",
-            "Type": "String"
+          "default": "Email Address"
         },
         "RegFirstName": {
-            "Description": "First Name",
-            "MinLength": "1",
-            "Type": "String"
+          "default": "First Name"
         },
         "RegIndustry": {
-            "Description": "Industry",
-            "Type": "String"
+          "default": "Industry"
         },
         "RegLastName": {
-            "Description": "Last Name",
-            "MinLength": "1",
-            "Type": "String"
+          "default": "Last Name"
         },
         "RegPhone": {
-            "Description": "Phone",
-            "Type": "String"
+          "default": "Phone"
         },
         "RegState": {
-            "Description": "State",
-            "Type": "String"
+          "default": "State"
         },
         "RegTitle": {
-            "Description": "Title",
-            "Type": "String"
+          "default": "Title"
         },
         "RegZip": {
-            "Description": "ZIP/Postal Code",
-            "Type": "String"
+          "default": "Zip/Postal Code"
         },
         "SourceCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "The CIDR address from which you will connect to the instance",
-            "Type": "String"
+          "default": "Source CIDR for Access"
         },
         "TableauServerAdminPassword": {
-            "Description": "The password of the initial administrator for Tableau Server",
-            "MinLength": "1",
-            "NoEcho": "true",
-            "Type": "String"
+          "default": "Tableau Server administrator password"
         },
         "TableauServerAdminUser": {
-            "Description": "The name of the initial administrator for Tableau Server",
-            "MinLength": "1",
-            "Type": "String"
+          "default": "Tableau Server administrator username"
         },
         "TableauServerLicenseKey": {
-            "Description": "License Key (leave blank for trial)",
-            "Type": "String"
+          "default": "Tableau Activation Key"
         },
         "Username": {
-            "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]*$",
-            "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
-            "MaxLength": "30",
-            "Type": "String"
+          "default": "Tableau Services Manager (TSM) administrator username"
         },
         "VPCCIDR": {
-            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
-            "Default": "10.0.0.0/16",
-            "Description": "CIDR Block for the VPC",
-            "Type": "String"
+          "default": "VPC CIDR"
         }
-    },
-    "Conditions": {
-        "InfaOnWindows": {
-            "Fn::Equals": [
-                {
-                    "Ref": "AMIOS"
-                },
-                "Windows"
-            ]
-        },
-        "InfaOnCentos": {
-            "Fn::Equals": [
-                {
-                    "Ref": "AMIOS"
-                },
-                "CentOS-7-HVM"
-            ]
-        }
-    },
-    "Resources": {
-        "VPCStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template"
-                },
-                "Parameters": {
-                    "AvailabilityZones": {
-                        "Fn::Join": [
-                            ",",
-                            {
-                                "Ref": "AvailabilityZones"
-                            }
-                        ]
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "NATInstanceType": "t2.small",
-                    "NumberOfAZs": "2",
-                    "PublicSubnet1CIDR": {
-                        "Ref": "PublicSubnet1CIDR"
-                    },
-                    "PublicSubnet2CIDR": {
-                        "Ref": "PublicSubnet2CIDR"
-                    },
-                    "VPCCIDR": {
-                        "Ref": "VPCCIDR"
-                    }
-                }
-            }
-        },
-        "WorkloadStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "DependsOn": [
-                "VPCStack"
-            ],
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/tableau-single-server.template"
-                },
-                "Parameters": {
-                    "AcceptEULA": {
-                        "Ref": "AcceptEULA"
-                    },
-                    "AMIOS": {
-                        "Ref": "AMIOS"
-                    },
-                    "InstanceType": {
-                        "Ref": "InstanceType"
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "Password": {
-                        "Ref": "Password"
-                    },
-                    "PublicSubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet1ID"
-                        ]
-                    },
-                    "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
-                    },
-                    "QSS3KeyPrefix": {
-                        "Ref": "QSS3KeyPrefix"
-                    },
-                    "RegCity": {
-                        "Ref": "RegCity"
-                    },
-                    "RegCompany": {
-                        "Ref": "RegCompany"
-                    },
-                    "RegCountry": {
-                        "Ref": "RegCountry"
-                    },
-                    "RegDepartment": {
-                        "Ref": "RegDepartment"
-                    },
-                    "RegEmail": {
-                        "Ref": "RegEmail"
-                    },
-                    "RegFirstName": {
-                        "Ref": "RegFirstName"
-                    },
-                    "RegIndustry": {
-                        "Ref": "RegIndustry"
-                    },
-                    "RegLastName": {
-                        "Ref": "RegLastName"
-                    },
-                    "RegPhone": {
-                        "Ref": "RegPhone"
-                    },
-                    "RegState": {
-                        "Ref": "RegState"
-                    },
-                    "RegTitle": {
-                        "Ref": "RegTitle"
-                    },
-                    "RegZip": {
-                        "Ref": "RegZip"
-                    },
-                    "SourceCIDR": {
-                        "Ref": "SourceCIDR"
-                    },
-                    "TableauServerAdminPassword": {
-                        "Ref": "TableauServerAdminPassword"
-                    },
-                    "TableauServerAdminUser": {
-                        "Ref": "TableauServerAdminUser"
-                    },
-                    "TableauServerLicenseKey": {
-                        "Ref": "TableauServerLicenseKey"
-                    },
-                    "Username": {
-                        "Ref": "Username"
-                    },
-                    "VPCID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.VPCID"
-                        ]
-                    }
-                }
-            }
-        }
-    },
-    "Outputs": {
-        "VPCID": {
-            "Description": "VPC ID",
-            "Value": {
-                "Fn::GetAtt": [
-                    "VPCStack",
-                    "Outputs.VPCID"
-                ]
-            }
-        },
-        "InstanceID": {
-            "Description": "EC2 InstanceID of the instance running Tableau Server",
-            "Value": {
-                "Fn::GetAtt": [
-                    "WorkloadStack",
-                    "Outputs.InstanceID"
-                ]
-            }
-        },
-        "PublicIPAddress": {
-            "Description": "Public IP Address of instance running Tableau Server",
-            "Value": {
-                "Fn::GetAtt": [
-                    "WorkloadStack",
-                    "Outputs.PublicIPAddress"
-                ]
-            }
-        },
-        "TableauServicesManagerURL": {
-            "Description": "URL for the TSM Web UI",
-            "Value": {
-                "Fn::GetAtt": [
-                    "WorkloadStack",
-                    "Outputs.TableauServicesManagerURL"
-                ]
-            }
-        },
-        "TableauServerURL": {
-            "Description": "URL for the Tableau Server",
-            "Value": {
-                "Fn::GetAtt": [
-                    "WorkloadStack",
-                    "Outputs.TableauServerURL"
-                ]
-            }
-        }
+      }
     }
+  },
+  "Parameters": {
+    "AvailabilityZones": {
+      "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 2 AZs will be used for this deployment",
+      "Type": "List<AWS::EC2::AvailabilityZone::Name>"
+    },
+    "AMIOS": {
+      "AllowedValues": [
+        "Windows",
+        "CentOS-7-HVM",
+        "Ubuntu-Server-16.04-LTS-HVM"
+      ],
+      "Default": "CentOS-7-HVM",
+      "Description": "Operating System on which Tableau Server will be deployed",
+      "Type": "String"
+    },
+    "AcceptEULA": {
+      "AllowedPattern": "Yes",
+      "AllowedValues": ["Yes", "No"],
+      "Description": "View the EULA at the Link: https://www.tableau.com/eula",
+      "Type": "String"
+    },
+    "InstanceType": {
+      "AllowedValues": [
+        "m4.2xlarge",
+        "m4.4xlarge",
+        "m4.10xlarge",
+        "m5.4xlarge",
+        "m5.12xlarge",
+        "c5.4xlarge",
+        "c4.4xlarge",
+        "c5d.4xlarge",
+        "r5d.4xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type.",
+      "Default": "m5.4xlarge",
+      "Description": "Amazon EC2 instance type",
+      "Type": "String"
+    },
+    "KeyPairName": {
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "Password": {
+      "Description": "Tableau Services Manager (TSM) administrator password",
+      "NoEcho": "true",
+      "Type": "String"
+    },
+    "PublicSubnet1CIDR": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "10.0.128.0/20",
+      "Description": "CIDR Block for the Public DMZ Subnet located in AZ1",
+      "Type": "String"
+    },
+    "PublicSubnet2CIDR": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "10.0.144.0/20",
+      "Description": "CIDR Block for the Public DMZ Subnet located in AZ2",
+      "Type": "String"
+    },
+    "QSS3BucketName": {
+      "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+      "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+      "Default": "aws-quickstart",
+      "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+      "Type": "String"
+    },
+    "QSS3KeyPrefix": {
+      "AllowedPattern": "^[0-9a-zA-Z-/]*$",
+      "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+      "Default": "quickstart-tableau-server/",
+      "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+      "Type": "String"
+    },
+    "RegCity": {
+      "Description": "City",
+      "Type": "String"
+    },
+    "RegCompany": {
+      "Description": "Company",
+      "Type": "String"
+    },
+    "RegCountry": {
+      "Description": "Country",
+      "Type": "String"
+    },
+    "RegDepartment": {
+      "Description": "Department",
+      "Type": "String"
+    },
+    "RegEmail": {
+      "Description": "Email",
+      "MinLength": "1",
+      "Type": "String"
+    },
+    "RegFirstName": {
+      "Description": "First Name",
+      "MinLength": "1",
+      "Type": "String"
+    },
+    "RegIndustry": {
+      "Description": "Industry",
+      "Type": "String"
+    },
+    "RegLastName": {
+      "Description": "Last Name",
+      "MinLength": "1",
+      "Type": "String"
+    },
+    "RegPhone": {
+      "Description": "Phone",
+      "Type": "String"
+    },
+    "RegState": {
+      "Description": "State",
+      "Type": "String"
+    },
+    "RegTitle": {
+      "Description": "Title",
+      "Type": "String"
+    },
+    "RegZip": {
+      "Description": "ZIP/Postal Code",
+      "Type": "String"
+    },
+    "SourceCIDR": {
+      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+      "Description": "The CIDR address from which you will connect to the instance",
+      "Type": "String"
+    },
+    "TableauServerAdminPassword": {
+      "Description": "The password of the initial administrator for Tableau Server",
+      "MinLength": "1",
+      "NoEcho": "true",
+      "Type": "String"
+    },
+    "TableauServerAdminUser": {
+      "Description": "The name of the initial administrator for Tableau Server",
+      "MinLength": "1",
+      "Type": "String"
+    },
+    "TableauServerLicenseKey": {
+      "Description": "License Key (leave blank for trial)",
+      "Type": "String"
+    },
+    "Username": {
+      "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]*$",
+      "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
+      "MaxLength": "30",
+      "Type": "String"
+    },
+    "VPCCIDR": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "10.0.0.0/16",
+      "Description": "CIDR Block for the VPC",
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "InfaOnWindows": {
+      "Fn::Equals": [
+        {
+          "Ref": "AMIOS"
+        },
+        "Windows"
+      ]
+    },
+    "InfaOnCentos": {
+      "Fn::Equals": [
+        {
+          "Ref": "AMIOS"
+        },
+        "CentOS-7-HVM"
+      ]
+    }
+  },
+  "Resources": {
+    "VPCStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template"
+        },
+        "Parameters": {
+          "AvailabilityZones": {
+            "Fn::Join": [
+              ",",
+              {
+                "Ref": "AvailabilityZones"
+              }
+            ]
+          },
+          "KeyPairName": {
+            "Ref": "KeyPairName"
+          },
+          "NATInstanceType": "t2.small",
+          "NumberOfAZs": "2",
+          "PublicSubnet1CIDR": {
+            "Ref": "PublicSubnet1CIDR"
+          },
+          "PublicSubnet2CIDR": {
+            "Ref": "PublicSubnet2CIDR"
+          },
+          "CreatePrivateSubnets": "false",
+          "VPCCIDR": {
+            "Ref": "VPCCIDR"
+          }
+        }
+      }
+    },
+    "WorkloadStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": ["VPCStack"],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/tableau-single-server.template"
+        },
+        "Parameters": {
+          "AcceptEULA": {
+            "Ref": "AcceptEULA"
+          },
+          "AMIOS": {
+            "Ref": "AMIOS"
+          },
+          "InstanceType": {
+            "Ref": "InstanceType"
+          },
+          "KeyPairName": {
+            "Ref": "KeyPairName"
+          },
+          "Password": {
+            "Ref": "Password"
+          },
+          "PublicSubnetID": {
+            "Fn::GetAtt": ["VPCStack", "Outputs.PublicSubnet1ID"]
+          },
+          "QSS3BucketName": {
+            "Ref": "QSS3BucketName"
+          },
+          "QSS3KeyPrefix": {
+            "Ref": "QSS3KeyPrefix"
+          },
+          "RegCity": {
+            "Ref": "RegCity"
+          },
+          "RegCompany": {
+            "Ref": "RegCompany"
+          },
+          "RegCountry": {
+            "Ref": "RegCountry"
+          },
+          "RegDepartment": {
+            "Ref": "RegDepartment"
+          },
+          "RegEmail": {
+            "Ref": "RegEmail"
+          },
+          "RegFirstName": {
+            "Ref": "RegFirstName"
+          },
+          "RegIndustry": {
+            "Ref": "RegIndustry"
+          },
+          "RegLastName": {
+            "Ref": "RegLastName"
+          },
+          "RegPhone": {
+            "Ref": "RegPhone"
+          },
+          "RegState": {
+            "Ref": "RegState"
+          },
+          "RegTitle": {
+            "Ref": "RegTitle"
+          },
+          "RegZip": {
+            "Ref": "RegZip"
+          },
+          "SourceCIDR": {
+            "Ref": "SourceCIDR"
+          },
+          "TableauServerAdminPassword": {
+            "Ref": "TableauServerAdminPassword"
+          },
+          "TableauServerAdminUser": {
+            "Ref": "TableauServerAdminUser"
+          },
+          "TableauServerLicenseKey": {
+            "Ref": "TableauServerLicenseKey"
+          },
+          "Username": {
+            "Ref": "Username"
+          },
+          "VPCID": {
+            "Fn::GetAtt": ["VPCStack", "Outputs.VPCID"]
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "VPCID": {
+      "Description": "VPC ID",
+      "Value": {
+        "Fn::GetAtt": ["VPCStack", "Outputs.VPCID"]
+      }
+    },
+    "InstanceID": {
+      "Description": "EC2 InstanceID of the instance running Tableau Server",
+      "Value": {
+        "Fn::GetAtt": ["WorkloadStack", "Outputs.InstanceID"]
+      }
+    },
+    "PublicIPAddress": {
+      "Description": "Public IP Address of instance running Tableau Server",
+      "Value": {
+        "Fn::GetAtt": ["WorkloadStack", "Outputs.PublicIPAddress"]
+      }
+    },
+    "TableauServicesManagerURL": {
+      "Description": "URL for the TSM Web UI",
+      "Value": {
+        "Fn::GetAtt": ["WorkloadStack", "Outputs.TableauServicesManagerURL"]
+      }
+    },
+    "TableauServerURL": {
+      "Description": "URL for the Tableau Server",
+      "Value": {
+        "Fn::GetAtt": ["WorkloadStack", "Outputs.TableauServerURL"]
+      }
+    }
+  }
 }
