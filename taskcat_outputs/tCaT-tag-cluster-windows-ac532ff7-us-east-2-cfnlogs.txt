@@ -1,0 +1,225 @@
+-----------------------------------------------------------------------------
+Region: us-east-2
+StackName: tCaT-tag-cluster-windows-ac532ff7
+*****************************************************************************
+ResourceStatusReason:  
+The following resource(s) failed to create: [WorkloadStack].
+*****************************************************************************
+*****************************************************************************
+Events:  
+TimeStamp                         ResourceStatus      ResourceType                LogicalResourceId                  ResourceStatusReason
+--------------------------------  ------------------  --------------------------  ---------------------------------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2019-01-31 21:10:31.404000+00:00  CREATE_FAILED       AWS::CloudFormation::Stack  tCaT-tag-cluster-windows-ac532ff7  The following resource(s) failed to create: [WorkloadStack].
+2019-01-31 21:10:30.353000+00:00  CREATE_FAILED       AWS::CloudFormation::Stack  WorkloadStack                      Embedded stack arn:aws:cloudformation:us-east-2:694704352678:stack/tCaT-tag-cluster-windows-ac532ff7-WorkloadStack-1T71IBDP6DRBH/fc4a54d0-2597-11e9-97f0-0a71b7d84638 was not successfully created: The following resource(s) failed to create: [TableauPrimaryWaitCondition].
+2019-01-31 20:38:13.244000+00:00  CREATE_COMPLETE     AWS::CloudFormation::Stack  BastionHost
+2019-01-31 20:37:12.023000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  BastionHost                        Resource creation Initiated
+2019-01-31 20:37:11.804000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  WorkloadStack                      Resource creation Initiated
+2019-01-31 20:37:11.357000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  BastionHost
+2019-01-31 20:37:10.954000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  WorkloadStack
+2019-01-31 20:37:07.176000+00:00  CREATE_COMPLETE     AWS::CloudFormation::Stack  VPCStack
+2019-01-31 20:33:03.133000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  VPCStack                           Resource creation Initiated
+2019-01-31 20:33:00.660000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  VPCStack
+2019-01-31 20:32:55+00:00         CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  tCaT-tag-cluster-windows-ac532ff7  User Initiated
+*****************************************************************************
+-----------------------------------------------------------------------------
+Tested on: Thursday, 31. January 2019 03:10PM
+-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+Region: us-east-2
+StackName: tCaT-tag-cluster-windows-ac532ff7-BastionHost-1WG1C7Z97D003
+*****************************************************************************
+ResourceStatusReason:  
+Stack launch was successful
+*****************************************************************************
+*****************************************************************************
+Events:  
+TimeStamp                         ResourceStatus      ResourceType                LogicalResourceId                                            ResourceStatusReason
+--------------------------------  ------------------  --------------------------  -----------------------------------------------------------  ---------------------------
+2019-01-31 20:38:00.419000+00:00  CREATE_COMPLETE     AWS::CloudFormation::Stack  tCaT-tag-cluster-windows-ac532ff7-BastionHost-1WG1C7Z97D003
+2019-01-31 20:37:58.135000+00:00  CREATE_COMPLETE     AWS::EC2::Instance          BastionHost
+2019-01-31 20:37:25.906000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance          BastionHost                                                  Resource creation Initiated
+2019-01-31 20:37:24.654000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance          BastionHost
+2019-01-31 20:37:21.811000+00:00  CREATE_COMPLETE     AWS::EC2::SecurityGroup     BastionSecurityGroup
+2019-01-31 20:37:20.868000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroup     BastionSecurityGroup                                         Resource creation Initiated
+2019-01-31 20:37:16.303000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroup     BastionSecurityGroup
+2019-01-31 20:37:11.898000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  tCaT-tag-cluster-windows-ac532ff7-BastionHost-1WG1C7Z97D003  User Initiated
+*****************************************************************************
+-----------------------------------------------------------------------------
+Tested on: Thursday, 31. January 2019 03:10PM
+-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+Region: us-east-2
+StackName: tCaT-tag-cluster-windows-ac532ff7-VPCStack-1T720FAAAM385
+*****************************************************************************
+ResourceStatusReason:  
+Stack launch was successful
+*****************************************************************************
+*****************************************************************************
+Events:  
+TimeStamp                         ResourceStatus      ResourceType                           LogicalResourceId                                         ResourceStatusReason
+--------------------------------  ------------------  -------------------------------------  --------------------------------------------------------  ---------------------------
+2019-01-31 20:36:37.765000+00:00  CREATE_COMPLETE     AWS::CloudFormation::Stack             tCaT-tag-cluster-windows-ac532ff7-VPCStack-1T720FAAAM385
+2019-01-31 20:36:32.449000+00:00  CREATE_COMPLETE     AWS::EC2::Route                        PrivateSubnet2ARoute
+2019-01-31 20:36:17.024000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PrivateSubnet2ARoute                                      Resource creation Initiated
+2019-01-31 20:36:16.818000+00:00  CREATE_COMPLETE     AWS::EC2::Route                        PrivateSubnet3ARoute
+2019-01-31 20:36:16.368000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PrivateSubnet2ARoute
+2019-01-31 20:36:12.978000+00:00  CREATE_COMPLETE     AWS::EC2::NatGateway                   NATGateway2
+2019-01-31 20:36:01.684000+00:00  CREATE_COMPLETE     AWS::EC2::Route                        PrivateSubnet1ARoute
+2019-01-31 20:36:01.328000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PrivateSubnet3ARoute                                      Resource creation Initiated
+2019-01-31 20:36:00.704000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PrivateSubnet3ARoute
+2019-01-31 20:35:57.747000+00:00  CREATE_COMPLETE     AWS::EC2::NatGateway                   NATGateway3
+2019-01-31 20:35:46.301000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PrivateSubnet1ARoute                                      Resource creation Initiated
+2019-01-31 20:35:45.632000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PrivateSubnet1ARoute
+2019-01-31 20:35:42.013000+00:00  CREATE_COMPLETE     AWS::EC2::NatGateway                   NATGateway1
+2019-01-31 20:34:10.171000+00:00  CREATE_IN_PROGRESS  AWS::EC2::NatGateway                   NATGateway1                                               Resource creation Initiated
+2019-01-31 20:34:09.952000+00:00  CREATE_IN_PROGRESS  AWS::EC2::NatGateway                   NATGateway3                                               Resource creation Initiated
+2019-01-31 20:34:09.916000+00:00  CREATE_IN_PROGRESS  AWS::EC2::NatGateway                   NATGateway2                                               Resource creation Initiated
+2019-01-31 20:34:09.823000+00:00  CREATE_IN_PROGRESS  AWS::EC2::NatGateway                   NATGateway1
+2019-01-31 20:34:09.545000+00:00  CREATE_IN_PROGRESS  AWS::EC2::NatGateway                   NATGateway3
+2019-01-31 20:34:09.375000+00:00  CREATE_IN_PROGRESS  AWS::EC2::NatGateway                   NATGateway2
+2019-01-31 20:34:07.803000+00:00  CREATE_COMPLETE     AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet2ARouteTableAssociation
+2019-01-31 20:34:07.213000+00:00  CREATE_COMPLETE     AWS::EC2::SubnetRouteTableAssociation  PublicSubnet1RouteTableAssociation
+2019-01-31 20:34:06.913000+00:00  CREATE_COMPLETE     AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet3ARouteTableAssociation
+2019-01-31 20:34:06.903000+00:00  CREATE_COMPLETE     AWS::EC2::SubnetRouteTableAssociation  PublicSubnet3RouteTableAssociation
+2019-01-31 20:34:06.895000+00:00  CREATE_COMPLETE     AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet1ARouteTableAssociation
+2019-01-31 20:34:06.853000+00:00  CREATE_COMPLETE     AWS::EC2::SubnetRouteTableAssociation  PublicSubnet2RouteTableAssociation
+2019-01-31 20:34:05.394000+00:00  CREATE_COMPLETE     AWS::EC2::EIP                          NAT1EIP
+2019-01-31 20:34:04.982000+00:00  CREATE_COMPLETE     AWS::EC2::EIP                          NAT2EIP
+2019-01-31 20:34:04.962000+00:00  CREATE_COMPLETE     AWS::EC2::EIP                          NAT3EIP
+2019-01-31 20:34:04.841000+00:00  CREATE_COMPLETE     AWS::EC2::Route                        PublicSubnetRoute
+2019-01-31 20:33:52.351000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet2ARouteTableAssociation                      Resource creation Initiated
+2019-01-31 20:33:51.931000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PublicSubnet1RouteTableAssociation                        Resource creation Initiated
+2019-01-31 20:33:51.563000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet1ARouteTableAssociation                      Resource creation Initiated
+2019-01-31 20:33:51.559000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet3ARouteTableAssociation                      Resource creation Initiated
+2019-01-31 20:33:51.553000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet2ARouteTableAssociation
+2019-01-31 20:33:51.500000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PublicSubnet2RouteTableAssociation                        Resource creation Initiated
+2019-01-31 20:33:51.448000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PublicSubnet3RouteTableAssociation                        Resource creation Initiated
+2019-01-31 20:33:51.223000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PublicSubnet1RouteTableAssociation
+2019-01-31 20:33:50.888000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet1ARouteTableAssociation
+2019-01-31 20:33:50.863000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PrivateSubnet3ARouteTableAssociation
+2019-01-31 20:33:50.818000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PublicSubnet2RouteTableAssociation
+2019-01-31 20:33:50.677000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SubnetRouteTableAssociation  PublicSubnet3RouteTableAssociation
+2019-01-31 20:33:49.939000+00:00  CREATE_IN_PROGRESS  AWS::EC2::EIP                          NAT1EIP                                                   Resource creation Initiated
+2019-01-31 20:33:49.623000+00:00  CREATE_IN_PROGRESS  AWS::EC2::EIP                          NAT2EIP                                                   Resource creation Initiated
+2019-01-31 20:33:49.522000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PublicSubnetRoute                                         Resource creation Initiated
+2019-01-31 20:33:49.503000+00:00  CREATE_IN_PROGRESS  AWS::EC2::EIP                          NAT3EIP                                                   Resource creation Initiated
+2019-01-31 20:33:49.370000+00:00  CREATE_IN_PROGRESS  AWS::EC2::EIP                          NAT1EIP
+2019-01-31 20:33:49.231000+00:00  CREATE_IN_PROGRESS  AWS::EC2::EIP                          NAT2EIP
+2019-01-31 20:33:49.055000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Route                        PublicSubnetRoute
+2019-01-31 20:33:49.016000+00:00  CREATE_IN_PROGRESS  AWS::EC2::EIP                          NAT3EIP
+2019-01-31 20:33:47.475000+00:00  CREATE_COMPLETE     AWS::EC2::Subnet                       PublicSubnet1
+2019-01-31 20:33:47.015000+00:00  CREATE_COMPLETE     AWS::EC2::Subnet                       PrivateSubnet2A
+2019-01-31 20:33:46.805000+00:00  CREATE_COMPLETE     AWS::EC2::Subnet                       PrivateSubnet1A
+2019-01-31 20:33:46.609000+00:00  CREATE_COMPLETE     AWS::EC2::Subnet                       PublicSubnet3
+2019-01-31 20:33:46.570000+00:00  CREATE_COMPLETE     AWS::EC2::Subnet                       PrivateSubnet3A
+2019-01-31 20:33:46.473000+00:00  CREATE_COMPLETE     AWS::EC2::Subnet                       PublicSubnet2
+2019-01-31 20:33:45.359000+00:00  CREATE_COMPLETE     AWS::EC2::VPCGatewayAttachment         VPCGatewayAttachment
+2019-01-31 20:33:35.783000+00:00  CREATE_COMPLETE     AWS::EC2::VPCEndpoint                  S3VPCEndpoint
+2019-01-31 20:33:35.456000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPCEndpoint                  S3VPCEndpoint                                             Resource creation Initiated
+2019-01-31 20:33:34.967000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPCEndpoint                  S3VPCEndpoint
+2019-01-31 20:33:31.549000+00:00  CREATE_COMPLETE     AWS::EC2::RouteTable                   PublicSubnetRouteTable
+2019-01-31 20:33:31.449000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PublicSubnet1                                             Resource creation Initiated
+2019-01-31 20:33:31.299000+00:00  CREATE_COMPLETE     AWS::EC2::RouteTable                   PrivateSubnet3ARouteTable
+2019-01-31 20:33:31.071000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PrivateSubnet2A                                           Resource creation Initiated
+2019-01-31 20:33:30.896000+00:00  CREATE_COMPLETE     AWS::EC2::RouteTable                   PrivateSubnet1ARouteTable
+2019-01-31 20:33:30.826000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PublicSubnet1
+2019-01-31 20:33:30.734000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PublicSubnetRouteTable                                    Resource creation Initiated
+2019-01-31 20:33:30.733000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PrivateSubnet1A                                           Resource creation Initiated
+2019-01-31 20:33:30.652000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PublicSubnet3                                             Resource creation Initiated
+2019-01-31 20:33:30.636000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PrivateSubnet2A
+2019-01-31 20:33:30.605000+00:00  CREATE_COMPLETE     AWS::EC2::VPCDHCPOptionsAssociation    VPCDHCPOptionsAssociation
+2019-01-31 20:33:30.520000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PrivateSubnet3ARouteTable                                 Resource creation Initiated
+2019-01-31 20:33:30.489000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PrivateSubnet3A                                           Resource creation Initiated
+2019-01-31 20:33:30.485000+00:00  CREATE_COMPLETE     AWS::EC2::RouteTable                   PrivateSubnet2ARouteTable
+2019-01-31 20:33:30.482000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPCDHCPOptionsAssociation    VPCDHCPOptionsAssociation                                 Resource creation Initiated
+2019-01-31 20:33:30.406000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PublicSubnet2                                             Resource creation Initiated
+2019-01-31 20:33:30.351000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PublicSubnetRouteTable
+2019-01-31 20:33:30.242000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PrivateSubnet1A
+2019-01-31 20:33:30.205000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PublicSubnet3
+2019-01-31 20:33:30.171000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PrivateSubnet3ARouteTable
+2019-01-31 20:33:30.135000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPCDHCPOptionsAssociation    VPCDHCPOptionsAssociation
+2019-01-31 20:33:30.054000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PrivateSubnet1ARouteTable                                 Resource creation Initiated
+2019-01-31 20:33:30.011000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPCGatewayAttachment         VPCGatewayAttachment                                      Resource creation Initiated
+2019-01-31 20:33:29.984000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PrivateSubnet3A
+2019-01-31 20:33:29.874000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Subnet                       PublicSubnet2
+2019-01-31 20:33:29.740000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PrivateSubnet2ARouteTable                                 Resource creation Initiated
+2019-01-31 20:33:29.683000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPCGatewayAttachment         VPCGatewayAttachment
+2019-01-31 20:33:29.662000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PrivateSubnet1ARouteTable
+2019-01-31 20:33:29.330000+00:00  CREATE_IN_PROGRESS  AWS::EC2::RouteTable                   PrivateSubnet2ARouteTable
+2019-01-31 20:33:25.875000+00:00  CREATE_COMPLETE     AWS::EC2::InternetGateway              InternetGateway
+2019-01-31 20:33:25.765000+00:00  CREATE_COMPLETE     AWS::EC2::VPC                          VPC
+2019-01-31 20:33:25.190000+00:00  CREATE_COMPLETE     AWS::EC2::DHCPOptions                  DHCPOptions
+2019-01-31 20:33:09.970000+00:00  CREATE_IN_PROGRESS  AWS::EC2::InternetGateway              InternetGateway                                           Resource creation Initiated
+2019-01-31 20:33:09.571000+00:00  CREATE_IN_PROGRESS  AWS::EC2::InternetGateway              InternetGateway
+2019-01-31 20:33:09.480000+00:00  CREATE_IN_PROGRESS  AWS::EC2::DHCPOptions                  DHCPOptions                                               Resource creation Initiated
+2019-01-31 20:33:09.356000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPC                          VPC                                                       Resource creation Initiated
+2019-01-31 20:33:09.134000+00:00  CREATE_IN_PROGRESS  AWS::EC2::DHCPOptions                  DHCPOptions
+2019-01-31 20:33:08.933000+00:00  CREATE_IN_PROGRESS  AWS::EC2::VPC                          VPC
+2019-01-31 20:33:02.918000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack             tCaT-tag-cluster-windows-ac532ff7-VPCStack-1T720FAAAM385  User Initiated
+*****************************************************************************
+-----------------------------------------------------------------------------
+Tested on: Thursday, 31. January 2019 03:10PM
+-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+Region: us-east-2
+StackName: tCaT-tag-cluster-windows-ac532ff7-WorkloadStack-1T71IBDP6DRBH
+*****************************************************************************
+ResourceStatusReason:  
+The following resource(s) failed to create: [TableauPrimaryWaitCondition].
+*****************************************************************************
+*****************************************************************************
+Events:  
+TimeStamp                         ResourceStatus      ResourceType                              LogicalResourceId                                              ResourceStatusReason
+--------------------------------  ------------------  ----------------------------------------  -------------------------------------------------------------  ------------------------------------------------------------------------------------------------
+2019-01-31 21:09:35.217000+00:00  CREATE_FAILED       AWS::CloudFormation::Stack                tCaT-tag-cluster-windows-ac532ff7-WorkloadStack-1T71IBDP6DRBH  The following resource(s) failed to create: [TableauPrimaryWaitCondition].
+2019-01-31 21:09:34.130000+00:00  CREATE_FAILED       AWS::CloudFormation::WaitCondition        TableauPrimaryWaitCondition                                    WaitCondition received failed message: 'Configuration failed.' for uniqueId: i-03e64513099a9569b
+2019-01-31 20:42:50.257000+00:00  CREATE_COMPLETE     AWS::EC2::Instance                        PrimaryHost
+2019-01-31 20:42:18.513000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance                        PrimaryHost                                                    Resource creation Initiated
+2019-01-31 20:42:17.251000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance                        PrimaryHost
+2019-01-31 20:42:12.351000+00:00  CREATE_COMPLETE     AWS::CloudFormation::WaitCondition        TableauWorkerWaitCondition
+2019-01-31 20:39:53.098000+00:00  CREATE_COMPLETE     AWS::IAM::InstanceProfile                 TableauWindowsServerInstanceProfile
+2019-01-31 20:37:52.645000+00:00  CREATE_IN_PROGRESS  AWS::IAM::InstanceProfile                 TableauWindowsServerInstanceProfile                            Resource creation Initiated
+2019-01-31 20:37:52.370000+00:00  CREATE_IN_PROGRESS  AWS::IAM::InstanceProfile                 TableauWindowsServerInstanceProfile
+2019-01-31 20:37:48.190000+00:00  CREATE_COMPLETE     AWS::IAM::Role                            LoadBalancerRegisterRole
+2019-01-31 20:37:45.339000+00:00  CREATE_COMPLETE     AWS::EC2::Instance                        WorkerHost2
+2019-01-31 20:37:44.146000+00:00  CREATE_COMPLETE     AWS::EC2::Instance                        WorkerHost1
+2019-01-31 20:37:32.346000+00:00  CREATE_IN_PROGRESS  AWS::IAM::Role                            LoadBalancerRegisterRole                                       Resource creation Initiated
+2019-01-31 20:37:31.975000+00:00  CREATE_IN_PROGRESS  AWS::IAM::Role                            LoadBalancerRegisterRole
+2019-01-31 20:37:28.482000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance                        WorkerHost1                                                    Resource creation Initiated
+2019-01-31 20:37:28.424000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance                        WorkerHost2                                                    Resource creation Initiated
+2019-01-31 20:37:28.304000+00:00  CREATE_COMPLETE     AWS::ElasticLoadBalancing::LoadBalancer   ServerLoadBalancer
+2019-01-31 20:37:27.888000+00:00  CREATE_IN_PROGRESS  AWS::ElasticLoadBalancing::LoadBalancer   ServerLoadBalancer                                             Resource creation Initiated
+2019-01-31 20:37:27.815000+00:00  CREATE_COMPLETE     AWS::EC2::SecurityGroupIngress            WorkloadSecurityGroupLoadBalancerIngress
+2019-01-31 20:37:27.296000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance                        WorkerHost1
+2019-01-31 20:37:27.208000+00:00  CREATE_IN_PROGRESS  AWS::EC2::Instance                        WorkerHost2
+2019-01-31 20:37:27.185000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroupIngress            WorkloadSecurityGroupLoadBalancerIngress                       Resource creation Initiated
+2019-01-31 20:37:27.091000+00:00  CREATE_COMPLETE     AWS::EC2::SecurityGroupIngress            WorkloadSecurityGroupMutualIngress
+2019-01-31 20:37:27.060000+00:00  CREATE_IN_PROGRESS  AWS::ElasticLoadBalancing::LoadBalancer   ServerLoadBalancer
+2019-01-31 20:37:27.035000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroupIngress            WorkloadSecurityGroupLoadBalancerIngress
+2019-01-31 20:37:26.317000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroupIngress            WorkloadSecurityGroupMutualIngress                             Resource creation Initiated
+2019-01-31 20:37:26.160000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroupIngress            WorkloadSecurityGroupMutualIngress
+2019-01-31 20:37:22.960000+00:00  CREATE_COMPLETE     AWS::EC2::SecurityGroup                   LoadBalancerSecurityGroup
+2019-01-31 20:37:22.361000+00:00  CREATE_COMPLETE     AWS::EC2::SecurityGroup                   WorkloadSecurityGroup
+2019-01-31 20:37:22.120000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroup                   LoadBalancerSecurityGroup                                      Resource creation Initiated
+2019-01-31 20:37:21.724000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroup                   WorkloadSecurityGroup                                          Resource creation Initiated
+2019-01-31 20:37:20.070000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitCondition        TableauPrimaryWaitCondition                                    Resource creation Initiated
+2019-01-31 20:37:19.881000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitCondition        TableauPrimaryWaitCondition
+2019-01-31 20:37:19.750000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitCondition        TableauWorkerWaitCondition                                     Resource creation Initiated
+2019-01-31 20:37:19.568000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitCondition        TableauWorkerWaitCondition
+2019-01-31 20:37:17.483000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroup                   LoadBalancerSecurityGroup
+2019-01-31 20:37:17.108000+00:00  CREATE_IN_PROGRESS  AWS::EC2::SecurityGroup                   WorkloadSecurityGroup
+2019-01-31 20:37:16.419000+00:00  CREATE_COMPLETE     AWS::CloudFormation::WaitConditionHandle  TableauPrimaryWaitHandle
+2019-01-31 20:37:16.295000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitConditionHandle  TableauPrimaryWaitHandle                                       Resource creation Initiated
+2019-01-31 20:37:16.253000+00:00  CREATE_COMPLETE     AWS::CloudFormation::WaitConditionHandle  TableauWorkerWaitHandle
+2019-01-31 20:37:16.113000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitConditionHandle  TableauWorkerWaitHandle                                        Resource creation Initiated
+2019-01-31 20:37:16.071000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitConditionHandle  TableauPrimaryWaitHandle
+2019-01-31 20:37:15.868000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::WaitConditionHandle  TableauWorkerWaitHandle
+2019-01-31 20:37:11.606000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack                tCaT-tag-cluster-windows-ac532ff7-WorkloadStack-1T71IBDP6DRBH  User Initiated
+*****************************************************************************
+-----------------------------------------------------------------------------
+Tested on: Thursday, 31. January 2019 03:10PM
+-----------------------------------------------------------------------------
+

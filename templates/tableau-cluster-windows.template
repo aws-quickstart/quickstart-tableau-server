@@ -308,49 +308,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.12.12"
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2018.12.13"
             },
             "ap-northeast-1": {
-                "WS2012R2": "ami-0e8e51f50c1d7d1b6"
+                "WS2012R2": "ami-01a36b3a16228aabc"
             },
             "ap-northeast-2": {
-                "WS2012R2": "ami-00dc8ef56b733f3dc"
+                "WS2012R2": "ami-028139f205d2daa74"
             },
             "ap-south-1": {
-                "WS2012R2": "ami-03291442a55ad02c1"
+                "WS2012R2": "ami-0fa27628302568cf8"
             },
             "ap-southeast-1": {
-                "WS2012R2": "ami-059b411d0e166914e"
+                "WS2012R2": "ami-0634a2a4e5f335566"
             },
             "ap-southeast-2": {
-                "WS2012R2": "ami-0d5ee30b3c177dc50"
+                "WS2012R2": "ami-0af54fcc300d51d81"
             },
             "ca-central-1": {
-                "WS2012R2": "ami-067f74c12478608c0"
+                "WS2012R2": "ami-0a828787cebefec3a"
             },
             "eu-central-1": {
-                "WS2012R2": "ami-07338b9e99ae289ac"
+                "WS2012R2": "ami-0a6b3fad1e65fbba5"
             },
             "eu-west-1": {
-                "WS2012R2": "ami-08d5e9721f152cfc1"
+                "WS2012R2": "ami-05697bc3b1b84a9a6"
             },
             "eu-west-2": {
-                "WS2012R2": "ami-0254182a5a5fba789"
+                "WS2012R2": "ami-041f490cbeaf309e1"
             },
             "sa-east-1": {
-                "WS2012R2": "ami-098c1f48dc672ab2b"
+                "WS2012R2": "ami-0203e28b0bd45659f"
             },
             "us-east-1": {
-                "WS2012R2": "ami-085ea1972627f58fd"
+                "WS2012R2": "ami-02cb4450ba80eb057"
             },
             "us-east-2": {
-                "WS2012R2": "ami-0a562b81f2dd5ffe6"
+                "WS2012R2": "ami-0335db37835305b27"
             },
             "us-west-1": {
-                "WS2012R2": "ami-0aee96900bc0502fd"
+                "WS2012R2": "ami-0b6ac87fe08b48203"
             },
             "us-west-2": {
-                "WS2012R2": "ami-03833dcc7d9010c5a"
+                "WS2012R2": "ami-01d5bff29ab3fb41e"
             }
         },
         "DefaultConfiguration": {
@@ -378,15 +378,15 @@
                         "FromPort": {
                             "Fn::If": [
                                 "HasSSLCertificate",
-                                "443",
-                                "80"
+                                443,
+                                80
                             ]
                         },
                         "ToPort": {
                             "Fn::If": [
                                 "HasSSLCertificate",
-                                "443",
-                                "80"
+                                443,
+                                80
                             ]
                         },
                         "CidrIp": {
@@ -1295,7 +1295,7 @@
                 "Handle": {
                     "Ref": "TableauWorkerWaitHandle"
                 },
-                "Count": "2",
+                "Count": 2,
                 "Timeout": "1800"
             }
         },
@@ -1308,7 +1308,7 @@
                 "Handle": {
                     "Ref": "TableauPrimaryWaitHandle"
                 },
-                "Count": "1",
+                "Count": 1,
                 "Timeout": "5400"
             }
         }
