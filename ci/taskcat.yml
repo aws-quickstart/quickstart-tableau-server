@@ -48,7 +48,7 @@ tests:
   cluster-centos:
     parameter_input: cluster-centos.json
     regions:
-      - ap-southeast-2
+      - us-east-1
     template_file: tableau-cluster-linux-master.template
   cluster-ubuntu:
     parameter_input: cluster-ubuntu.json
@@ -58,7 +58,6 @@ tests:
   cluster-windows:
     parameter_input: cluster-windows.json
     regions:
-      - us-east-1
       - us-east-2
       - us-west-2
     template_file: tableau-cluster-windows-master.template
