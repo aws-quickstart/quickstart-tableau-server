@@ -81,7 +81,7 @@
   },
   {
     "ParameterKey": "TableauServerLicenseKey",
-    "ParameterValue": "***REMOVED***"
+    "ParameterValue": "overridden"
   },
   {
     "ParameterKey": "QSS3BucketName",
