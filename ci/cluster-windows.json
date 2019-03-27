@@ -81,7 +81,7 @@
   },
   {
     "ParameterKey": "TableauServerLicenseKey",
-    "ParameterValue": "overridden"
+    "ParameterValue": "$[alfred_getlicensecontent]/tableau/server/license.key"
   },
   {
     "ParameterKey": "QSS3BucketName",
