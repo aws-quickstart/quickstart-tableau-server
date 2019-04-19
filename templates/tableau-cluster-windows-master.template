@@ -244,49 +244,49 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.03.13"
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.04.10"
             },
             "ap-northeast-1": {
-                "WS2012R2": "ami-045a5d71b00d066b0"
+                "WS2012R2": "ami-0bc9076d1971b892f"
             },
             "ap-northeast-2": {
-                "WS2012R2": "ami-00f93ebe6e0f44b5e"
+                "WS2012R2": "ami-01e294502925e6862"
             },
             "ap-south-1": {
-                "WS2012R2": "ami-0b64cdef39da126a0"
+                "WS2012R2": "ami-0afbf2194efe9f3ee"
             },
             "ap-southeast-1": {
-                "WS2012R2": "ami-055d5146cfa1eea18"
+                "WS2012R2": "ami-0c512a41948d56a41"
             },
             "ap-southeast-2": {
-                "WS2012R2": "ami-0c3e23a890cc1b84b"
+                "WS2012R2": "ami-07dd8d162e848226a"
             },
             "ca-central-1": {
-                "WS2012R2": "ami-0389dfe354ca7f037"
+                "WS2012R2": "ami-041d6b4493f5ef9a0"
             },
             "eu-central-1": {
-                "WS2012R2": "ami-01f9f86ba9db42573"
+                "WS2012R2": "ami-00295326eb2df74ae"
             },
             "eu-west-1": {
-                "WS2012R2": "ami-03d95a1f128ac4d9b"
+                "WS2012R2": "ami-03f8a7003ac359dc3"
             },
             "eu-west-2": {
-                "WS2012R2": "ami-03a5f1e86a0e52868"
+                "WS2012R2": "ami-00a6ba830abfa65d7"
             },
             "sa-east-1": {
-                "WS2012R2": "ami-022bfe5384cf6fa50"
+                "WS2012R2": "ami-0411d28c82e5ea0c0"
             },
             "us-east-1": {
-                "WS2012R2": "ami-0ad4ef84bc9427b85"
+                "WS2012R2": "ami-0e775ae02dfe67fea"
             },
             "us-east-2": {
-                "WS2012R2": "ami-0a95e6864096336b1"
+                "WS2012R2": "ami-0e4566dd8919a823c"
             },
             "us-west-1": {
-                "WS2012R2": "ami-03600d8a40583354a"
+                "WS2012R2": "ami-09ca663e09891225b"
             },
             "us-west-2": {
-                "WS2012R2": "ami-02022815fa941f1ea"
+                "WS2012R2": "ami-0a8d209357472bee1"
             }
         },
         "DefaultConfiguration": {
