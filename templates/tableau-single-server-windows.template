@@ -248,49 +248,55 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.04.10"
+                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.02.13-75953b31-4312-4d31-9e37-94173c3432e3-ami-066663db63b3aa675.4"
             },
             "ap-northeast-1": {
-                "WS2012R2": "ami-0bc9076d1971b892f"
+                "WS2012R2": "ami-0d463d6a841077c65"
             },
             "ap-northeast-2": {
-                "WS2012R2": "ami-01e294502925e6862"
+                "WS2012R2": "ami-0715f5fc210cc89e5"
             },
             "ap-south-1": {
-                "WS2012R2": "ami-0afbf2194efe9f3ee"
+                "WS2012R2": "ami-0048a36753e7edca6"
             },
             "ap-southeast-1": {
-                "WS2012R2": "ami-0c512a41948d56a41"
+                "WS2012R2": "ami-01cd7bc38a84e9405"
             },
             "ap-southeast-2": {
-                "WS2012R2": "ami-07dd8d162e848226a"
+                "WS2012R2": "ami-031403942c3aa6620"
             },
             "ca-central-1": {
-                "WS2012R2": "ami-041d6b4493f5ef9a0"
+                "WS2012R2": "ami-022df9985b9fcdf84"
             },
             "eu-central-1": {
-                "WS2012R2": "ami-00295326eb2df74ae"
+                "WS2012R2": "ami-02c7f1c30ae4cbc6e"
+            },
+            "eu-north-1": {
+                "WS2012R2": "ami-b70e87c9"
             },
             "eu-west-1": {
-                "WS2012R2": "ami-03f8a7003ac359dc3"
+                "WS2012R2": "ami-01c22dac14a1450bb"
             },
             "eu-west-2": {
-                "WS2012R2": "ami-00a6ba830abfa65d7"
+                "WS2012R2": "ami-0a7c104174a5c3f14"
+            },
+            "eu-west-3": {
+                "WS2012R2": "ami-0cde4d9e3d94f4ecf"
             },
             "sa-east-1": {
-                "WS2012R2": "ami-0411d28c82e5ea0c0"
+                "WS2012R2": "ami-0c78e968ee05f9595"
             },
             "us-east-1": {
-                "WS2012R2": "ami-0e775ae02dfe67fea"
+                "WS2012R2": "ami-00d5da24dbc075461"
             },
             "us-east-2": {
-                "WS2012R2": "ami-0e4566dd8919a823c"
+                "WS2012R2": "ami-06f27228c2d2b96f0"
             },
             "us-west-1": {
-                "WS2012R2": "ami-09ca663e09891225b"
+                "WS2012R2": "ami-0858e3ce4867ff6fb"
             },
             "us-west-2": {
-                "WS2012R2": "ami-0a8d209357472bee1"
+                "WS2012R2": "ami-0a825964863671c00"
             }
         },
         "DefaultConfiguration": {

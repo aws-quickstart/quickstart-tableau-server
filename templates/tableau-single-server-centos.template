@@ -269,11 +269,17 @@
             "eu-central-1": {
                 "CENTOS7HVM": "ami-08ee2037f6ff4c4f8"
             },
+            "eu-north-1": {
+                "CENTOS7HVM": "ami-ee018890"
+            },
             "eu-west-1": {
                 "CENTOS7HVM": "ami-052a73ca1503f9659"
             },
             "eu-west-2": {
                 "CENTOS7HVM": "ami-01e754e81f5d9cf72"
+            },
+            "eu-west-3": {
+                "CENTOS7HVM": "ami-0babed2e514cff4f8"
             },
             "sa-east-1": {
                 "CENTOS7HVM": "ami-0e94806bd2a350945"
