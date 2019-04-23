@@ -17,7 +17,7 @@
     },
     {
         "ParameterKey": "InstanceType",
-        "ParameterValue": "m4.2xlarge"
+        "ParameterValue": "m5.4xlarge"
     },
     {
         "ParameterKey": "KeyPairName",
