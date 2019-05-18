@@ -232,6 +232,10 @@
             "Description": "License Key (leave blank for trial)",
             "Type": "String"
         },
+        "TableauServerInstanceProfile": {
+            "Description": "Tableau server IAM Instance Profile",
+            "Type": "String"
+        },
         "Username": {
             "AllowedPattern": "^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$",
             "Description": "Tableau Services Manager (TSM) administrator username (cannot be 'tableau' or 'tsmagent' or 'admin' or 'root')",
@@ -450,6 +454,9 @@
                 },
                 "InstanceType": {
                     "Ref": "InstanceType"
+                },
+                "IamInstanceProfile": {
+                    "Ref": "TableauServerInstanceProfile"
                 },
                 "ImageId": {
                     "Fn::FindInMap": [

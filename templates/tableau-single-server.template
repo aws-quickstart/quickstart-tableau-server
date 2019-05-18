@@ -308,8 +308,39 @@
         }
     },
     "Resources": {
+        "TableauIAMRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "Path": "/",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com"
+                        },
+                        "Action": "sts:AssumeRole"
+                    }
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+                ]
+            }
+        },
+        "TableauInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "TableauIAMRole"
+                    }
+                ]
+            }
+        },
         "WorkloadStack": {
             "Type": "AWS::CloudFormation::Stack",
+            "DependsOn": "TableauInstanceProfile",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -394,6 +425,9 @@
                     },
                     "TableauServerLicenseKey": {
                         "Ref": "TableauServerLicenseKey"
+                    },
+                    "TableauInstanceProfile": {
+                        "Ref": "TableauInstanceProfile"
                     },
                     "Username": {
                         "Ref": "Username"
