@@ -327,7 +327,7 @@
                 ]
             }
         },
-        "TableauInstanceProfile": {
+        "TableauServerInstanceProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
@@ -340,7 +340,7 @@
         },
         "WorkloadStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DependsOn": "TableauInstanceProfile",
+            "DependsOn": "TableauServerInstanceProfile",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -426,8 +426,8 @@
                     "TableauServerLicenseKey": {
                         "Ref": "TableauServerLicenseKey"
                     },
-                    "TableauInstanceProfile": {
-                        "Ref": "TableauInstanceProfile"
+                    "TableauServerInstanceProfile": {
+                        "Ref": "TableauServerInstanceProfile"
                     },
                     "Username": {
                         "Ref": "Username"
