@@ -577,6 +577,12 @@
                     "TableauServerLicenseKey": {
                         "Ref": "TableauServerLicenseKey"
                     },
+                    "QSS3BucketName": {
+                        "Ref": "QSS3BucketName"
+                    },
+                    "QSS3KeyPrefix": {
+                        "Ref": "QSS3KeyPrefix"
+                    },
                     "RegFirstName": {
                         "Ref": "RegFirstName"
                     },
