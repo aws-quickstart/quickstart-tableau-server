@@ -366,63 +366,63 @@
         "AWSAMIRegionMap": {
             "AMI": {
                 "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-0722b432-8459-49b6-9b90-79b42624d25d-ami-05713873c6794f575.4",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190617"
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190628"
             },
             "ap-northeast-1": {
                 "CENTOS7HVM": "ami-045f38c93733dd48d",
-                "US1604HVM": "ami-0187a903e08b8fd23"
+                "US1604HVM": "ami-096c57cee908da809"
             },
             "ap-northeast-2": {
                 "CENTOS7HVM": "ami-06cf2a72dadf92410",
-                "US1604HVM": "ami-0b5edf72c627a56c9"
+                "US1604HVM": "ami-0a25005e83c56767a"
             },
             "ap-south-1": {
                 "CENTOS7HVM": "ami-02e60be79e78fef21",
-                "US1604HVM": "ami-00dd92d5ec4efe42f"
+                "US1604HVM": "ami-03dcedc81ea3e7e27"
             },
             "ap-southeast-1": {
                 "CENTOS7HVM": "ami-0b4dd9d65556cac22",
-                "US1604HVM": "ami-048e9abf7b87347bb"
+                "US1604HVM": "ami-04613ff1fdcd2eab1"
             },
             "ap-southeast-2": {
                 "CENTOS7HVM": "ami-08bd00d7713a39e7d",
-                "US1604HVM": "ami-087f6b10dc5273252"
+                "US1604HVM": "ami-000c2343cf03d7fd7"
             },
             "ca-central-1": {
                 "CENTOS7HVM": "ami-033e6106180a626d0",
-                "US1604HVM": "ami-04aa97394c31b1acb"
+                "US1604HVM": "ami-0eb3e12d3927c36ef"
             },
             "eu-central-1": {
                 "CENTOS7HVM": "ami-04cf43aca3e6f3de3",
-                "US1604HVM": "ami-0033d0dbf7f5e92af"
+                "US1604HVM": "ami-0085d4f8878cddc81"
             },
             "eu-west-1": {
                 "CENTOS7HVM": "ami-0ff760d16d9497662",
-                "US1604HVM": "ami-007e3c932f184b118"
+                "US1604HVM": "ami-03746875d916becc0"
             },
             "eu-west-2": {
                 "CENTOS7HVM": "ami-0eab3a90fc693af19",
-                "US1604HVM": "ami-03ae06654506d93bd"
+                "US1604HVM": "ami-0cbe2951c7cd54704"
             },
             "sa-east-1": {
                 "CENTOS7HVM": "ami-0b8d86d4bf91850af",
-                "US1604HVM": "ami-000921599a5685f05"
+                "US1604HVM": "ami-09beb384ba644b754"
             },
             "us-east-1": {
                 "CENTOS7HVM": "ami-02eac2c0129f6376b",
-                "US1604HVM": "ami-08fb5eb0e3af3d163"
+                "US1604HVM": "ami-0cfee17793b08a293"
             },
             "us-east-2": {
                 "CENTOS7HVM": "ami-0f2b4fc905b0bd1f1",
-                "US1604HVM": "ami-0be769204fc3cab51"
+                "US1604HVM": "ami-0f93b5fd8f220e428"
             },
             "us-west-1": {
                 "CENTOS7HVM": "ami-074e2d6769f445be5",
-                "US1604HVM": "ami-0b1ecb4f6ec8f417b"
+                "US1604HVM": "ami-09eb5e8a83c7aa890"
             },
             "us-west-2": {
                 "CENTOS7HVM": "ami-01ed306a12b7d1c96",
-                "US1604HVM": "ami-0375ca3842950ade6"
+                "US1604HVM": "ami-0b37e9efc396e4c38"
             }
         },
         "LinuxAMINameMap": {
