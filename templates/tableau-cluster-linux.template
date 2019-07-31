@@ -4,7 +4,7 @@
     "Metadata": {
         "AWSAMIRegionMap": {
             "Filters": {
-                "CENTOS7HVM": {
+                "TABCENTOS7HVM": {
                     "name": "CentOS Linux 7 x86_64 HVM EBS*",
                     "owner-alias": "aws-marketplace",
                     "product-code": "aw0evgkw8e5c1q413zgy5pjce",
@@ -375,69 +375,69 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-0722b432-8459-49b6-9b90-79b42624d25d-ami-05713873c6794f575.4",
+                "TABCENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-0722b432-8459-49b6-9b90-79b42624d25d-ami-05713873c6794f575.4",
                 "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190628"
             },
             "ap-northeast-1": {
-                "CENTOS7HVM": "ami-0a7d05cbf0b747899",
+                "TABCENTOS7HVM": "ami-045f38c93733dd48d",
                 "US1604HVM": "ami-096c57cee908da809"
             },
             "ap-northeast-2": {
-                "CENTOS7HVM": "ami-0d95ea061eb3e3af2",
+                "TABCENTOS7HVM": "ami-06cf2a72dadf92410",
                 "US1604HVM": "ami-0a25005e83c56767a"
             },
             "ap-south-1": {
-                "CENTOS7HVM": "ami-0107ef36b4fa42898",
+                "TABCENTOS7HVM": "ami-02e60be79e78fef21",
                 "US1604HVM": "ami-03dcedc81ea3e7e27"
             },
             "ap-southeast-1": {
-                "CENTOS7HVM": "ami-0183fd284787bb585",
+                "TABCENTOS7HVM": "ami-0b4dd9d65556cac22",
                 "US1604HVM": "ami-04613ff1fdcd2eab1"
             },
             "ap-southeast-2": {
-                "CENTOS7HVM": "ami-0777c25253de28c0e",
+                "TABCENTOS7HVM": "ami-08bd00d7713a39e7d",
                 "US1604HVM": "ami-000c2343cf03d7fd7"
             },
             "ca-central-1": {
-                "CENTOS7HVM": "ami-0c2178b2a49bf0ffe",
+                "TABCENTOS7HVM": "ami-033e6106180a626d0",
                 "US1604HVM": "ami-0eb3e12d3927c36ef"
             },
             "eu-central-1": {
-                "CENTOS7HVM": "ami-08ee2037f6ff4c4f8",
+                "TABCENTOS7HVM": "ami-04cf43aca3e6f3de3",
                 "US1604HVM": "ami-0085d4f8878cddc81"
             },
             "eu-west-1": {
-                "CENTOS7HVM": "ami-052a73ca1503f9659",
+                "TABCENTOS7HVM": "ami-0ff760d16d9497662",
                 "US1604HVM": "ami-03746875d916becc0"
             },
             "eu-west-2": {
-                "CENTOS7HVM": "ami-01e754e81f5d9cf72",
+                "TABCENTOS7HVM": "ami-0eab3a90fc693af19",
                 "US1604HVM": "ami-0cbe2951c7cd54704"
             },
             "sa-east-1": {
-                "CENTOS7HVM": "ami-0e94806bd2a350945",
+                "TABCENTOS7HVM": "ami-0b8d86d4bf91850af",
                 "US1604HVM": "ami-09beb384ba644b754"
             },
             "us-east-1": {
-                "CENTOS7HVM": "ami-089ccd342f0be98ab",
+                "TABCENTOS7HVM": "ami-02eac2c0129f6376b",
                 "US1604HVM": "ami-0cfee17793b08a293"
             },
             "us-east-2": {
-                "CENTOS7HVM": "ami-0813f56b578baedb1",
+                "TABCENTOS7HVM": "ami-0f2b4fc905b0bd1f1",
                 "US1604HVM": "ami-0f93b5fd8f220e428"
             },
             "us-west-1": {
-                "CENTOS7HVM": "ami-00c7a73740c25fdfe",
+                "TABCENTOS7HVM": "ami-074e2d6769f445be5",
                 "US1604HVM": "ami-09eb5e8a83c7aa890"
             },
             "us-west-2": {
-                "CENTOS7HVM": "ami-053ceb1ddca82b4ba",
+                "TABCENTOS7HVM": "ami-01ed306a12b7d1c96",
                 "US1604HVM": "ami-0b37e9efc396e4c38"
             }
         },
         "LinuxAMINameMap": {
             "CentOS-7-HVM": {
-                "Code": "CENTOS7HVM"
+                "Code": "TABCENTOS7HVM"
             },
             "Ubuntu-Server-16.04-LTS-HVM": {
                 "Code": "US1604HVM"
