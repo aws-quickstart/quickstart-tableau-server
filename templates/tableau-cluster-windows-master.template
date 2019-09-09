@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname",
+    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname. (qs-1puphiikg)",
     "Parameters": {
         "AWSHostedZoneID": {
             "Description": "DNS Zone ID to contain the cluster's DNS entry (blank = no DNS)",

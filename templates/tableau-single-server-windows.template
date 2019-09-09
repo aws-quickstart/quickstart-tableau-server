@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudFormation Template for TSM-based Tableau Server on Windows",
+    "Description": "CloudFormation Template for TSM-based Tableau Server on Windows. (qs-1puphiiml)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [

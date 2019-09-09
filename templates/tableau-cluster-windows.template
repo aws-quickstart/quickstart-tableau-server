@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Three node cluster with instances placed as specified in parameters QS(5012)",
+    "Description": "Three node cluster with instances placed as specified in parameters. (qs-1puphiik3)",
     "Parameters": {
         "AWSPublicFQDN": {
             "Description": "Tableau Server portal will be reachable at this address (blank = no DNS)",

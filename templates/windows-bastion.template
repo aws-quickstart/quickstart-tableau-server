@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Bastion host, useful to access private instances created inside a VPC",
+    "Description": "Bastion host, useful to access private instances created inside a VPC. (qs-1puphiin3)",
     "Parameters": {
         "InstanceType": {
             "Default": "t2.micro",

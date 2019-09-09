@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS CloudFormation Template: Tableau Server Cluster running on Linux (CentOS/Ubuntu).",
+    "Description": "AWS CloudFormation Template: Tableau Server Cluster running on Linux (CentOS/Ubuntu). (qs-1puphiigo)",
     "Metadata": {
         "AWSAMIRegionMap": {
             "Filters": {

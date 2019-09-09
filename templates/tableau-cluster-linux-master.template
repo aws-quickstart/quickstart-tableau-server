@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS CloudFormation Template: Tableau Server Cluster with three nodes running on Linux (CentOS).",
+    "Description": "AWS CloudFormation Template: Tableau Server Cluster with three nodes running on Linux (CentOS). (qs-1puphiijr)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [

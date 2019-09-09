@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS CloudFormation Template: Tableau Server running on Linux (CentOS).",
+    "Description": "AWS CloudFormation Template: Tableau Server running on Linux (CentOS). (qs-1puphiilb)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
