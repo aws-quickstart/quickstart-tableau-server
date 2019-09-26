@@ -6,3 +6,11 @@
 	path = submodules/quickstart-linux-bastion
 	url = https://github.com/aws-quickstart/quickstart-linux-bastion.git
 	branch = master
+[submodule "submodules/quickstart-microsoft-activedirectory"]
+	path = submodules/quickstart-microsoft-activedirectory
+	url = https://github.com/aws-quickstart/quickstart-microsoft-activedirectory.git
+	branch = master
+[submodule "submodules/quickstart-microsoft-utilities"]
+	path = submodules/quickstart-microsoft-utilities
+	url = https://github.com/aws-quickstart/quickstart-microsoft-utilities.git
+	branch = master

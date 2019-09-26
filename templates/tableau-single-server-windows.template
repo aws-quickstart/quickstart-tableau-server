@@ -3,8 +3,7 @@
     "Description": "CloudFormation Template for TSM-based Tableau Server on Windows. (qs-1puphiiml)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
+            "ParameterGroups": [{
                     "Label": {
                         "default": "AWS Environment and Machine Configuration"
                     },
@@ -130,6 +129,30 @@
                 "No"
             ],
             "Description": "View the EULA at the Link: https://www.tableau.com/eula",
+            "Type": "String"
+        },
+        "DomainAdminPassword": {
+            "AllowedPattern": "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*",
+            "Description": "Password for the domain admin user. Must be at least 8 characters containing letters, numbers and symbols",
+            "MaxLength": "32",
+            "MinLength": "8",
+            "NoEcho": "true",
+            "Type": "String"
+        },
+        "DomainDNSName": {
+            "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+            "Default": "example.com",
+            "Description": "Fully qualified domain name (FQDN) of the forest root domain e.g. example.com",
+            "MaxLength": "255",
+            "MinLength": "2",
+            "Type": "String"
+        },
+        "DomainNetBIOSName": {
+            "AllowedPattern": "[a-zA-Z0-9]+",
+            "Default": "example",
+            "Description": "NetBIOS name of the domain (up to 15 characters) for users of earlier versions of Windows e.g. EXAMPLE",
+            "MaxLength": "15",
+            "MinLength": "1",
             "Type": "String"
         },
         "InstanceType": {
@@ -346,17 +369,15 @@
                                     "content_admin_pass": {
                                         "Ref": "TableauServerAdminPassword"
                                     },
-                                    "product_keys": [
-                                        {
-                                            "Fn::If": [
-                                                "IsTrial",
-                                                "trial",
-                                                {
-                                                    "Fn::Sub": "${TableauServerLicenseKey}"
-                                                }
-                                            ]
-                                        }
-                                    ]
+                                    "product_keys": [{
+                                        "Fn::If": [
+                                            "IsTrial",
+                                            "trial",
+                                            {
+                                                "Fn::Sub": "${TableauServerLicenseKey}"
+                                            }
+                                        ]
+                                    }]
                                 }
                             },
                             "c:\\tabsetup\\registration.json": {
@@ -372,9 +393,7 @@
                                     },
                                     "company": {
                                         "Fn::Join": [
-                                            ";",
-                                            [
-                                                {
+                                            ";", [{
                                                     "Ref": "RegCompany"
                                                 },
                                                 "AWSQuickStart-Win"
@@ -410,8 +429,7 @@
                             "c:\\tabsetup\\SilentInstaller.py": {
                                 "source": {
                                     "Fn::Join": [
-                                        "",
-                                        [
+                                        "", [
                                             "https://",
                                             {
                                                 "Fn::FindInMap": [
@@ -430,7 +448,17 @@
                                     "configEntities": {
                                         "identityStore": {
                                             "_type": "identityStoreType",
-                                            "type": "local"
+                                            "type": "activedirectory",
+                                            "domain": {
+                                                "Ref": "DomainDNSName"
+                                            },
+                                            "nickname": {
+                                                "Ref": "DomainNetBIOSName"
+                                            },
+                                            "username": "Admin",
+                                            "password": {
+                                                "Ref": "DomainAdminPassword"
+                                            }
                                         }
                                     },
                                     "topologyVersion": {}
@@ -442,8 +470,7 @@
                             "c:\\tabsetup\\tableau-server-webapp-installer.exe": {
                                 "source": {
                                     "Fn::Join": [
-                                        "",
-                                        [
+                                        "", [
                                             "https://",
                                             {
                                                 "Fn::FindInMap": [
@@ -463,6 +490,11 @@
                                         ]
                                     ]
                                 }
+                            },
+                            "c:\\cfn\\scripts\\Join-Domain.ps1": {
+                                "source": {
+                                    "Fn::Sub": "https://aws-quickstart.s3.amazonaws.com/quickstart-microsoft-rdgateway/submodules/quickstart-microsoft-utilities/scripts/Join-Domain.ps1"
+                                }
                             }
                         },
                         "commands": {
@@ -476,52 +508,38 @@
                                 "cwd": "c:\\tabsetup",
                                 "waitAfterCompletion": "0"
                             },
-                            "2-create-user": {
-                                "command": {
-                                    "Fn::Join": [
-                                        " ",
-                                        [
-                                            "net",
-                                            "user",
-                                            {
-                                                "Fn::Sub": "${Username}"
-                                            },
-                                            {
-                                                "Fn::Sub": "${Password}"
-                                            },
-                                            "/add",
-                                            "/y"
-                                        ]
-                                    ]
-                                },
-                                "cwd": "c:\\tabsetup",
+                            "2-set-execution-policy": {
+                                "command": "powershell.exe -Command \"Set-ExecutionPolicy RemoteSigned -Force\"",
                                 "waitAfterCompletion": "0"
                             },
-                            "3-add-admin": {
+                            "3-join-domain": {
                                 "command": {
                                     "Fn::Join": [
-                                        " ",
-                                        [
-                                            "net",
-                                            "localgroup",
-                                            "Administrators",
+                                        "", [
+                                            "powershell.exe -Command \"C:\\cfn\\scripts\\Join-Domain.ps1 -DomainName '",
                                             {
-                                                "Fn::Sub": "${Username}"
+                                                "Ref": "DomainDNSName"
                                             },
-                                            "/add",
-                                            "/y"
+                                            "' -UserName '",
+                                            {
+                                                "Ref": "DomainNetBIOSName"
+                                            },
+                                            "\\Admin",
+                                            "' -Password '",
+                                            {
+                                                "Ref": "DomainAdminPassword"
+                                            },
+                                            "'\""
                                         ]
                                     ]
                                 },
-                                "cwd": "c:\\tabsetup",
-                                "waitAfterCompletion": "0"
+                                "waitAfterCompletion": "forever"
                             },
                             "4-run-installer": {
                                 "cwd": "c:\\tabsetup",
                                 "command": {
                                     "Fn::Join": [
-                                        " ",
-                                        [
+                                        " ", [
                                             "\"C:\\Program Files\\Python36\\python.exe\"",
                                             "SilentInstaller.py",
                                             "install",
@@ -546,11 +564,9 @@
                 }
             },
             "Properties": {
-                "SecurityGroupIds": [
-                    {
-                        "Ref": "ServerSecurityGroup"
-                    }
-                ],
+                "SecurityGroupIds": [{
+                    "Ref": "ServerSecurityGroup"
+                }],
                 "SubnetId": {
                     "Ref": "PublicSubnetId"
                 },
@@ -575,8 +591,7 @@
                         }
                     ]
                 },
-                "BlockDeviceMappings": [
-                    {
+                "BlockDeviceMappings": [{
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
                             "VolumeType": "gp2",
@@ -609,8 +624,7 @@
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
-                            "\n",
-                            [
+                            "\n", [
                                 "<script>",
                                 {
                                     "Fn::Sub": "cfn-init.exe -v -s ${AWS::StackId} -r TableauWindowsServer --region ${AWS::Region}"
@@ -632,14 +646,12 @@
                         ]
                     }
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}-cfn-tableau-server"
-                        }
+                "Tags": [{
+                    "Key": "Name",
+                    "Value": {
+                        "Fn::Sub": "${AWS::StackName}-cfn-tableau-server"
                     }
-                ]
+                }]
             }
         },
         "EIP": {
@@ -657,8 +669,7 @@
                     "Ref": "VPCId"
                 },
                 "GroupDescription": "Enable HTTP access via port 80 and HTTPS access on port 8850, and RDP access on Port 3389 from the provided network CIDR",
-                "SecurityGroupIngress": [
-                    {
+                "SecurityGroupIngress": [{
                         "IpProtocol": "tcp",
                         "FromPort": "3389",
                         "ToPort": "3389",
@@ -718,8 +729,7 @@
             "Description": "URL for the TSM Web UI",
             "Value": {
                 "Fn::Join": [
-                    "",
-                    [
+                    "", [
                         "https://",
                         {
                             "Fn::GetAtt": [
@@ -736,8 +746,7 @@
             "Description": "Public DNS name of instance running Tableau Server",
             "Value": {
                 "Fn::Join": [
-                    "",
-                    [
+                    "", [
                         "http://",
                         {
                             "Fn::GetAtt": [

@@ -167,6 +167,31 @@
       "Description": "View the EULA at the Link: https://www.tableau.com/eula",
       "Type": "String"
     },
+    "DomainAdminPassword": {
+      "AllowedPattern": "(?=^.{6,255}$)((?=.*\\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))^.*",
+      "Description": "Password for the domain admin user. Must be at least 8 characters containing letters, numbers and symbols",
+      "Default": "Test_RestoreM0de-123",
+      "MaxLength": "32",
+      "MinLength": "8",
+      "NoEcho": "true",
+      "Type": "String"
+    },
+    "DomainDNSName": {
+      "AllowedPattern": "[a-zA-Z0-9]+\\..+",
+      "Default": "example.com",
+      "Description": "Fully qualified domain name (FQDN) of the forest root domain e.g. example.com",
+      "MaxLength": "255",
+      "MinLength": "2",
+      "Type": "String"
+    },
+    "DomainNetBIOSName": {
+      "AllowedPattern": "[a-zA-Z0-9]+",
+      "Default": "example",
+      "Description": "NetBIOS name of the domain (up to 15 characters) for users of earlier versions of Windows e.g. EXAMPLE",
+      "MaxLength": "15",
+      "MinLength": "1",
+      "Type": "String"
+    },
     "InstanceType": {
       "AllowedValues": [
         "m4.2xlarge",
@@ -357,9 +382,68 @@
         }
       }
     },
+    "ADStack": {
+      "DependsOn": "VPCStack",
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-microsoft-activedirectory/templates/ad-3.template"
+        },
+        "Parameters": {
+          "DomainAdminPassword": {
+            "Ref": "DomainAdminPassword"
+          },
+          "DomainDNSName": {
+            "Ref": "DomainDNSName"
+          },
+          "DomainNetBIOSName": {
+            "Ref": "DomainNetBIOSName"
+          },
+          "PrivateSubnet1CIDR": {
+            "Ref": "PublicSubnet1CIDR"
+          },
+          "PrivateSubnet1ID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.PublicSubnet1ID"
+            ]
+          },
+          "PrivateSubnet2CIDR": {
+            "Ref": "PublicSubnet2CIDR"
+          },
+          "PrivateSubnet2ID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.PublicSubnet2ID"
+            ]
+          },
+          "PublicSubnet1CIDR": {
+            "Ref": "PublicSubnet1CIDR"
+          },
+          "PublicSubnet2CIDR": {
+            "Ref": "PublicSubnet2CIDR"
+          },
+          "QSS3BucketName": {
+            "Ref": "QSS3BucketName"
+          },
+          "QSS3KeyPrefix": {
+            "Fn::Sub": "${QSS3KeyPrefix}submodules/quickstart-microsoft-activedirectory/"
+          },
+          "VPCID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.VPCID"
+            ]
+          },
+          "VPCCIDR": {
+            "Ref": "VPCCIDR"
+          }
+        }
+      }
+    },
     "WorkloadStack": {
       "Type": "AWS::CloudFormation::Stack",
-      "DependsOn": ["VPCStack"],
+      "DependsOn": ["ADStack"],
       "Properties": {
         "TemplateURL": {
           "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/tableau-single-server.template"
@@ -370,6 +454,15 @@
           },
           "AMIOS": {
             "Ref": "AMIOS"
+          },
+          "DomainAdminPassword": {
+            "Ref": "DomainAdminPassword"
+          },
+          "DomainDNSName": {
+            "Ref": "DomainDNSName"
+          },
+          "DomainNetBIOSName": {
+            "Ref": "DomainNetBIOSName"
           },
           "InstanceType": {
             "Ref": "InstanceType"
