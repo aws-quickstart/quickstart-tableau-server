@@ -1,703 +1,385 @@
-{
-    "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Tableau Server cluster with three nodes running on Windows, available via user-provided hostname. (qs-1puphiikg)",
-    "Parameters": {
-        "AWSHostedZoneID": {
-            "Description": "DNS Zone ID to contain the cluster's DNS entry (blank = no DNS)",
-            "Type": "String"
-        },
-        "AWSPublicFQDN": {
-            "Description": "Tableau Server portal will be reachable at this address (blank = no DNS)",
-            "Type": "String"
-        },
-        "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and 3 AZs MUST be used for this deployment",
-            "Type": "List<AWS::EC2::AvailabilityZone::Name>"
-        },
-        "TableauServerAdminPassword": {
-            "Description": "The password for the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "NoEcho": "true",
-            "Type": "String"
-        },
-        "TableauServerAdminUser": {
-            "Default": "admin",
-            "Description": "The name of the initial Admin user for Tableau server",
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "KeyPairName": {
-            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
-            "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "QSS3BucketName": {
-            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
-            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "aws-quickstart",
-            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Type": "String"
-        },
-        "QSS3KeyPrefix": {
-            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
-            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Default": "quickstart-tableau-server/",
-            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Type": "String"
-        },
-        "RegCity": {
-            "Type": "String"
-        },
-        "RegCompany": {
-            "Type": "String"
-        },
-        "RegCountry": {
-            "Type": "String"
-        },
-        "RegDepartment": {
-            "Type": "String"
-        },
-        "RegEmail": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegFirstName": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegIndustry": {
-            "Type": "String"
-        },
-        "RegLastName": {
-            "MinLength": "1",
-            "Type": "String"
-        },
-        "RegPhone": {
-            "Type": "String"
-        },
-        "RegState": {
-            "Type": "String"
-        },
-        "RegTitle": {
-            "Type": "String"
-        },
-        "RegZip": {
-            "Type": "String"
-        },
-        "SSLCertificateARN": {
-            "Description": "The Amazon Resource Name for the existing SSL cert you wish to use; empty for none",
-            "Type": "String"
-        },
-        "SourceCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "CIDR from which you may connect to web interface or bastion host (e.g., 1.1.1.1/32)",
-            "Type": "String"
-        },
-        "TableauServerLicenseKey": {
-            "Description": "License Key",
-            "MinLength": "1",
-            "Type": "String"
-        }
-    },
-    "Metadata": {
-        "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
-                    "Label": {
-                        "default": "Network Configuration"
-                    },
-                    "Parameters": [
-                        "AvailabilityZones",
-                        "SourceCIDR"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Server DNS configuration"
-                    },
-                    "Parameters": [
-                        "SSLCertificateARN",
-                        "AWSPublicFQDN",
-                        "AWSHostedZoneID"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Amazon EC2 Configuration"
-                    },
-                    "Parameters": [
-                        "KeyPairName"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Configure Initial Tableau Admin User"
-                    },
-                    "Parameters": [
-                        "TableauServerAdminUser",
-                        "TableauServerAdminPassword"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Registration"
-                    },
-                    "Parameters": [
-                        "TableauServerLicenseKey",
-                        "RegFirstName",
-                        "RegLastName",
-                        "RegEmail",
-                        "RegCompany",
-                        "RegTitle",
-                        "RegDepartment",
-                        "RegIndustry",
-                        "RegPhone",
-                        "RegCity",
-                        "RegState",
-                        "RegZip",
-                        "RegCountry"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "AWS Quick Start Configuration"
-                    },
-                    "Parameters": [
-                        "QSS3BucketName",
-                        "QSS3KeyPrefix"
-                    ]
-                }
-            ],
-            "ParameterLabels": {
-                "AvailabilityZones": {
-                    "default": "Availability Zones"
-                },
-                "AWSHostedZoneID": {
-                    "default": "DNS Zone ID"
-                },
-                "AWSPublicFQDN": {
-                    "default": "Full DNS Name for Cluster"
-                },
-                "TableauServerAdminUser": {
-                    "default": "Tableau Server administrator username"
-                },
-                "TableauServerAdminPassword": {
-                    "default": "Tableau Server administrator password"
-                },
-                "KeyPairName": {
-                    "default": "Key Pair Name"
-                },
-                "QSS3BucketName": {
-                    "default": "Quick Start S3 Bucket Name"
-                },
-                "QSS3KeyPrefix": {
-                    "default": "Quick Start S3 Key Prefix"
-                },
-                "TableauServerLicenseKey": {
-                    "default": "Tableau Activation Key"
-                },
-                "RegFirstName": {
-                    "default": "First Name"
-                },
-                "RegLastName": {
-                    "default": "Last Name"
-                },
-                "RegEmail": {
-                    "default": "Email Address"
-                },
-                "RegCompany": {
-                    "default": "Company"
-                },
-                "RegTitle": {
-                    "default": "Title"
-                },
-                "RegDepartment": {
-                    "default": "Department"
-                },
-                "RegIndustry": {
-                    "default": "Industry"
-                },
-                "RegPhone": {
-                    "default": "Phone"
-                },
-                "RegCity": {
-                    "default": "City"
-                },
-                "RegState": {
-                    "default": "State"
-                },
-                "RegZip": {
-                    "default": "Zip/Postal Code"
-                },
-                "RegCountry": {
-                    "default": "Country"
-                },
-                "SourceCIDR": {
-                    "default": "Source CIDR for Access"
-                },
-                "SSLCertificateARN": {
-                    "default": "SSL Certificate ARN (Requires matching DNS name)"
-                }
-            }
-        }
-    },
-    "Mappings": {
-        "AWSAMIRegionMap": {
-            "AMI": {
-                "WS2012R2": "Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.07.12"
-            },
-            "ap-northeast-1": {
-                "WS2012R2": "ami-005ee2767c33f46f6"
-            },
-            "ap-northeast-2": {
-                "WS2012R2": "ami-0a0b21dd07f1083bf"
-            },
-            "ap-south-1": {
-                "WS2012R2": "ami-0c317e1f81c5fb88c"
-            },
-            "ap-southeast-1": {
-                "WS2012R2": "ami-0364b7df071ead294"
-            },
-            "ap-southeast-2": {
-                "WS2012R2": "ami-0b90712bab07bff79"
-            },
-            "ca-central-1": {
-                "WS2012R2": "ami-077aa0feeb9f0276a"
-            },
-            "eu-central-1": {
-                "WS2012R2": "ami-0987d7897f512004d"
-            },
-            "eu-west-1": {
-                "WS2012R2": "ami-0927c25b5177ff0de"
-            },
-            "eu-west-2": {
-                "WS2012R2": "ami-0e90780577bc9d091"
-            },
-            "sa-east-1": {
-                "WS2012R2": "ami-03fb3b14747ca1fe6"
-            },
-            "us-east-1": {
-                "WS2012R2": "ami-028be67c2aa2f1ce1"
-            },
-            "us-east-2": {
-                "WS2012R2": "ami-09ee46c8d9abcb966"
-            },
-            "us-west-1": {
-                "WS2012R2": "ami-05cd4c9c42e255074"
-            },
-            "us-west-2": {
-                "WS2012R2": "ami-095f164d8ca0bdbbf"
-            }
-        },
-        "DefaultConfiguration": {
-            "MachineConfiguration": {
-                "BastionInstanceType": "t2.micro"
-            },
-            "NetworkConfiguration": {
-                "VPCCIDR": "10.0.0.0/16",
-                "PublicSubnet1CIDR": "10.0.1.0/24",
-                "PrivateSubnet1CIDR": "10.0.2.0/24",
-                "PublicSubnet2CIDR": "10.0.3.0/24",
-                "PrivateSubnet2CIDR": "10.0.4.0/24",
-                "PublicSubnet3CIDR": "10.0.5.0/24",
-                "PrivateSubnet3CIDR": "10.0.6.0/24",
-                "PrimaryIP": "10.0.2.11",
-                "Worker1IP": "10.0.4.11",
-                "Worker2IP": "10.0.6.11"
-            }
-        }
-    },
-    "Conditions": {
-        "NoDNSEntry": {
-            "Fn::Or": [
-                {
-                    "Fn::Equals": [
-                        "",
-                        {
-                            "Ref": "AWSHostedZoneID"
-                        }
-                    ]
-                },
-                {
-                    "Fn::Equals": [
-                        "",
-                        {
-                            "Ref": "AWSPublicFQDN"
-                        }
-                    ]
-                }
-            ]
-        },
-        "CreateDNSEntry": {
-            "Fn::Not": [
-                {
-                    "Condition": "NoDNSEntry"
-                }
-            ]
-        }
-    },
-    "Resources": {
-        "VPCStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template"
-                },
-                "Parameters": {
-                    "AvailabilityZones": {
-                        "Fn::Join": [
-                            ",",
-                            {
-                                "Ref": "AvailabilityZones"
-                            }
-                        ]
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "NumberOfAZs": "3",
-                    "PrivateSubnet1ACIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PrivateSubnet1CIDR"
-                        ]
-                    },
-                    "PrivateSubnet2ACIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PrivateSubnet2CIDR"
-                        ]
-                    },
-                    "PrivateSubnet3ACIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PrivateSubnet3CIDR"
-                        ]
-                    },
-                    "PublicSubnet1CIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PublicSubnet1CIDR"
-                        ]
-                    },
-                    "PublicSubnet2CIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PublicSubnet2CIDR"
-                        ]
-                    },
-                    "PublicSubnet3CIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PublicSubnet3CIDR"
-                        ]
-                    },
-                    "VPCCIDR": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "VPCCIDR"
-                        ]
-                    }
-                }
-            }
-        },
-        "BastionHost": {
-            "Type": "AWS::CloudFormation::Stack",
-            "DependsOn": [
-                "VPCStack"
-            ],
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/windows-bastion.template"
-                },
-                "Parameters": {
-                    "InstanceType": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "MachineConfiguration",
-                            "BastionInstanceType"
-                        ]
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "SourceCIDR": {
-                        "Ref": "SourceCIDR"
-                    },
-                    "SubnetId": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet1ID"
-                        ]
-                    },
-                    "VPCID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.VPCID"
-                        ]
-                    }
-                }
-            }
-        },
-        "WorkloadStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "DependsOn": [
-                "VPCStack"
-            ],
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/tableau-cluster-windows.template"
-                },
-                "Parameters": {
-                    "AWSPublicFQDN": {
-                        "Ref": "AWSPublicFQDN"
-                    },
-                    "TableauServerAdminPassword": {
-                        "Ref": "TableauServerAdminPassword"
-                    },
-                    "TableauServerAdminUser": {
-                        "Ref": "TableauServerAdminUser"
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "PrimaryIP": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "PrimaryIP"
-                        ]
-                    },
-                    "PrimaryPublicSubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet1ID"
-                        ]
-                    },
-                    "PrimarySubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PrivateSubnet1AID"
-                        ]
-                    },
-                    "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
-                    },
-                    "QSS3KeyPrefix": {
-                        "Ref": "QSS3KeyPrefix"
-                    },
-                    "RegCity": {
-                        "Ref": "RegCity"
-                    },
-                    "RegCompany": {
-                        "Ref": "RegCompany"
-                    },
-                    "RegCountry": {
-                        "Ref": "RegCountry"
-                    },
-                    "RegDepartment": {
-                        "Ref": "RegDepartment"
-                    },
-                    "RegEmail": {
-                        "Ref": "RegEmail"
-                    },
-                    "RegFirstName": {
-                        "Ref": "RegFirstName"
-                    },
-                    "RegIndustry": {
-                        "Ref": "RegIndustry"
-                    },
-                    "RegLastName": {
-                        "Ref": "RegLastName"
-                    },
-                    "RegPhone": {
-                        "Ref": "RegPhone"
-                    },
-                    "RegState": {
-                        "Ref": "RegState"
-                    },
-                    "RegTitle": {
-                        "Ref": "RegTitle"
-                    },
-                    "RegZip": {
-                        "Ref": "RegZip"
-                    },
-                    "SSLCertificateARN": {
-                        "Ref": "SSLCertificateARN"
-                    },
-                    "SourceCIDR": {
-                        "Ref": "SourceCIDR"
-                    },
-                    "TableauServerLicenseKey": {
-                        "Ref": "TableauServerLicenseKey"
-                    },
-                    "VPCID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.VPCID"
-                        ]
-                    },
-                    "Worker1IP": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "Worker1IP"
-                        ]
-                    },
-                    "Worker1PublicSubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet2ID"
-                        ]
-                    },
-                    "Worker1SubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PrivateSubnet2AID"
-                        ]
-                    },
-                    "Worker2IP": {
-                        "Fn::FindInMap": [
-                            "DefaultConfiguration",
-                            "NetworkConfiguration",
-                            "Worker2IP"
-                        ]
-                    },
-                    "Worker2PublicSubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PublicSubnet3ID"
-                        ]
-                    },
-                    "Worker2SubnetID": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.PrivateSubnet3AID"
-                        ]
-                    }
-                }
-            }
-        },
-        "WorkloadSecurityGroupBastionRDPIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn": [
-                "BastionHost",
-                "WorkloadStack"
-            ],
-            "Properties": {
-                "GroupId": {
-                    "Fn::GetAtt": [
-                        "WorkloadStack",
-                        "Outputs.SecurityGroup"
-                    ]
-                },
-                "IpProtocol": "tcp",
-                "FromPort": 3389,
-                "ToPort": 3389,
-                "SourceSecurityGroupId": {
-                    "Fn::GetAtt": [
-                        "BastionHost",
-                        "Outputs.SecurityGroup"
-                    ]
-                }
-            }
-        },
-        "WorkloadSecurityGroupBastionWebIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "DependsOn": [
-                "BastionHost",
-                "WorkloadStack"
-            ],
-            "Properties": {
-                "GroupId": {
-                    "Fn::GetAtt": [
-                        "WorkloadStack",
-                        "Outputs.SecurityGroup"
-                    ]
-                },
-                "IpProtocol": "tcp",
-                "FromPort": 80,
-                "ToPort": 80,
-                "SourceSecurityGroupId": {
-                    "Fn::GetAtt": [
-                        "BastionHost",
-                        "Outputs.SecurityGroup"
-                    ]
-                }
-            }
-        },
-        "DNSNameEntry": {
-            "Type": "AWS::Route53::RecordSet",
-            "Condition": "CreateDNSEntry",
-            "DependsOn": [
-                "WorkloadStack"
-            ],
-            "Properties": {
-                "HostedZoneId": {
-                    "Ref": "AWSHostedZoneID"
-                },
-                "Name": {
-                    "Fn::Sub": "${AWSPublicFQDN}."
-                },
-                "Type": "A",
-                "AliasTarget": {
-                    "HostedZoneId": {
-                        "Fn::GetAtt": [
-                            "WorkloadStack",
-                            "Outputs.LoadBalancerCanonicalHostedZoneNameID"
-                        ]
-                    },
-                    "DNSName": {
-                        "Fn::GetAtt": [
-                            "WorkloadStack",
-                            "Outputs.LoadBalancerDNSName"
-                        ]
-                    }
-                }
-            }
-        }
-    },
-    "Outputs": {
-        "VPCID": {
-            "Description": "VPC ID",
-            "Value": {
-                "Fn::GetAtt": [
-                    "VPCStack",
-                    "Outputs.VPCID"
-                ]
-            }
-        },
-        "LoadBalancerDNSName": {
-            "Description": "DNS Name for the load balancer",
-            "Value": {
-                "Fn::GetAtt": [
-                    "WorkloadStack",
-                    "Outputs.LoadBalancerDNSName"
-                ]
-            }
-        },
-        "BastionDNSName": {
-            "Description": "Public DNS name of bastion host",
-            "Value": {
-                "Fn::GetAtt": [
-                    "BastionHost",
-                    "Outputs.BastionDNSName"
-                ]
-            }
-        },
-        "ClusterDNSName": {
-            "Description": "Public DNS name to reach cluster",
-            "Condition": "CreateDNSEntry",
-            "Value": {
-                "Ref": "AWSPublicFQDN"
-            }
-        }
-    }
-}
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Tableau Server cluster with three nodes running on Windows, available
+  via user-provided hostname. (qs-1puphiikg)
+Parameters:
+  AWSHostedZoneID:
+    Description: DNS Zone ID to contain the cluster's DNS entry (blank = no DNS)
+    Type: String
+  AWSPublicFQDN:
+    Description: Tableau Server portal will be reachable at this address (blank =
+      no DNS)
+    Type: String
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
+      The logical order is preserved and 3 AZs MUST be used for this deployment'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  TableauServerAdminPassword:
+    Description: The password for the initial Admin user for Tableau server
+    MinLength: '1'
+    NoEcho: 'true'
+    Type: String
+  TableauServerAdminUser:
+    Default: admin
+    Description: The name of the initial Admin user for Tableau server
+    MinLength: '1'
+    Type: String
+  KeyPairName:
+    Description: Public/private key pairs allow you to securely connect to your instance
+      after it launches
+    Type: AWS::EC2::KeyPair::KeyName
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-tableau-server/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  RegCity:
+    Type: String
+  RegCompany:
+    Type: String
+  RegCountry:
+    Type: String
+  RegDepartment:
+    Type: String
+  RegEmail:
+    MinLength: '1'
+    Type: String
+  RegFirstName:
+    MinLength: '1'
+    Type: String
+  RegIndustry:
+    Type: String
+  RegLastName:
+    MinLength: '1'
+    Type: String
+  RegPhone:
+    Type: String
+  RegState:
+    Type: String
+  RegTitle:
+    Type: String
+  RegZip:
+    Type: String
+  SSLCertificateARN:
+    Description: The Amazon Resource Name for the existing SSL cert you wish to use;
+      empty for none
+    Type: String
+  SourceCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: CIDR from which you may connect to web interface or bastion host
+      (e.g., 1.1.1.1/32)
+    Type: String
+  TableauServerLicenseKey:
+    Description: License Key
+    MinLength: '1'
+    Type: String
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - AvailabilityZones
+          - SourceCIDR
+      - Label:
+          default: Server DNS configuration
+        Parameters:
+          - SSLCertificateARN
+          - AWSPublicFQDN
+          - AWSHostedZoneID
+      - Label:
+          default: Amazon EC2 Configuration
+        Parameters:
+          - KeyPairName
+      - Label:
+          default: Configure Initial Tableau Admin User
+        Parameters:
+          - TableauServerAdminUser
+          - TableauServerAdminPassword
+      - Label:
+          default: Registration
+        Parameters:
+          - TableauServerLicenseKey
+          - RegFirstName
+          - RegLastName
+          - RegEmail
+          - RegCompany
+          - RegTitle
+          - RegDepartment
+          - RegIndustry
+          - RegPhone
+          - RegCity
+          - RegState
+          - RegZip
+          - RegCountry
+      - Label:
+          default: AWS Quick Start Configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      AWSHostedZoneID:
+        default: DNS Zone ID
+      AWSPublicFQDN:
+        default: Full DNS Name for Cluster
+      TableauServerAdminUser:
+        default: Tableau Server administrator username
+      TableauServerAdminPassword:
+        default: Tableau Server administrator password
+      KeyPairName:
+        default: Key Pair Name
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
+      TableauServerLicenseKey:
+        default: Tableau Activation Key
+      RegFirstName:
+        default: First Name
+      RegLastName:
+        default: Last Name
+      RegEmail:
+        default: Email Address
+      RegCompany:
+        default: Company
+      RegTitle:
+        default: Title
+      RegDepartment:
+        default: Department
+      RegIndustry:
+        default: Industry
+      RegPhone:
+        default: Phone
+      RegCity:
+        default: City
+      RegState:
+        default: State
+      RegZip:
+        default: Zip/Postal Code
+      RegCountry:
+        default: Country
+      SourceCIDR:
+        default: Source CIDR for Access
+      SSLCertificateARN:
+        default: SSL Certificate ARN (Requires matching DNS name)
+Mappings:
+  AWSAMIRegionMap:
+    AMI:
+      WS2012R2: Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.07.12
+    ap-northeast-1:
+      WS2012R2: ami-005ee2767c33f46f6
+    ap-northeast-2:
+      WS2012R2: ami-0a0b21dd07f1083bf
+    ap-south-1:
+      WS2012R2: ami-0c317e1f81c5fb88c
+    ap-southeast-1:
+      WS2012R2: ami-0364b7df071ead294
+    ap-southeast-2:
+      WS2012R2: ami-0b90712bab07bff79
+    ca-central-1:
+      WS2012R2: ami-077aa0feeb9f0276a
+    eu-central-1:
+      WS2012R2: ami-0987d7897f512004d
+    eu-west-1:
+      WS2012R2: ami-0927c25b5177ff0de
+    eu-west-2:
+      WS2012R2: ami-0e90780577bc9d091
+    sa-east-1:
+      WS2012R2: ami-03fb3b14747ca1fe6
+    us-east-1:
+      WS2012R2: ami-028be67c2aa2f1ce1
+    us-east-2:
+      WS2012R2: ami-09ee46c8d9abcb966
+    us-west-1:
+      WS2012R2: ami-05cd4c9c42e255074
+    us-west-2:
+      WS2012R2: ami-095f164d8ca0bdbbf
+  DefaultConfiguration:
+    MachineConfiguration:
+      BastionInstanceType: t2.micro
+    NetworkConfiguration:
+      VPCCIDR: 10.0.0.0/16
+      PublicSubnet1CIDR: 10.0.1.0/24
+      PrivateSubnet1CIDR: 10.0.2.0/24
+      PublicSubnet2CIDR: 10.0.3.0/24
+      PrivateSubnet2CIDR: 10.0.4.0/24
+      PublicSubnet3CIDR: 10.0.5.0/24
+      PrivateSubnet3CIDR: 10.0.6.0/24
+      PrimaryIP: 10.0.2.11
+      Worker1IP: 10.0.4.11
+      Worker2IP: 10.0.6.11
+Conditions:
+  NoDNSEntry: !Or
+    - !Equals
+      - ''
+      - !Ref 'AWSHostedZoneID'
+    - !Equals
+      - ''
+      - !Ref 'AWSPublicFQDN'
+  CreateDNSEntry: !Not
+    - !Condition 'NoDNSEntry'
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+      Parameters:
+        AvailabilityZones: !Join
+          - ','
+          - !Ref 'AvailabilityZones'
+        KeyPairName: !Ref 'KeyPairName'
+        NumberOfAZs: '3'
+        PrivateSubnet1ACIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PrivateSubnet1CIDR
+        PrivateSubnet2ACIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PrivateSubnet2CIDR
+        PrivateSubnet3ACIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PrivateSubnet3CIDR
+        PublicSubnet1CIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PublicSubnet1CIDR
+        PublicSubnet2CIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PublicSubnet2CIDR
+        PublicSubnet3CIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PublicSubnet3CIDR
+        VPCCIDR: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - VPCCIDR
+  BastionHost:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VPCStack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/windows-bastion.template'
+      Parameters:
+        InstanceType: !FindInMap
+          - DefaultConfiguration
+          - MachineConfiguration
+          - BastionInstanceType
+        KeyPairName: !Ref 'KeyPairName'
+        SourceCIDR: !Ref 'SourceCIDR'
+        SubnetId: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+  WorkloadStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VPCStack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/tableau-cluster-windows.template'
+      Parameters:
+        AWSPublicFQDN: !Ref 'AWSPublicFQDN'
+        TableauServerAdminPassword: !Ref 'TableauServerAdminPassword'
+        TableauServerAdminUser: !Ref 'TableauServerAdminUser'
+        KeyPairName: !Ref 'KeyPairName'
+        PrimaryIP: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - PrimaryIP
+        PrimaryPublicSubnetID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        PrimarySubnetID: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'
+        QSS3BucketName: !Ref 'QSS3BucketName'
+        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        RegCity: !Ref 'RegCity'
+        RegCompany: !Ref 'RegCompany'
+        RegCountry: !Ref 'RegCountry'
+        RegDepartment: !Ref 'RegDepartment'
+        RegEmail: !Ref 'RegEmail'
+        RegFirstName: !Ref 'RegFirstName'
+        RegIndustry: !Ref 'RegIndustry'
+        RegLastName: !Ref 'RegLastName'
+        RegPhone: !Ref 'RegPhone'
+        RegState: !Ref 'RegState'
+        RegTitle: !Ref 'RegTitle'
+        RegZip: !Ref 'RegZip'
+        SSLCertificateARN: !Ref 'SSLCertificateARN'
+        SourceCIDR: !Ref 'SourceCIDR'
+        TableauServerLicenseKey: !Ref 'TableauServerLicenseKey'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+        Worker1IP: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - Worker1IP
+        Worker1PublicSubnetID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+        Worker1SubnetID: !GetAtt 'VPCStack.Outputs.PrivateSubnet2AID'
+        Worker2IP: !FindInMap
+          - DefaultConfiguration
+          - NetworkConfiguration
+          - Worker2IP
+        Worker2PublicSubnetID: !GetAtt 'VPCStack.Outputs.PublicSubnet3ID'
+        Worker2SubnetID: !GetAtt 'VPCStack.Outputs.PrivateSubnet3AID'
+  WorkloadSecurityGroupBastionRDPIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+      - BastionHost
+      - WorkloadStack
+    Properties:
+      GroupId: !GetAtt 'WorkloadStack.Outputs.SecurityGroup'
+      IpProtocol: tcp
+      FromPort: 3389
+      ToPort: 3389
+      SourceSecurityGroupId: !GetAtt 'BastionHost.Outputs.SecurityGroup'
+  WorkloadSecurityGroupBastionWebIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+      - BastionHost
+      - WorkloadStack
+    Properties:
+      GroupId: !GetAtt 'WorkloadStack.Outputs.SecurityGroup'
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !GetAtt 'BastionHost.Outputs.SecurityGroup'
+  DNSNameEntry:
+    Type: AWS::Route53::RecordSet
+    Condition: CreateDNSEntry
+    DependsOn:
+      - WorkloadStack
+    Properties:
+      HostedZoneId: !Ref 'AWSHostedZoneID'
+      Name: !Sub '${AWSPublicFQDN}.'
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt 'WorkloadStack.Outputs.LoadBalancerCanonicalHostedZoneNameID'
+        DNSName: !GetAtt 'WorkloadStack.Outputs.LoadBalancerDNSName'
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !GetAtt 'VPCStack.Outputs.VPCID'
+  LoadBalancerDNSName:
+    Description: DNS Name for the load balancer
+    Value: !GetAtt 'WorkloadStack.Outputs.LoadBalancerDNSName'
+  BastionDNSName:
+    Description: Public DNS name of bastion host
+    Value: !GetAtt 'BastionHost.Outputs.BastionDNSName'
+  ClusterDNSName:
+    Description: Public DNS name to reach cluster
+    Condition: CreateDNSEntry
+    Value: !Ref 'AWSPublicFQDN'

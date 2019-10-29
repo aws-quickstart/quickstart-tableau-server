@@ -4,16 +4,12 @@
         "ParameterValue": "$[taskcat_genaz_2]"
     },
     {
-        "ParameterKey": "AMIOS",
-        "ParameterValue": "Ubuntu-Server-16.04-LTS-HVM"
-    },
-  {
         "ParameterKey": "AcceptEULA",
         "ParameterValue": "Yes"
     },
     {
         "ParameterKey": "AMIOS",
-        "ParameterValue": "CentOS-7-HVM"
+        "ParameterValue": "Ubuntu-Server-16.04-LTS-HVM"
     },
     {
         "ParameterKey": "InstanceType",
