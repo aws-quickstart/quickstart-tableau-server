@@ -706,12 +706,13 @@ Resources:
                         tsm start -u "$tsm_admin_user" -p "$tsm_admin_pass"
                     }
                     send_singal_to_topologyWaitHandle() {
-                    # Signal successful completion
-                    /opt/aws/bin/cfn-signal -e $? ${TopologyWaitHandle}
+                        # Signal successful completion
+                        /opt/aws/bin/cfn-signal -e $? "${TopologyWaitHandle}"
+                    }
                     set_topology
                     unset -f set_topology
                     trap send_singal_to_topologyWaitHandle EXIT
-                - '# No action needed'
+                - No action needed
             /tmp/config.json:
               content:
                 !Sub |
@@ -834,6 +835,7 @@ Resources:
             unset -f install
             # publish the Primary xml
             mv bootstrap.cfg /restricted/
+            chmod 555 /restricted/bootstrap.cfg
             # Signal successful completion
             /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource PrimaryServer --region ${AWS::Region}
             # Wait for workers
@@ -1018,7 +1020,7 @@ Resources:
             install
             unset -f install
             # Signal successful completion
-            {'Fn::Sub': "/opt/aws/bin/cfn-signal -e $? '${WorkerWaitHandle}'"}
+            /opt/aws/bin/cfn-signal -e $? "${WorkerWaitHandle}"
             # Cleanup
             rm -f /tmp/secrets.properties
             rm -f /tmp/tableau-server*
