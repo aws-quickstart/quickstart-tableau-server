@@ -365,6 +365,7 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref 'TableauServer'
+      Domain: 'vpc'
   ServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
