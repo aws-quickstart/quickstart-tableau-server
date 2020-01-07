@@ -583,7 +583,8 @@
             "Properties": {
                 "InstanceId": {
                     "Ref": "TableauServer"
-                }
+                },
+                "Domain": "vpc"
             }
         },
         "ServerSecurityGroup": {

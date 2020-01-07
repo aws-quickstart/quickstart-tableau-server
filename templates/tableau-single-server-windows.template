@@ -647,7 +647,8 @@
             "Properties": {
                 "InstanceId": {
                     "Ref": "TableauWindowsServer"
-                }
+                },
+                "Domain": "vpc"
             }
         },
         "ServerSecurityGroup": {
