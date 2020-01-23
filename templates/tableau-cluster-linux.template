@@ -472,6 +472,7 @@ Resources:
             	// write data to request body
             	request.write(responseBody);
             	request.end();
+            };
       Handler: index.handler
       Role: !GetAtt 'LambdaExecutionRole.Arn'
       Runtime: nodejs12.x
