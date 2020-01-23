@@ -472,9 +472,10 @@ Resources:
             	// write data to request body
             	request.write(responseBody);
             	request.end();
+            };
       Handler: index.handler
       Role: !GetAtt 'LambdaExecutionRole.Arn'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 30
   LambdaExecutionRole:
     Type: AWS::IAM::Role
