@@ -249,33 +249,33 @@ Mappings:
     AMI:
       WS2012R2: Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.07.12
     ap-northeast-1:
-      WS2012R2: ami-005ee2767c33f46f6
+      WS2012R2: ami-0eee9047b95b1f74c
     ap-northeast-2:
-      WS2012R2: ami-0a0b21dd07f1083bf
+      WS2012R2: ami-03e603f10c77a5463
     ap-south-1:
-      WS2012R2: ami-0c317e1f81c5fb88c
+      WS2012R2: ami-0ed889b4a59795a32
     ap-southeast-1:
-      WS2012R2: ami-0364b7df071ead294
+      WS2012R2: ami-0331be4a84b3b2e75
     ap-southeast-2:
-      WS2012R2: ami-0b90712bab07bff79
+      WS2012R2: ami-087682590b598bde5
     ca-central-1:
-      WS2012R2: ami-077aa0feeb9f0276a
+      WS2012R2: ami-05b0f7544383bc098
     eu-central-1:
-      WS2012R2: ami-0987d7897f512004d
+      WS2012R2: ami-02bafaa0e5f273fe6
     eu-west-1:
-      WS2012R2: ami-0927c25b5177ff0de
+      WS2012R2: ami-0c12af89247c70572
     eu-west-2:
-      WS2012R2: ami-0e90780577bc9d091
+      WS2012R2: ami-040d07b284d8ded6b
     sa-east-1:
-      WS2012R2: ami-03fb3b14747ca1fe6
+      WS2012R2: ami-0b3e238c9181e2d52
     us-east-1:
-      WS2012R2: ami-028be67c2aa2f1ce1
+      WS2012R2: ami-0b7fbf81b6d5e4ac5
     us-east-2:
-      WS2012R2: ami-09ee46c8d9abcb966
+      WS2012R2: ami-002c8e8f81577a96c
     us-west-1:
-      WS2012R2: ami-05cd4c9c42e255074
+      WS2012R2: ami-073e71ca7a28f7de4
     us-west-2:
-      WS2012R2: ami-095f164d8ca0bdbbf
+      WS2012R2: ami-07872c9dbb86b69ed
   DefaultConfiguration:
     InstallationConfig:
       InstallationBucket: tableau-quickstart
