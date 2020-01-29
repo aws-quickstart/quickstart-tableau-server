@@ -294,46 +294,46 @@ Mappings:
       US1604HVM: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190628
     ap-northeast-1:
       TABCENTOS7HVM: ami-045f38c93733dd48d
-      US1604HVM: ami-018e83eeb86cbe915
+      US1604HVM: ami-095a7c744beee8c87
     ap-northeast-2:
       TABCENTOS7HVM: ami-06cf2a72dadf92410
-      US1604HVM: ami-025376d8670c1a73f
+      US1604HVM: ami-0451e7b0d3c372ce6
     ap-south-1:
       TABCENTOS7HVM: ami-02e60be79e78fef21
-      US1604HVM: ami-0979cb27961aadbf7
+      US1604HVM: ami-0a67c85123dafc9d3
     ap-southeast-1:
       TABCENTOS7HVM: ami-0b4dd9d65556cac22
-      US1604HVM: ami-0216473266cb8902d
+      US1604HVM: ami-0792dcb6a254a96e0
     ap-southeast-2:
       TABCENTOS7HVM: ami-08bd00d7713a39e7d
-      US1604HVM: ami-04dc124dae2db71ce
+      US1604HVM: ami-0185bd7bedae7a446
     ca-central-1:
       TABCENTOS7HVM: ami-033e6106180a626d0
-      US1604HVM: ami-038c40a61ea4741d9
+      US1604HVM: ami-0bc93f104edd5eae8
     eu-central-1:
       TABCENTOS7HVM: ami-04cf43aca3e6f3de3
-      US1604HVM: ami-0e0104f9044920d13
+      US1604HVM: ami-09d2aca27f127f64a
     eu-west-1:
       TABCENTOS7HVM: ami-0ff760d16d9497662
-      US1604HVM: ami-0b508e9b54730f606
+      US1604HVM: ami-0853dbe15819c0ec6
     eu-west-2:
       TABCENTOS7HVM: ami-0eab3a90fc693af19
-      US1604HVM: ami-0a99b53e387548f98
+      US1604HVM: ami-00e7b855fbcdba1ae
     sa-east-1:
       TABCENTOS7HVM: ami-0b8d86d4bf91850af
-      US1604HVM: ami-0b2044c8d1b29388f
+      US1604HVM: ami-0aa73e2ddb1bc44c4
     us-east-1:
       TABCENTOS7HVM: ami-02eac2c0129f6376b
-      US1604HVM: ami-0bfb5f753b6c2d30b
+      US1604HVM: ami-0f5eaa84a344fe6b8
     us-east-2:
       TABCENTOS7HVM: ami-0f2b4fc905b0bd1f1
-      US1604HVM: ami-0bf3d772090752dc5
+      US1604HVM: ami-022f108baf2e4e854
     us-west-1:
       TABCENTOS7HVM: ami-074e2d6769f445be5
-      US1604HVM: ami-086be1694c3196bfb
+      US1604HVM: ami-09148297c3ae8385e
     us-west-2:
       TABCENTOS7HVM: ami-01ed306a12b7d1c96
-      US1604HVM: ami-06c94f9acb4ba21b2
+      US1604HVM: ami-0156c01adcf9bcb6b
   LinuxAMINameMap:
     CentOS-7-HVM:
       Code: TABCENTOS7HVM
