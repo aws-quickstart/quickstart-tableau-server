@@ -85,10 +85,10 @@ Metadata:
         default: Target VPC
 Parameters:
   AcceptEULA:
-    AllowedPattern: 'Yes'
+    AllowedPattern: 'yes'
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'yes'
+      - 'no'
     Description: 'View the EULA at the Link: https://www.tableau.com/eula'
     Type: String
   InstanceType:
@@ -218,7 +218,7 @@ Mappings:
       TABCENTOS7HVM: ami-01ed306a12b7d1c96
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server.x86_64.rpm
+      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2019-4-2.x86_64.rpm
       AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
     MachineConfiguration:
       SystemVolumeSize: 100
@@ -290,6 +290,7 @@ Resources:
                 state: !Ref 'RegState'
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
+                eula: !Ref 'AcceptEULA'
     Properties:
       SecurityGroupIds:
         - !Ref 'ServerSecurityGroup'
