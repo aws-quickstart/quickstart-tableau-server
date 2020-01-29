@@ -84,10 +84,10 @@ Metadata:
         default: Target VPC
 Parameters:
   AcceptEULA:
-    AllowedPattern: 'Yes'
+    AllowedPattern: 'yes'
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'yes'
+      - 'no'
     Description: 'View the EULA at the Link: https://www.tableau.com/eula'
     Type: String
   InstanceType:
@@ -223,7 +223,7 @@ Mappings:
   DefaultConfiguration:
     InstallationConfig:
       InstallationBucket: tableau-quickstart
-      InstallationExecutable: TableauServer-64bit.exe
+      InstallationExecutable: TableauServer-64bit-2019-4-2.exe
     MachineConfiguration:
       SystemVolumeSize: 50
       DataVolumeSize: 100
@@ -267,6 +267,7 @@ Resources:
                 state: !Ref 'RegState'
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
+                eula: !Ref 'AcceptEULA'
             c:\tabsetup\SilentInstaller.py:
               source: !Join
                 - ''
@@ -293,7 +294,7 @@ Resources:
                     - DefaultConfiguration
                     - InstallationConfig
                     - InstallationBucket
-                  - .s3.amazonaws.com/
+                  - .s3-us-west-2.amazonaws.com/
                   - !FindInMap
                     - DefaultConfiguration
                     - InstallationConfig

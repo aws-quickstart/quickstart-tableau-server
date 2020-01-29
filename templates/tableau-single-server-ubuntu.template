@@ -220,7 +220,7 @@ Mappings:
       US1604HVM: ami-0994c095691a46fb5
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server_amd64.deb
+      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2019-4-2_amd64.deb
       AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
     MachineConfiguration:
       SystemVolumeSize: 100
