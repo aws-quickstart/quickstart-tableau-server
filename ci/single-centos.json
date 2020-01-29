@@ -5,7 +5,7 @@
   },
   {
     "ParameterKey": "AcceptEULA",
-    "ParameterValue": "Yes"
+    "ParameterValue": "yes"
   },
   {
     "ParameterKey": "AMIOS",
@@ -31,9 +31,9 @@
     "ParameterKey": "PublicSubnet2CIDR",
     "ParameterValue": "10.0.144.0/20"
   },
- {
-        "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "$[taskcat_autobucket]"
+  {
+    "ParameterKey": "QSS3BucketName",
+    "ParameterValue": "$[taskcat_autobucket]"
   },
   {
     "ParameterKey": "QSS3KeyPrefix",
