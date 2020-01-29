@@ -290,6 +290,7 @@ Resources:
                 state: !Ref 'RegState'
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
+                eula: !Ref 'AcceptEULA'
     Properties:
       SecurityGroupIds:
         - !Ref 'ServerSecurityGroup'
