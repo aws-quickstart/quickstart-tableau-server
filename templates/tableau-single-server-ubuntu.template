@@ -187,37 +187,37 @@ Mappings:
     AMI:
       US1604HVM: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190628
     ap-northeast-1:
-      US1604HVM: ami-095a7c744beee8c87
+      US1604HVM: ami-03344c819e1ac354d
     ap-northeast-2:
-      US1604HVM: ami-0451e7b0d3c372ce6
+      US1604HVM: ami-0c5a717974f63b04c
     ap-south-1:
-      US1604HVM: ami-0a67c85123dafc9d3
+      US1604HVM: ami-0c28d7c6dd94fb3a7
     ap-southeast-1:
-      US1604HVM: ami-0792dcb6a254a96e0
+      US1604HVM: ami-0ca13b3dabeb6c66d
     ap-southeast-2:
-      US1604HVM: ami-0185bd7bedae7a446
+      US1604HVM: ami-02d7e25c1cfdd5695
     ca-central-1:
-      US1604HVM: ami-0bc93f104edd5eae8
+      US1604HVM: ami-0f06e521718460abf
     eu-central-1:
-      US1604HVM: ami-09d2aca27f127f64a
+      US1604HVM: ami-03d8059563982d7b0
     eu-north-1:
-      US1604HVM: ami-0e84469ffd87999a2
+      US1604HVM: ami-017ad30b324faed9b
     eu-west-1:
-      US1604HVM: ami-0853dbe15819c0ec6
+      US1604HVM: ami-0f630a3f40b1eb0b8
     eu-west-2:
-      US1604HVM: ami-00e7b855fbcdba1ae
+      US1604HVM: ami-0a590332f9f499197
     eu-west-3:
-      US1604HVM: ami-0e0cdd7b92ba4684a
+      US1604HVM: ami-051ebe9615b416c15
     sa-east-1:
-      US1604HVM: ami-0aa73e2ddb1bc44c4
+      US1604HVM: ami-0a16d0952a2a7b0ce
     us-east-1:
-      US1604HVM: ami-0f5eaa84a344fe6b8
+      US1604HVM: ami-08bc77a2c7eb2b1da
     us-east-2:
-      US1604HVM: ami-022f108baf2e4e854
+      US1604HVM: ami-08cec7c429219e339
     us-west-1:
-      US1604HVM: ami-09148297c3ae8385e
+      US1604HVM: ami-094f0176b0d009d9f
     us-west-2:
-      US1604HVM: ami-0156c01adcf9bcb6b
+      US1604HVM: ami-02d0ea44ae3fe9561
   DefaultConfiguration:
     InstallationConfig:
       TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2019-4-2_amd64.deb
