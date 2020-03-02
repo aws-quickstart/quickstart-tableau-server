@@ -183,33 +183,33 @@ Mappings:
     AMI:
       WS2012R2: Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.07.12
     ap-northeast-1:
-      WS2012R2: ami-0eee9047b95b1f74c
+      WS2012R2: ami-06823103be2218b98
     ap-northeast-2:
-      WS2012R2: ami-03e603f10c77a5463
+      WS2012R2: ami-050e65d9f2ec90145
     ap-south-1:
-      WS2012R2: ami-0ed889b4a59795a32
+      WS2012R2: ami-045e1f06f29929467
     ap-southeast-1:
-      WS2012R2: ami-0331be4a84b3b2e75
+      WS2012R2: ami-0c322369af7718803
     ap-southeast-2:
-      WS2012R2: ami-087682590b598bde5
+      WS2012R2: ami-0813db0de4ddab990
     ca-central-1:
-      WS2012R2: ami-05b0f7544383bc098
+      WS2012R2: ami-0850dfaa3ee6f6233
     eu-central-1:
-      WS2012R2: ami-02bafaa0e5f273fe6
+      WS2012R2: ami-024652d0a3df40e74
     eu-west-1:
-      WS2012R2: ami-0c12af89247c70572
+      WS2012R2: ami-0d2f69fcc5f00c97a
     eu-west-2:
-      WS2012R2: ami-040d07b284d8ded6b
+      WS2012R2: ami-0998a91bb1756752d
     sa-east-1:
-      WS2012R2: ami-0b3e238c9181e2d52
+      WS2012R2: ami-044d56b6baa621d7d
     us-east-1:
-      WS2012R2: ami-0b7fbf81b6d5e4ac5
+      WS2012R2: ami-094a644f1fb9e4ce3
     us-east-2:
-      WS2012R2: ami-002c8e8f81577a96c
+      WS2012R2: ami-0a1a54d8690206089
     us-west-1:
-      WS2012R2: ami-073e71ca7a28f7de4
+      WS2012R2: ami-094dcbdb1aa24c8da
     us-west-2:
-      WS2012R2: ami-07872c9dbb86b69ed
+      WS2012R2: ami-0f8967b5f815400c0
   DefaultConfiguration:
     MachineConfiguration:
       BastionInstanceType: t2.micro
