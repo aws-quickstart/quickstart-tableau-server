@@ -223,7 +223,7 @@ Mappings:
   DefaultConfiguration:
     InstallationConfig:
       InstallationBucket: tableau-quickstart
-      InstallationExecutable: TableauServer-64bit-2019-4-2.exe
+      InstallationExecutable: TableauServer-64bit-2020-1-0.exe
     MachineConfiguration:
       SystemVolumeSize: 50
       DataVolumeSize: 100
