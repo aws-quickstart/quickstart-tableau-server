@@ -42,6 +42,7 @@ Metadata:
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
+          - QSS3BucketRegion
     ParameterLabels:
       AcceptEULA:
         default: Accept Tableau End User License Agreement
@@ -59,6 +60,8 @@ Metadata:
         default: Quick Start S3 Bucket Name
       QSS3KeyPrefix:
         default: Quick Start S3 Key Prefix
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
       RegCity:
         default: City
       RegCompany:
@@ -157,6 +160,10 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
   RegCity:
     Description: City
     Type: String
@@ -229,6 +236,7 @@ Conditions:
   InfaOnCentos: !Equals
     - !Ref 'AMIOS'
     - CentOS-7-HVM
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   TableauIAMRole:
     Type: AWS::IAM::Role
@@ -242,15 +250,18 @@ Resources:
             Service: ec2.amazonaws.com
           Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - 'arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
+        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
       Policies:
         - PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Action:
                   - s3:GetObject
-                Resource:
-                  - !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
+                Resource: !Sub
+                  - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
+                  - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
                 Effect: Allow
           PolicyName: aws-quick-start-s3-policy
   TableauServerInstanceProfile:
@@ -264,8 +275,10 @@ Resources:
     DependsOn: TableauServerInstanceProfile
     Properties:
       TemplateURL: !Sub
-        - https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/${QSTableauWorkloadTemplate}
-        - QSTableauWorkloadTemplate: !If
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/${QSTableauWorkloadTemplate}
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+          QSTableauWorkloadTemplate: !If
             - InfaOnWindows
             - tableau-single-server-windows.template
             - !If
