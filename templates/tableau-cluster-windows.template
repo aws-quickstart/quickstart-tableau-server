@@ -356,18 +356,18 @@ Resources:
                 Action:
                   - elasticloadbalancing:RegisterInstancesWithLoadBalancer
                 Resource:
-                  - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}'
+                  - !Sub 'arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}'
         - PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
                 Effect: Allow
           PolicyName: aws-quick-start-s3-policy
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM
   TableauWindowsServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     DependsOn:

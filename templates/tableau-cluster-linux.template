@@ -490,7 +490,7 @@ Resources:
             Action:
               - sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Path: /
       Policies:
         - PolicyName: root
@@ -522,15 +522,7 @@ Resources:
                 Action:
                   - cloudformation:DescribeStackResource
                   - cloudformation:SignalResource
-                Resource: !Join
-                  - ''
-                  - - 'arn:aws:cloudformation:'
-                    - !Ref 'AWS::Region'
-                    - ':'
-                    - !Ref 'AWS::AccountId'
-                    - :stack/
-                    - !Ref 'AWS::StackName'
-                    - /*
+                Resource: !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*
               - Effect: Allow
                 Action: ec2:DescribeInstances
                 Resource: '*'
@@ -540,11 +532,11 @@ Resources:
               - Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub 'arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
                 Effect: Allow
           PolicyName: aws-quick-start-s3-policy
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM
   RootInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
