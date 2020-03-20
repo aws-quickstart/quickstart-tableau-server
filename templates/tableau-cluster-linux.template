@@ -59,6 +59,7 @@ Metadata:
         Parameters:
           - QSS3BucketName
           - QSS3KeyPrefix
+          - QSS3BucketRegion
     ParameterLabels:
       AMIOS:
         default: AMI Operating System
@@ -86,6 +87,8 @@ Metadata:
         default: Quick Start S3 Bucket Name
       QSS3KeyPrefix:
         default: Quick Start S3 Key Prefix
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
       RegCity:
         default: City
       RegCompany:
@@ -200,6 +203,10 @@ Parameters:
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
     Type: String
   RegCity:
     Description: City
@@ -341,8 +348,8 @@ Mappings:
       Code: US1604HVM
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstallerOnCentos: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2019-4-2.x86_64.rpm
-      TableauServerInstallerOnUbuntu: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2019-4-2_amd64.deb
+      TableauServerInstallerOnCentos: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
+      TableauServerInstallerOnUbuntu: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0_amd64.deb
       AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
     MachineConfiguration:
       SystemVolumeSize: 100
@@ -378,6 +385,7 @@ Conditions:
   IsCentos: !Equals
     - CentOS-7-HVM
     - !Ref 'AMIOS'
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   VpcInfo:
     Type: Custom::VpcInfo
@@ -531,12 +539,15 @@ Resources:
             Statement:
               - Action:
                   - s3:GetObject
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*'
+                Resource: !Sub
+                  - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
+                  - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
                 Effect: Allow
           PolicyName: aws-quick-start-s3-policy
       ManagedPolicyArns:
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
   RootInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -588,8 +599,6 @@ Resources:
       VpcId: !Ref 'VpcId'
   ServerLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
-    DependsOn:
-      - LoadBalancerSecurityGroup
     Properties:
       Scheme: internet-facing
       Subnets: !Split
@@ -606,10 +615,10 @@ Resources:
             - HTTP
           LoadBalancerPort: !If
             - HasSSLCertificate
-            - 443
-            - 80
+            - '443'
+            - '80'
           InstanceProtocol: HTTP
-          InstancePort: 80
+          InstancePort: '80'
           SSLCertificateId: !If
             - HasSSLCertificate
             - !Ref 'SSLCertificateARN'
@@ -622,8 +631,6 @@ Resources:
   DNSNameEntry:
     Type: AWS::Route53::RecordSet
     Condition: CreateDNSEntry
-    DependsOn:
-      - ServerLoadBalancer
     Properties:
       HostedZoneId: !Ref 'AWSHostedZoneID'
       Name: !Sub '${AWSPublicFQDN}.'
@@ -667,7 +674,7 @@ Resources:
               content: !If
                 - HasWorkers
                 - !Sub |
-                    #!/bin/bash -e
+                    #!/bin/bash -ex
                     # Wait for workers
                     sleep 30
                     wait_json=$(aws cloudformation describe-stack-resource --stack-name "${AWS::StackName}" --region "${AWS::Region}" --logical-resource-id WorkerWaitCondition)
@@ -677,26 +684,60 @@ Resources:
                     done
                     sleep 30
                     set_topology() {
+                        echo 'load server secrects'
                         source '/tmp/secrets.properties'
-                        tsm topology list-nodes -u "$tsm_admin_user" -p "$tsm_admin_pass" | while read p; do
-                            tsm topology set-process -n "$p" -pr clustercontroller -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr gateway -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr vizportal -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr vizqlserver -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr cacheserver -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr searchserver -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr backgrounder -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr dataserver -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr dataengine -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                            tsm topology set-process -n "$p" -pr filestore -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
+
+                        echo 'login'
+                        set +x
+                        tsm login --username $tsm_admin_user --password $tsm_admin_pass
+                        set -x
+
+                        echo 'apply changes'
+                        tsm_nodes=$(tsm topology list-nodes | sed 's/node//g' | awk '$1>m{m=$1}END{print m}')
+                        for n in $(seq 2 $tsm_nodes); do
+                          tsm topology set-process --node node$n --process clustercontroller --count 1
+                          tsm topology set-process --node node$n --process apigateway --count 1
+                          tsm topology set-process --node node$n --process backgrounder --count 2
+                          tsm topology set-process --node node$n --process cacheserver --count 2
+                          tsm topology set-process --node node$n --process dataserver --count 2
+                          tsm topology set-process --node node$n --process filestore --count 1
+                          tsm topology set-process --node node$n --process gateway --count 1
+                          tsm topology set-process --node node$n --process interactive --count 1
+                          tsm topology set-process --node node$n --process searchserver --count 1
+                          tsm topology set-process --node node$n --process vizportal --count 1
+                          tsm topology set-process --node node$n --process vizqlserver --count 2
                         done
-                        tsm topology set-process -n node2 -pr pgsql -c 1 -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                        tsm pending-changes apply --ignore-prompt -iw -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                        tsm stop -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                        tsm topology deploy-coordination-service -n node1,node2,node3  -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                        sleep 120
-                        tsm topology cleanup-coordination-service -u "$tsm_admin_user" -p "$tsm_admin_pass"
-                        tsm start -u "$tsm_admin_user" -p "$tsm_admin_pass"
+                        if [ $tsm_nodes -gt 2 ]; then
+                          tsm topology set-process --node node2 --process pgsql --count 1
+                        fi
+                        if [ $tsm_nodes -gt 2 ]; then
+                          tsm topology set-node-role --nodes node1 --role all-jobs
+                          tsm topology set-node-role --nodes node2 --role no-flows
+                          tsm topology set-node-role --nodes node3 --role flows
+                        fi
+
+                        tsm pending-changes list
+                        tsm pending-changes apply --ignore-warnings --ignore-prompt
+                       
+                        echo 'deploy coordination service'
+                        numbercnNodes=$tsm_nodes
+                        if [ $numbercnNodes -gt 5 ]; then
+                          numbercnNodes=5
+                        elif [ $numbercnNodes -eq 4 ]; then
+                          numbercnNodes=3
+                        elif [ $numbercnNodes -eq 2 ]; then
+                          numbercnNodes=1
+                        fi
+                        if [ $numbercnNodes -gt 1 ]; then
+                          cnNodes=''
+                          for n in $(seq 1 $numbercnNodes); do
+                            cnNodes="${!cnNodes}node$n,"
+                          done
+                          cnNodes=${!cnNodes::-1}
+                          tsm stop
+                          tsm topology deploy-coordination-service --nodes $cnNodes --ignore-prompt
+                          tsm start
+                        fi
                     }
                     send_singal_to_topologyWaitHandle() {
                         # Signal successful completion
@@ -708,21 +749,20 @@ Resources:
                 - No action needed
             /tmp/config.json:
               content:
-                !Sub |
-                  {"configEntities": {
-                      "gatewaySettings": {
-                          "_type": "gatewaySettingsType",
-                          "port": 80,
-                          "firewallOpeningEnabled": true,
-                          "sslRedirectEnabled": true,
-                          "publicHost": "localhost",
-                          "publicPort": 80
-                      },
-                      "identityStore": {
-                          "_type": "identityStoreType",
-                          "type": "local"
-                      }
-                  }}
+                {"configEntities": {
+                    "gatewaySettings": {
+                        "_type": "gatewaySettingsType",
+                        "port": 80,
+                        "firewallOpeningEnabled": true,
+                        "sslRedirectEnabled": true,
+                        "publicHost": "localhost",
+                        "publicPort": 80
+                    },
+                    "identityStore": {
+                        "_type": "identityStoreType",
+                        "type": "local"
+                    }
+                }}
             /tmp/registration.json:
               content:
                 first_name: !Ref 'RegFirstName'
@@ -784,6 +824,7 @@ Resources:
                 apt-get install jq -y
                 apt-get install expect -y
             else
+                yum update -y
                 rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
                 yum install epel-release -y
                 yum install awscli -y
@@ -834,12 +875,12 @@ Resources:
             # Wait for workers
             /tmp/workers.sh
             # Cleanup
-            rm -f /tmp/config.json
-            rm -f /tmp/registration.json
-            rm -f /tmp/secrets.properties
-            rm -f /tmp/workers.sh
-            rm -f /tmp/tableau-server*
-            rm -f /tmp/automated-installer
+            # rm -f /tmp/config.json
+            # rm -f /tmp/registration.json
+            # rm -f /tmp/secrets.properties
+            # rm -f /tmp/workers.sh
+            # rm -f /tmp/tableau-server*
+            # rm -f /tmp/automated-installer
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-cfn-primary-tableau-server-linux'
@@ -857,7 +898,7 @@ Resources:
     Condition: NoServerSecurityGroup
     Properties:
       VpcId: !Ref 'VpcId'
-      GroupDescription: !Sub 'Enable HTTP access via ports 80 and HTTPS access on
+      GroupDescription: 'Enable HTTP access via ports 80 and HTTPS access on
         port 8850, and SSH access from the provided network CIDR, plus all access
         from within the VPC'
       SecurityGroupIngress:
@@ -866,16 +907,16 @@ Resources:
           ToPort: 80
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '8850'
-          ToPort: '8850'
+          FromPort: 8850
+          ToPort: 8850
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '22'
-          ToPort: '22'
+          FromPort: 22
+          ToPort: 22
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '0'
-          ToPort: '65535'
+          FromPort: 0
+          ToPort: 65535
           CidrIp: !GetAtt 'VpcInfo.CidrBlock'
   WorkerGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
