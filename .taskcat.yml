@@ -49,7 +49,7 @@ tests:
       SourceCIDR: 10.0.0.0/16
       TableauServerAdminPassword: $[alfred_genpass_32]
       TableauServerAdminUser: admin
-      TableauServerLicenseKey: $[alfred_getlicensecontent]/tableau/server/license.key
+      TableauServerLicenseKey: overridden
       Username: qsadmin
       WorkerCount: '2'
     regions:
@@ -86,7 +86,7 @@ tests:
       SourceCIDR: 10.0.0.0/16
       TableauServerAdminPassword: $[alfred_genpass_32]
       TableauServerAdminUser: admin
-      TableauServerLicenseKey: $[alfred_getlicensecontent]/tableau/server/license.key
+      TableauServerLicenseKey: overridden
       Username: qsadmin
       WorkerCount: '2'
     regions:
