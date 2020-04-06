@@ -19,110 +19,110 @@ project:
   - us-west-2
   s3_bucket: ''
 tests:
-  cluster-centos:
-    parameters:
-      AMIOS: CentOS-7-HVM
-      AWSHostedZoneID: ''
-      AWSPublicFQDN: ''
-      AcceptEULA: 'Yes'
-      AvailabilityZones: $[alfred_getaz_3]
-      ExistingSecurityGroup: ''
-      IPAddress: ''
-      InstanceType: m4.4xlarge
-      KeyPairName: $[alfred_getkeypair]
-      Password: $[alfred_genpass_32]
-      QSS3BucketName: $[taskcat_autobucket]
-      QSS3BucketRegion: $[taskcat_current_region]
-      RegCity: Test City
-      RegCompany: Test Company
-      RegCountry: Test Country
-      RegDepartment: Test Department
-      RegEmail: testemail@example.com
-      RegFirstName: Test First Name
-      RegIndustry: Test Industry
-      RegLastName: Test Last Name
-      RegPhone: Test Phone
-      RegState: Test State
-      RegTitle: Test Title
-      RegZip: Test Zip
-      SSLCertificateARN: ''
-      SourceCIDR: 10.0.0.0/16
-      TableauServerAdminPassword: $[alfred_genpass_32]
-      TableauServerAdminUser: admin
-      TableauServerLicenseKey: overridden
-      Username: qsadmin
-      WorkerCount: '2'
-    regions:
-    - us-east-1
-    s3_bucket: ''
-    template: templates/tableau-cluster-linux-master.template
-  cluster-ubuntu:
-    parameters:
-      AMIOS: Ubuntu-Server-16.04-LTS-HVM
-      AWSHostedZoneID: ''
-      AWSPublicFQDN: ''
-      AcceptEULA: 'Yes'
-      AvailabilityZones: $[alfred_getaz_3]
-      ExistingSecurityGroup: ''
-      IPAddress: ''
-      InstanceType: m4.4xlarge
-      KeyPairName: $[alfred_getkeypair]
-      Password: $[alfred_genpass_32]
-      QSS3BucketName: $[taskcat_autobucket]
-      QSS3BucketRegion: $[taskcat_current_region]
-      RegCity: Test City
-      RegCompany: Test Company
-      RegCountry: Test Country
-      RegDepartment: Test Department
-      RegEmail: testemail@example.com
-      RegFirstName: Test First Name
-      RegIndustry: Test Industry
-      RegLastName: Test Last Name
-      RegPhone: Test Phone
-      RegState: Test State
-      RegTitle: Test Title
-      RegZip: Test Zip
-      SSLCertificateARN: ''
-      SourceCIDR: 10.0.0.0/16
-      TableauServerAdminPassword: $[alfred_genpass_32]
-      TableauServerAdminUser: admin
-      TableauServerLicenseKey: overridden
-      Username: qsadmin
-      WorkerCount: '2'
-    regions:
-    - eu-west-1
-    s3_bucket: ''
-    template: templates/tableau-cluster-linux-master.template
-  cluster-windows:
-    parameters:
-      AWSHostedZoneID: ''
-      AWSPublicFQDN: ''
-      AvailabilityZones: $[alfred_getaz_3]
-      KeyPairName: $[alfred_getkeypair]
-      QSS3BucketName: $[taskcat_autobucket]
-      QSS3BucketRegion: $[taskcat_current_region]
-      RegCity: Test City
-      RegCompany: Test Company
-      RegCountry: Test Country
-      RegDepartment: Test Department
-      RegEmail: testemail@example.com
-      RegFirstName: Test First Name
-      RegIndustry: Test Industry
-      RegLastName: Test Last Name
-      RegPhone: Test Phone
-      RegState: Test State
-      RegTitle: Test Title
-      RegZip: Test Zip
-      SSLCertificateARN: ''
-      SourceCIDR: 10.0.0.0/16
-      TableauServerAdminPassword: $[alfred_genpass_32]
-      TableauServerAdminUser: admin
-      TableauServerLicenseKey: overridden
-    regions:
-    - us-east-2
-    - us-west-2
-    s3_bucket: ''
-    template: templates/tableau-cluster-windows-master.template
+#  cluster-centos:
+#    parameters:
+#      AMIOS: CentOS-7-HVM
+#      AWSHostedZoneID: ''
+#      AWSPublicFQDN: ''
+#      AcceptEULA: 'yes'
+#      AvailabilityZones: $[alfred_getaz_3]
+#      ExistingSecurityGroup: ''
+#      IPAddress: ''
+#      InstanceType: m4.4xlarge
+#      KeyPairName: $[alfred_getkeypair]
+#      Password: $[alfred_genpass_32]
+#      QSS3BucketName: $[taskcat_autobucket]
+#      QSS3BucketRegion: $[taskcat_current_region]
+#      RegCity: Test City
+#      RegCompany: Test Company
+#      RegCountry: Test Country
+#      RegDepartment: Test Department
+#      RegEmail: testemail@example.com
+#      RegFirstName: Test First Name
+#      RegIndustry: Test Industry
+#      RegLastName: Test Last Name
+#      RegPhone: Test Phone
+#      RegState: Test State
+#      RegTitle: Test Title
+#      RegZip: Test Zip
+#      SSLCertificateARN: ''
+#      SourceCIDR: 10.0.0.0/16
+#      TableauServerAdminPassword: $[alfred_genpass_32]
+#      TableauServerAdminUser: admin
+#      TableauServerLicenseKey: overridden
+#      Username: qsadmin
+#      WorkerCount: '2'
+#    regions:
+#    - us-east-1
+#    s3_bucket: ''
+#    template: templates/tableau-cluster-linux-master.template
+#  cluster-ubuntu:
+#    parameters:
+#      AMIOS: Ubuntu-Server-16.04-LTS-HVM
+#      AWSHostedZoneID: ''
+#      AWSPublicFQDN: ''
+#      AcceptEULA: 'yes'
+#      AvailabilityZones: $[alfred_getaz_3]
+#      ExistingSecurityGroup: ''
+#      IPAddress: ''
+#      InstanceType: m4.4xlarge
+#      KeyPairName: $[alfred_getkeypair]
+#      Password: $[alfred_genpass_32]
+#      QSS3BucketName: $[taskcat_autobucket]
+#      QSS3BucketRegion: $[taskcat_current_region]
+#      RegCity: Test City
+#      RegCompany: Test Company
+#      RegCountry: Test Country
+#      RegDepartment: Test Department
+#      RegEmail: testemail@example.com
+#      RegFirstName: Test First Name
+#      RegIndustry: Test Industry
+#      RegLastName: Test Last Name
+#      RegPhone: Test Phone
+#      RegState: Test State
+#      RegTitle: Test Title
+#      RegZip: Test Zip
+#      SSLCertificateARN: ''
+#      SourceCIDR: 10.0.0.0/16
+#      TableauServerAdminPassword: $[alfred_genpass_32]
+#      TableauServerAdminUser: admin
+#      TableauServerLicenseKey: overridden
+#      Username: qsadmin
+#      WorkerCount: '2'
+#    regions:
+#    - eu-west-1
+#    s3_bucket: ''
+#    template: templates/tableau-cluster-linux-master.template
+#  cluster-windows:
+#    parameters:
+#      AWSHostedZoneID: ''
+#      AWSPublicFQDN: ''
+#      AvailabilityZones: $[alfred_getaz_3]
+#      KeyPairName: $[alfred_getkeypair]
+#      QSS3BucketName: $[taskcat_autobucket]
+#      QSS3BucketRegion: $[taskcat_current_region]
+#      RegCity: Test City
+#      RegCompany: Test Company
+#      RegCountry: Test Country
+#      RegDepartment: Test Department
+#      RegEmail: testemail@example.com
+#      RegFirstName: Test First Name
+#      RegIndustry: Test Industry
+#      RegLastName: Test Last Name
+#      RegPhone: Test Phone
+#      RegState: Test State
+#      RegTitle: Test Title
+#      RegZip: Test Zip
+#      SSLCertificateARN: ''
+#      SourceCIDR: 10.0.0.0/16
+#      TableauServerAdminPassword: $[alfred_genpass_32]
+#      TableauServerAdminUser: admin
+#      TableauServerLicenseKey: overridden
+#    regions:
+#    - us-east-2
+#    - us-west-2
+#    s3_bucket: ''
+#    template: templates/tableau-cluster-windows-master.template
   single-centos:
     parameters:
       AMIOS: CentOS-7-HVM

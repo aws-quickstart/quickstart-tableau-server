@@ -111,7 +111,7 @@ Parameters:
     AllowedPattern: 'yes'
     AllowedValues:
       - 'yes'
-      - 'No'
+      - 'no'
     Description: 'View the EULA at the Link: https://www.tableau.com/eula'
     Type: String
   InstanceType:

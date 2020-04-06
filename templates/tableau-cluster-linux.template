@@ -145,10 +145,10 @@ Parameters:
       no DNS)
     Type: String
   AcceptEULA:
-    AllowedPattern: 'Yes'
+    AllowedPattern: 'yes'
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'yes'
+      - 'no'
     Description: 'View the EULA at the Link: https://www.tableau.com/eula'
     Type: String
   ExistingSecurityGroup:
