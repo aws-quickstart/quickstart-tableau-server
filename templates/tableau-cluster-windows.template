@@ -364,7 +364,7 @@ Resources:
                 Action:
                   - elasticloadbalancing:RegisterInstancesWithLoadBalancer
                 Resource:
-                  - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}'
+                  - !Sub 'arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/${ServerLoadBalancer}'
         - PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -376,9 +376,9 @@ Resources:
                 Effect: Allow
           PolicyName: aws-quick-start-s3-policy
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
-        - 'arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
-        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
   TableauWindowsServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     DependsOn:
