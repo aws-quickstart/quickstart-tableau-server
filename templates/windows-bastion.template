@@ -3,7 +3,7 @@ Description: Bastion host, useful to access private instances created inside a V
   (qs-1puphiin3)
 Parameters:
   InstanceType:
-    Default: t2.micro
+    Default: t3.micro
     Description: The AWS Instance Type to use for our bastion host
     Type: String
   KeyPairName:

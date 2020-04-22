@@ -268,7 +268,7 @@ Resources:
           - ','
           - !Ref 'AvailabilityZones'
         KeyPairName: !Ref 'KeyPairName'
-        NATInstanceType: t2.small
+        NATInstanceType: t3.small
         NumberOfAZs: '2'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'

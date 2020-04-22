@@ -281,7 +281,7 @@ Conditions:
 Mappings:
   DefaultConfiguration:
     MachineConfiguration:
-      BastionInstanceType: t2.micro
+      BastionInstanceType: t3.micro
     NetworkConfiguration:
       VPCCIDR: 10.0.0.0/16
       PublicSubnet1CIDR: 10.0.1.0/24
