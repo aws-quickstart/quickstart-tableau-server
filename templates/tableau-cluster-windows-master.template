@@ -219,7 +219,7 @@ Mappings:
       WS2012R2: ami-0f8967b5f815400c0
   DefaultConfiguration:
     MachineConfiguration:
-      BastionInstanceType: t2.micro
+      BastionInstanceType: t3.micro
     NetworkConfiguration:
       VPCCIDR: 10.0.0.0/16
       PublicSubnet1CIDR: 10.0.1.0/24

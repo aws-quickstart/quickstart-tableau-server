@@ -11,7 +11,7 @@ Tableau Server is an online solution for sharing, distributing, and collaboratin
 
 The Quick Start supports two standardized architectures and provides automatic deployment options for Tableau Server:
 - Standalone architecture. Installs Tableau Server on an Amazon EC2 m5.4xlarge instance running Microsoft Windows Server 2012 R2, CentOS 7 x86_64 HVM, or Ubuntu Server 16.04-LTS-HVM. This architecture is deployed into a new or existing VPC.
-- Cluster architecture. Installs Tableau Server on at least three Amazon EC2 m4.4xlarge instances running Microsoft Windows Server 2012 R2, CentOS 7 x86_64 HVM, or Ubuntu Server 16.04-LTS-HVM. This option builds a new AWS environment consisting of the VPC, subnets, NAT gateways, security groups, bastion host (on an Amazon EC2 t2.micro instance), and other infrastructure components, and then deploys Tableau Server into a new or existing VPC. Optionally, you can use an SSL certificate with this stack for enhanced security. 
+- Cluster architecture. Installs Tableau Server on at least three Amazon EC2 m4.4xlarge instances running Microsoft Windows Server 2012 R2, CentOS 7 x86_64 HVM, or Ubuntu Server 16.04-LTS-HVM. This option builds a new AWS environment consisting of the VPC, subnets, NAT gateways, security groups, bastion host (on an Amazon EC2 t3.micro instance), and other infrastructure components, and then deploys Tableau Server into a new or existing VPC. Optionally, you can use an SSL certificate with this stack for enhanced security. 
 
 This Quick Start provides the following deployment options: 
 - Deploy Tableau Server (on Windows Server, CentOS, or Ubuntu Server) into a new VPC (standalone architecture) 
