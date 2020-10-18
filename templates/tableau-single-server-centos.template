@@ -218,7 +218,7 @@ Mappings:
       TABCENTOS7HVM: ami-01ed306a12b7d1c96
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
+      TableauServerInstaller: https://downloads.tableau.com/esdalt/2020.2.6/tableau-server-2020-2-6.x86_64.rpm
       AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
     MachineConfiguration:
       SystemVolumeSize: 100
@@ -369,16 +369,16 @@ Resources:
         and SSH access from the provided network CIDR
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '80'
-          ToPort: '80'
+          FromPort: 80
+          ToPort: 80
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '8850'
-          ToPort: '8850'
+          FromPort: 8850
+          ToPort: 8850
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '22'
-          ToPort: '22'
+          FromPort: 22
+          ToPort: 22
           CidrIp: !Ref 'SourceCIDR'
 Outputs:
   InstanceID:

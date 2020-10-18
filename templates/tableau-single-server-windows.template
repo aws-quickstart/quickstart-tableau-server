@@ -405,16 +405,16 @@ Resources:
         and RDP access on Port 3389 from the provided network CIDR
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '3389'
-          ToPort: '3389'
+          FromPort: 3389
+          ToPort: 3389
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '8850'
-          ToPort: '8850'
+          FromPort: 8850
+          ToPort: 8850
           CidrIp: !Ref 'SourceCIDR'
         - IpProtocol: tcp
-          FromPort: '80'
-          ToPort: '80'
+          FromPort: 80
+          ToPort: 80
           CidrIp: !Ref 'SourceCIDR'
   TableauServerWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
