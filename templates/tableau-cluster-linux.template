@@ -24,6 +24,8 @@ Metadata:
           - SourceCIDR
           - ExistingSecurityGroup
           - IPAddress
+          - TopologyWaitTimeout
+          - WorkerWaitTimeout
       - Label:
           default: Server DNS configuration
         Parameters:
@@ -117,18 +119,56 @@ Metadata:
         default: SSL Certificate ARN (Requires matching DNS name)
       SourceCIDR:
         default: Source CIDR for Access
+      SpaceThresholdNotification:
+        default: Space Threshold Notification
       TableauServerAdminPassword:
         default: Tableau Server administrator password
       TableauServerAdminUser:
         default: Tableau Server administrator username
       TableauServerLicenseKey:
         default: Tableau Activation Key
+      NotificationUserSubscription:
+        default: Notification User Subscription
+      TableauSMTPAccount:
+        default: Tableau SMTP Account
+      TableauSMTPNotification:
+        default: Tableau SMTP Notification
+      TableauSMTPPort:
+        default:Tableau SMTP Port
+      TableauSMTPPassword:
+        default: Tableau SMTP Password
+      TableauSMTPServer:
+        default: Tableau SMTP Server
+      TableauSMTPCanonicalURL:
+        default: Tableau SMTP Canonical URL
+      TableauTargetAdresses:
+        default: Tableau Target Address
+      TableauSMTPFromAddress:
+        default: Tableau SMTP From Address
+      TableauTrustedHosts:
+        default: Tableau Trusted Hosts
+      TableauDatabaseRestore:
+        default: Tableau Database Restore
+      TableauDatabaseRestoreSource:
+        default: Tableau Database Restore Source
+      TableauServerRepository:
+        default: Tableau Server Repository
+      TableauServerRepositoryUser:
+        default: Tableau Server Repository
+      TableauServerRepositoryPassword:
+        default: Tableau Server Repository
+      DataS3KeyPrefix:
+        default: Data S3 Key Prefix
       Username:
         default: Tableau Services Manager (TSM) administrator username
       VpcId:
         default: Target VPC
       WorkerCount:
         default: Number of additional Tableau Server instances
+      TopologyWaitTimeout:
+        default: Timeout for TopologyWaitCondition
+      WorkerWaitTimeout:
+        default: Timeout for WorkerWaitCondition
 Parameters:
   AMIOS:
     AllowedValues:
@@ -161,8 +201,10 @@ Parameters:
     Type: String
   InstanceType:
     AllowedValues:
+      - t3a.2xlarge
       - m4.4xlarge
       - m4.10xlarge
+      - m5n.2xlarge
       - m5.4xlarge
       - m5.12xlarge
     ConstraintDescription: must be a valid EC2 instance type.
@@ -194,6 +236,15 @@ Parameters:
     Description: S3 bucket name for the Quick Start assets. This string can include
       numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
       or end with a hyphen (-).
+    Type: String
+  DataS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Data key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: data/
+    Description: S3 key prefix for the Data assets. Data key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
@@ -266,6 +317,10 @@ Parameters:
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
     Description: IP address/range to allow access from
     Type: String
+  SpaceThresholdNotification:
+    Description: Space Threshhold Notification
+    Default: 'false'
+    Type: String
   TableauServerAdminPassword:
     Description: The password of the initial administrator for Tableau Server
     MinLength: '1'
@@ -279,6 +334,78 @@ Parameters:
     Description: License Key
     MinLength: '1'
     Type: String
+  TableauSMTPNotification:
+    Description: Tableau SMTP Notification
+    Default: 'false'
+    Type: String
+  TableauSMTPAccount:
+    Description: Tableau SMTP Account
+    Default: ''
+    Type: String
+  TableauSMTPPort:
+    Description: Tableau SMTP Port
+    Default: '587'
+    Type: Number
+  TableauSMTPServer:
+    Description: Tableau SMTP Server
+    Default: ''
+    Type: String
+  TableauSMTPPassword:
+    Description: Tableau SMTP Password
+    Default: ''
+    Type: String
+  TableauSMTPFromAddress:
+    Description: Tableau SMTP From Address
+    Default: ''
+    Type: String
+  TableauSMTPCanonicalURL:
+    Description: Tableau SMTP Canonical URL
+    Default: ''
+    Type: String
+  TableauTargetAdresses:
+    Description: Tableau Target Adresses
+    Default: ''
+    Type: String
+  TableauTrustedHosts:
+    Description: Tableau Trusted Hosts
+    Default: '127.0.0.1'
+    Type: String
+  TableauDatabaseRestore:
+    Description: Tableau Database Restore
+    Default: 'false'
+    Type: String
+  TableauDatabaseRestoreSource:
+    Description: Tableau Database Restore Source
+    Default: ''
+    Type: String
+  TableauDesktopReporting:
+    Description: Tableau Desktop Reporting
+    Default: 'false'
+    Type: String
+  TableauServerRepository:
+    Description: Tableau Server Respository
+    Default: 'false'
+    Type: String
+  TableauServerRepositoryUser:
+    Description: Tableau Server Respository User
+    Default: 'readonly'
+    Type: String
+  TableauServerRepositoryPassword:
+    Description: Tableau Server Respository Password
+    Default: 'readonly'
+    Type: String
+  NotificationUserSubscription:
+    Description: Notification User Subscription
+    Type: String
+    Default: 'false'
+  TopologyWaitTimeout:
+    Description: TopologyWait Timeout
+    Default: '2100'
+    Type: Number
+  WorkerWaitTimeout:
+    Description: WorkerWait Timeout
+    Default: '1200'
+    Type: Number
   Username:
     AllowedPattern: ^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$
     Description: Tableau Services Manager (TSM) administrator username (cannot be
@@ -348,12 +475,21 @@ Mappings:
       Code: US1604HVM
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstallerOnCentos: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
+      TableauServerInstallerOnCentos: https://downloads.tableau.com/esdalt/2020.2.7/tableau-server-2020-2-7.x86_64.rpm
       TableauServerInstallerOnUbuntu: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0_amd64.deb
       AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
     MachineConfiguration:
       SystemVolumeSize: 100
 Conditions:
+  EnableRestoreDatabase: !Equals
+    - 'true'
+    - !Ref 'TableauDatabaseRestore'
+  EnableServerRepository: !Equals
+    - 'true'
+    - !Ref 'TableauServerRepository'
+  HasSMTPConfig: !Equals
+    - 'true'
+    - !Ref 'TableauSMTPNotification'
   HasWorkers: !Not
     - !Equals
       - 0
@@ -544,6 +680,16 @@ Resources:
                   - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
                 Effect: Allow
           PolicyName: aws-quick-start-s3-policy
+        - PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - s3:GetObject
+                Resource: !Sub
+                  - arn:${AWS::Partition}:s3:::${S3Bucket}/${DataS3KeyPrefix}*
+                  - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+                Effect: Allow
+          PolicyName: aws-data-s3-policy
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
@@ -565,7 +711,7 @@ Resources:
     Properties:
       Count: !Ref 'WorkerCount'
       Handle: !Ref 'WorkerWaitHandle'
-      Timeout: '1200'
+      Timeout: !Ref 'WorkerWaitTimeout'
   TopologyWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
     Condition: HasWorkers
@@ -577,7 +723,7 @@ Resources:
     Properties:
       Count: 1
       Handle: !Ref 'TopologyWaitHandle'
-      Timeout: '2100'
+      Timeout: !Ref 'TopologyWaitTimeout'
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -641,6 +787,10 @@ Resources:
   PrimaryServer:
     Type: AWS::EC2::Instance
     Metadata:
+      AWS::CloudFormation::Authentication: 
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref 'RootRole'
       AWS::CloudFormation::Init:
         config:
           files:
@@ -669,6 +819,47 @@ Resources:
                 - DefaultConfiguration
                 - InstallationConfig
                 - AutomatedInstaller
+            /tmp/serverrepo.sh:
+              mode: '550'
+              content: !If
+                - EnableServerRepository
+                - !Sub |
+                    #!/bin/bash -ex
+                    tsm login --username '${Username}' --password '${Password}'
+                    tsm data-access repository-access enable --repository-username '${TableauServerRepositoryUser}' --repository-password '${TableauServerRepositoryPassword}' --ignore-prompt
+                - No action needed
+            /tmp/restore.tsbak:
+              source: !Sub '${TableauDatabaseRestoreSource}'
+              mode: '777'
+              authentication: 'S3AccessCreds'
+            /tmp/restore.sh:
+              mode: '550'
+              content: !If
+                - EnableRestoreDatabase
+                - !Sub |
+                    #!/bin/bash -ex
+                    mv /tmp/restore.tsbak /var/opt/tableau/tableau_server/data/tabsvc/files/backups/restore.tsbak
+                    chmod 777 /var/opt/tableau/tableau_server/data/tabsvc/files/backups/restore.tsbak
+                    tsm stop
+                    tsm maintenance restore -f restore.tsbak >> /tmp/restore.log
+                    tsm start
+                - No action needed
+            /tmp/smtp.sh:
+              mode: '550'
+              content: !If
+                - HasSMTPConfig
+                - !Sub |
+                    #!/bin/bash -ex
+                    tsm login --username '${Username}' --password '${Password}'
+                    tsm configuration set -k svcmonitor.notification.smtp.enabled -v true
+                    tsm configuration set -k svcmonitor.notification.smtp.target_addresses -v '${TableauTargetAdresses}'
+                    tsm configuration set -k svcmonitor.notification.smtp.server -v '${TableauSMTPServer}'
+                    tsm configuration set -k svcmonitor.notification.smtp.send_account -v '${TableauSMTPAccount}'
+                    tsm configuration set -k svcmonitor.notification.smtp.port -v '${TableauSMTPPort}'
+                    tsm configuration set -k svcmonitor.notification.smtp.password -v '${TableauSMTPPassword}'
+                    tsm configuration set -k svcmonitor.notification.smtp.canonical_url -v '${TableauSMTPCanonicalURL}'
+                    tsm configuration set -k svcmonitor.notification.smtp.from_address -v '${TableauSMTPFromAddress}'
+                - No action needed
             /tmp/workers.sh:
               mode: '550'
               content: !If
@@ -712,8 +903,8 @@ Resources:
                         fi
                         if [ $tsm_nodes -gt 2 ]; then
                           tsm topology set-node-role --nodes node1 --role all-jobs
-                          tsm topology set-node-role --nodes node2 --role no-flows
-                          tsm topology set-node-role --nodes node3 --role flows
+                          tsm topology set-node-role --nodes node2 --role all-jobs
+                          tsm topology set-node-role --nodes node3 --role all-jobs
                         fi
 
                         tsm pending-changes list
@@ -825,7 +1016,7 @@ Resources:
                 apt-get install expect -y
             else
                 yum update -y
-                rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
+                rpm -i https://downloads.tableau.com/drivers/linux/yum/tableau-driver/tableau-postgresql-odbc-09.06.0500-1.x86_64.rpm
                 yum install epel-release -y
                 yum install awscli -y
                 yum install jq -y
@@ -864,9 +1055,17 @@ Resources:
                 /tmp/automated-installer -a $tsm_admin_user -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties $license -v --accepteula --force /tmp/tableau-server*
                 source /etc/profile.d/tableau_server.sh
                 tsm topology nodes get-bootstrap-file --file bootstrap.cfg -u "$tsm_admin_user" -p "$tsm_admin_pass"
+                tsm configuration set -k wgserver.trusted_hosts -v '${TableauTrustedHosts}' -u "$tsm_admin_user" -p "$tsm_admin_pass"
+                tsm configuration set -k features.DesktopReporting -v '${TableauDesktopReporting}'  -u "$tsm_admin_user" -p "$tsm_admin_pass"
+                tsm configuration set -k subscriptions.enabled -v '${NotificationUserSubscription}'  -u "$tsm_admin_user" -p "$tsm_admin_pass"
+                tsm configuration set -k storage.monitoring.email_enabled -v '${SpaceThresholdNotification}'  -u "$tsm_admin_user" -p "$tsm_admin_pass"
             }
             install
             unset -f install
+            # Setup repository access
+            /tmp/serverrepo.sh
+            # Setup smtp
+            /tmp/smtp.sh
             # publish the Primary xml
             mv bootstrap.cfg /restricted/
             chmod 555 /restricted/bootstrap.cfg
@@ -874,6 +1073,8 @@ Resources:
             /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource PrimaryServer --region ${AWS::Region}
             # Wait for workers
             /tmp/workers.sh
+            # Restore Database
+            /tmp/restore.sh
             # Cleanup
             # rm -f /tmp/config.json
             # rm -f /tmp/registration.json
@@ -1011,7 +1212,8 @@ Resources:
                 apt-get install jq -y
                 apt-get install expect -y
             else
-                rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
+                yum update -y
+                rpm -i https://downloads.tableau.com/drivers/linux/yum/tableau-driver/tableau-postgresql-odbc-09.06.0500-1.x86_64.rpm 
                 yum install epel-release -y
                 yum install awscli -y
                 yum install jq -y
