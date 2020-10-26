@@ -21,6 +21,9 @@ Parameters:
     Description: Name of an existing EC2 Key Pair used to get the Administrator password
       for the instance
     Type: AWS::EC2::KeyPair::KeyName
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-English-64Bit-Base'
   PrimaryIP:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
     ConstraintDescription: IP address parameter must be in the form x.x.x.x
@@ -253,37 +256,6 @@ Conditions:
     - !Ref 'AWSPublicFQDN'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Mappings:
-  AWSAMIRegionMap:
-    AMI:
-      WS2012R2: Windows_Server-2012-R2_RTM-English-64Bit-Base-2019.07.12
-    ap-northeast-1:
-      WS2012R2: ami-06823103be2218b98
-    ap-northeast-2:
-      WS2012R2: ami-050e65d9f2ec90145
-    ap-south-1:
-      WS2012R2: ami-045e1f06f29929467
-    ap-southeast-1:
-      WS2012R2: ami-0c322369af7718803
-    ap-southeast-2:
-      WS2012R2: ami-0813db0de4ddab990
-    ca-central-1:
-      WS2012R2: ami-0850dfaa3ee6f6233
-    eu-central-1:
-      WS2012R2: ami-024652d0a3df40e74
-    eu-west-1:
-      WS2012R2: ami-0d2f69fcc5f00c97a
-    eu-west-2:
-      WS2012R2: ami-0998a91bb1756752d
-    sa-east-1:
-      WS2012R2: ami-044d56b6baa621d7d
-    us-east-1:
-      WS2012R2: ami-094a644f1fb9e4ce3
-    us-east-2:
-      WS2012R2: ami-0a1a54d8690206089
-    us-west-1:
-      WS2012R2: ami-094dcbdb1aa24c8da
-    us-west-2:
-      WS2012R2: ami-0f8967b5f815400c0
   DefaultConfiguration:
     InstallationConfig:
       InstallationBucket: tableau-quickstart
@@ -588,13 +560,7 @@ Resources:
         - DefaultConfiguration
         - MachineConfiguration
         - InstanceType
-      ImageId: !FindInMap
-        - AWSAMIRegionMap
-        - !Ref 'AWS::Region'
-        - !FindInMap
-          - DefaultConfiguration
-          - MachineConfiguration
-          - WindowsVersion
+      ImageId: !Ref LatestAmiId
       SecurityGroupIds:
         - !Ref 'WorkloadSecurityGroup'
       IamInstanceProfile: !Ref 'TableauWindowsServerInstanceProfile'
