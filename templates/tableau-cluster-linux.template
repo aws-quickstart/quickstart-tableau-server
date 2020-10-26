@@ -712,8 +712,8 @@ Resources:
                         fi
                         if [ $tsm_nodes -gt 2 ]; then
                           tsm topology set-node-role --nodes node1 --role all-jobs
-                          tsm topology set-node-role --nodes node2 --role no-flows
-                          tsm topology set-node-role --nodes node3 --role flows
+                          tsm topology set-node-role --nodes node2 --role all-jobs
+                          tsm topology set-node-role --nodes node3 --role all-jobs
                         fi
 
                         tsm pending-changes list
