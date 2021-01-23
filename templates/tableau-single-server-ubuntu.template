@@ -148,6 +148,7 @@ Parameters:
     Description: Last Name
     MinLength: '1'
     Type: String
+    Default: ricky
   RegPhone:
     Description: Phone
     Type: String
