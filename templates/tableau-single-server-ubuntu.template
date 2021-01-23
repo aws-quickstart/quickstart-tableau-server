@@ -134,6 +134,7 @@ Parameters:
     Description: Email
     MinLength: '1'
     Type: String
+    Default: dileepctr87@gmail.com
   RegFirstName:
     Description: First Name
     MinLength: '1'
