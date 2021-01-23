@@ -126,6 +126,7 @@ Parameters:
   RegDepartment:
     Description: Department
     Type: String
+    Default: IT
   RegEmail:
     Description: Email
     MinLength: '1'
