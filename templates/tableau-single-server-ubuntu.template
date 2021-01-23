@@ -116,6 +116,7 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   RegCity:
     Description: City
+    Default: London
     Type: String
   RegCompany:
     Description: Company
