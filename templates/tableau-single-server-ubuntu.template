@@ -120,10 +120,12 @@ Parameters:
     Type: String
   RegCompany:
     Description: Company
+    Default: mycompany
     Type: String
   RegCountry:
     Description: Country
     Type: String
+    Default: India
   RegDepartment:
     Description: Department
     Type: String
