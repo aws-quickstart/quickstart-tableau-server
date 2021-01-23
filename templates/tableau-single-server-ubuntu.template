@@ -152,6 +152,7 @@ Parameters:
   RegPhone:
     Description: Phone
     Type: String
+    Default: 99999999
   RegState:
     Description: State
     Type: String
