@@ -139,7 +139,7 @@ Parameters:
     Description: First Name
     MinLength: '1'
     Type: String
-    Default: Chadrick
+    Default: Dileep
   RegIndustry:
     Description: Industry
     Type: String
