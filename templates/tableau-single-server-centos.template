@@ -187,35 +187,38 @@ Mappings:
     AMI:
       TABCENTOS7HVM: CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-0722b432-8459-49b6-9b90-79b42624d25d-ami-05713873c6794f575.4
     ap-northeast-1:
-      TABCENTOS7HVM: ami-045f38c93733dd48d
+      TABCENTOS7HVM: ami-06a46da680048c8ae
     ap-northeast-2:
-      TABCENTOS7HVM: ami-06cf2a72dadf92410
+      TABCENTOS7HVM: ami-06e83aceba2cb0907
     ap-south-1:
-      TABCENTOS7HVM: ami-02e60be79e78fef21
+      TABCENTOS7HVM: ami-026f33d38b6410e30
     ap-southeast-1:
-      TABCENTOS7HVM: ami-0b4dd9d65556cac22
+      TABCENTOS7HVM: ami-07f65177cb990d65b
     ap-southeast-2:
-      TABCENTOS7HVM: ami-08bd00d7713a39e7d
+      TABCENTOS7HVM: ami-0b2045146eb00b617
     ca-central-1:
-      TABCENTOS7HVM: ami-033e6106180a626d0
+      TABCENTOS7HVM: ami-04a25c39dc7a8aebb
     eu-central-1:
-      TABCENTOS7HVM: ami-04cf43aca3e6f3de3
+      TABCENTOS7HVM: ami-0e8286b71b81c3cc1
     eu-north-1:
-      TABCENTOS7HVM: ami-5ee66f20
+      TABCENTOS7HVM: ami-05788af9005ef9a93
     eu-west-1:
-      TABCENTOS7HVM: ami-0ff760d16d9497662
+      TABCENTOS7HVM: ami-0b850cf02cc00fdc8
     eu-west-2:
-      TABCENTOS7HVM: ami-0eab3a90fc693af19
+      TABCENTOS7HVM: ami-09e5afc68eed60ef4
+    eu-west-3:
+      TABCENTOS7HVM: ami-0cb72d2e599cffbf9
     sa-east-1:
-      TABCENTOS7HVM: ami-0b8d86d4bf91850af
+      TABCENTOS7HVM: ami-0b30f38d939dd4b54
     us-east-1:
-      TABCENTOS7HVM: ami-02eac2c0129f6376b
+      TABCENTOS7HVM: ami-0affd4508a5d2481b
     us-east-2:
-      TABCENTOS7HVM: ami-0f2b4fc905b0bd1f1
+      TABCENTOS7HVM: ami-01e36b7901e884a10
     us-west-1:
-      TABCENTOS7HVM: ami-074e2d6769f445be5
+      TABCENTOS7HVM: ami-098f55b4287a885ba
     us-west-2:
-      TABCENTOS7HVM: ami-01ed306a12b7d1c96
+      TABCENTOS7HVM: ami-0bc06212a56393ee1
+
   DefaultConfiguration:
     InstallationConfig:
       TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
