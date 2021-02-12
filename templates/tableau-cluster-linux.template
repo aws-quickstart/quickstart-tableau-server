@@ -24,6 +24,7 @@ Metadata:
           - SourceCIDR
           - ExistingSecurityGroup
           - IPAddress
+          - TopologyWaitTimeout
       - Label:
           default: Server DNS configuration
         Parameters:
@@ -129,6 +130,8 @@ Metadata:
         default: Target VPC
       WorkerCount:
         default: Number of additional Tableau Server instances
+      TopologyWaitTimeout:
+        default: Timeout for TopologyWaitCondition
 Parameters:
   AMIOS:
     AllowedValues:
@@ -161,6 +164,7 @@ Parameters:
     Type: String
   InstanceType:
     AllowedValues:
+      - t3a.2xlarge
       - m4.4xlarge
       - m4.10xlarge
       - m5.4xlarge
@@ -279,6 +283,10 @@ Parameters:
     Description: License Key
     MinLength: '1'
     Type: String
+  TopologyWaitTimeout:
+    Description: TopologyWait Timeout
+    Default: '2100'
+    Type: Number
   Username:
     AllowedPattern: ^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$
     Description: Tableau Services Manager (TSM) administrator username (cannot be
@@ -354,7 +362,7 @@ Mappings:
       Code: US1604HVM
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstallerOnCentos: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
+      TableauServerInstallerOnCentos: https://downloads.tableau.com/esdalt/2020.2.6/tableau-server-2020-2-6.x86_64.rpm
       TableauServerInstallerOnUbuntu: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0_amd64.deb
       AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
     MachineConfiguration:
@@ -583,7 +591,7 @@ Resources:
     Properties:
       Count: 1
       Handle: !Ref 'TopologyWaitHandle'
-      Timeout: '2100'
+      Timeout: !Ref 'TopologyWaitTimeout'
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -831,7 +839,7 @@ Resources:
                 apt-get install expect -y
             else
                 yum update -y
-                rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
+                rpm -i https://downloads.tableau.com/drivers/linux/yum/tableau-driver/tableau-postgresql-odbc-09.06.0500-1.x86_64.rpm
                 yum install epel-release -y
                 yum install awscli -y
                 yum install jq -y
@@ -1017,7 +1025,8 @@ Resources:
                 apt-get install jq -y
                 apt-get install expect -y
             else
-                rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
+                yum update -y
+                rpm -i https://downloads.tableau.com/drivers/linux/yum/tableau-driver/tableau-postgresql-odbc-09.06.0500-1.x86_64.rpm 
                 yum install epel-release -y
                 yum install awscli -y
                 yum install jq -y
