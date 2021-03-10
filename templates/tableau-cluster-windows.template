@@ -634,13 +634,7 @@ Resources:
         - DefaultConfiguration
         - MachineConfiguration
         - InstanceType
-      ImageId: !FindInMap
-        - AWSAMIRegionMap
-        - !Ref 'AWS::Region'
-        - !FindInMap
-          - DefaultConfiguration
-          - MachineConfiguration
-          - WindowsVersion
+      ImageId: !Ref LatestAmiId
       SecurityGroupIds:
         - !Ref 'WorkloadSecurityGroup'
       KeyName: !Ref 'KeyPairName'
@@ -713,13 +707,7 @@ Resources:
         - DefaultConfiguration
         - MachineConfiguration
         - InstanceType
-      ImageId: !FindInMap
-        - AWSAMIRegionMap
-        - !Ref 'AWS::Region'
-        - !FindInMap
-          - DefaultConfiguration
-          - MachineConfiguration
-          - WindowsVersion
+      ImageId: !Ref LatestAmiId
       SecurityGroupIds:
         - !Ref 'WorkloadSecurityGroup'
       KeyName: !Ref 'KeyPairName'
