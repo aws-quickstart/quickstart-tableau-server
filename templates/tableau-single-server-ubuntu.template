@@ -12,6 +12,7 @@ Metadata:
           - InstanceType
           - KeyPairName
           - SourceCIDR
+          - CloudFormationLogs
       - Label:
           default: Secrets
         Parameters:
@@ -182,6 +183,9 @@ Parameters:
   VPCId:
     Description: The ID of the VPC into which to deploy the cluster
     Type: AWS::EC2::VPC::Id
+  CloudFormationLogs:
+    Description: Cloudwatch LogsGroup
+    Type: String
 Mappings:
   AWSAMIRegionMap:
     AMI:
@@ -221,8 +225,9 @@ Mappings:
 
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0_amd64.deb
-      AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
+      TableauServerInstaller: https://www.tableau.com/downloads/server/deb
+      AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/linux/automated-installer/automated-installer
+      PostgreSqlJdbc: https://downloads.tableau.com/drivers/linux/postgresql/postgresql-42.2.14.jar
     MachineConfiguration:
       SystemVolumeSize: 100
       UbuntuVersion: US1604HVM
@@ -237,22 +242,18 @@ Resources:
       AWS::CloudFormation::Init:
         config:
           packages:
-            deb:
-              postgresql-odbc: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc_9.5.3_amd64.deb
             apt:
               awscli: []
           files:
             /tmp/secrets.properties:
               mode: '640'
-              content:
-                !Sub |
+              content: !Sub |
                   tsm_admin_user='${Username}'
                   tsm_admin_pass='${Password}'
                   tableau_server_admin_user='${TableauServerAdminUser}'
                   tableau_server_admin_pass='${TableauServerAdminPassword}'
             /tmp/config.json:
-              content:
-                !Sub |
+              content: !Sub |
                   {"configEntities": {
                       "gatewaySettings": {
                           "_type": "gatewaySettingsType",
@@ -269,15 +270,15 @@ Resources:
                   }}
             /tmp/tableau-server.deb:
               source: !FindInMap
-                - DefaultConfiguration
-                - InstallationConfig
-                - TableauServerInstaller
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - TableauServerInstaller
             /tmp/automated-installer:
               mode: '550'
               source: !FindInMap
-                - DefaultConfiguration
-                - InstallationConfig
-                - AutomatedInstaller
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - AutomatedInstaller
             /tmp/registration.json:
               content:
                 first_name: !Ref 'RegFirstName'
@@ -293,6 +294,47 @@ Resources:
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
                 eula: !Ref 'AcceptEULA'
+            /opt/tableau/tableau_driver/jdbc:
+              mode: '550'
+              source: !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - PostgreSqlJdbc
+            /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json:
+              content: !Sub |
+                  {
+                          "agent": {
+                                  "run_as_user": "root"
+                          },
+                          "logs": {
+                                  "logs_collected": {
+                                          "files": {
+                                                  "collect_list": [
+                                                          {
+                                                                  "file_path": "/var/log/cloud-init-output.log",
+                                                                  "log_group_name": "${CloudFormationLogs}",
+                                                                  "log_stream_name": "{instance_id}"
+                                                          },
+                                                          {
+                                                                  "file_path": "/var/log/cfn-init.log",
+                                                                  "log_group_name": "${CloudFormationLogs}",
+                                                                  "log_stream_name": "{instance_id}"
+                                                          }
+                                                  ]
+                                          }
+                                  }
+                          }
+                  } 
+              mode: '000444'
+              owner: root
+              group: root
+          services: 
+            sysvinit: 
+              awslogs: 
+                enabled: "true"
+                ensureRunning: "true"
+                files: 
+                      - "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
     Properties:
       SecurityGroupIds:
         - !Ref 'ServerSecurityGroup'
@@ -320,38 +362,42 @@ Resources:
         Fn::Sub:
         - |
             #!/bin/bash -x
-            apt-get update
-            apt-get install -y python-setuptools
-
+            # install CFN scripts and cloudwatch agent
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git; do echo "Retrying"; done
+              cd /quickstart-linux-utilities
+              source quickstart-cfn-tools.source
+              qs_update-os || qs_err
+              qs_bootstrap_pip || qs_err
+              qs_aws-cfn-bootstrap || qs_err
+              qs_cloudwatch_install || qs_err
             # Call Init
-            /usr/bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
+            /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
             # Various machine configs
-            hostnamectl set-hostname $(hostnamectl --static)
-            setup_sftp() {
-                source '/tmp/secrets.properties'
-                useradd -m "$tsm_admin_user"
-                echo -e "$tsm_admin_pass\n$tsm_admin_pass" | passwd "$tsm_admin_user"
+              hostnamectl set-hostname $(hostnamectl --static)
+              setup_sftp() {
+                  source '/tmp/secrets.properties'
+                  useradd -m "$tsm_admin_user"
+                  echo -e "$tsm_admin_pass\n$tsm_admin_pass" | passwd "$tsm_admin_user"
 
-            }
-            setup_sftp
-            unset -f setup_sftp
-            export LANG=en_US.UTF-8
+              }
+              setup_sftp
+              unset -f setup_sftp
+              export LANG=en_US.UTF-8
             # Install Tableau Server
-            install() {
-                source '/tmp/secrets.properties'
-                /tmp/automated-installer -a $tsm_admin_user -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseString} -v --accepteula --force /tmp/tableau-server.deb
-            }
-            install
-            unset -f install
+              install() {
+                  source '/tmp/secrets.properties'
+                  /tmp/automated-installer -a $tsm_admin_user -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseString} -v --accepteula --force /tmp/tableau-server.deb
+              }
+              install
+              unset -f install
             # Signal successful completion
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
+            /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
             # Cleanup
-            rm -f /tmp/config.json
-            rm -f /tmp/registration.json
-            rm -f /tmp/secrets.properties
-            rm -f /tmp/tableau-server.deb
-            rm -f /tmp/automated-installer
+              rm -f /tmp/config.json
+              rm -f /tmp/registration.json
+              rm -f /tmp/secrets.properties
+              rm -f /tmp/tableau-server.deb
+              rm -f /tmp/automated-installer
         - LicenseString:
               Fn::If:
                   - IsTrial

@@ -270,9 +270,17 @@ Resources:
       Path: /
       Roles:
         - !Ref 'TableauIAMRole'
+  CloudFormationLogs:
+    Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy : Retain
+    Properties:
+      LogGroupName: Tableau-Single-Server-Logs
+      RetentionInDays: 7
   WorkloadStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: TableauServerInstanceProfile
+    DependsOn: 
+     - TableauServerInstanceProfile
+     - CloudFormationLogs
     Properties:
       TemplateURL: !Sub
         - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/${QSTableauWorkloadTemplate}
@@ -310,6 +318,7 @@ Resources:
         TableauServerInstanceProfile: !Ref 'TableauServerInstanceProfile'
         Username: !Ref 'Username'
         VPCId: !Ref 'VPCID'
+        CloudFormationLogs: !Ref 'CloudFormationLogs'
 Outputs:
   InstanceID:
     Description: EC2 InstanceID of the instance running Tableau Server
