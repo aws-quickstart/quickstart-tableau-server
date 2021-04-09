@@ -1,0 +1,69 @@
+---
+region: us-east-1
+version: 2021-03-15
+resources:
+  - name: qs-tableau-server-single
+    resource_file: s3://aws-quickstart/quickstart-tableau-server/templates/tableau-single-server-master.template
+    parameters: 
+    - parameter_key: AvailabilityZones
+      parameter_value: us-east-1a, us-east-1b
+    - parameter_key: AcceptEULA
+      parameter_value: 'yes'
+    - parameter_key: AMIOS
+      parameter_value: CentOS-7-HVM
+    - parameter_key: InstanceType
+      parameter_value: m5.4xlarge
+    - parameter_key: KeyPairName
+      parameter_value: aws-qs-tc-all
+    - parameter_key: Password
+      parameter_value: _get_ssm_secure_string_/qs/genericpw/12ANS
+    - parameter_key: PublicSubnet1CIDR
+      parameter_value: 10.0.128.0/20
+    - parameter_key: PublicSubnet2CIDR
+      parameter_value: 10.0.144.0/20
+    - parameter_key: QSS3BucketName
+      parameter_value: aws-quickstart
+    - parameter_key: QSS3KeyPrefix
+      parameter_value: quickstart-tableau-server/
+    - parameter_key: RegCity
+      parameter_value: Test City
+    - parameter_key: RegCompany
+      parameter_value: Test Company
+    - parameter_key: RegCountry
+      parameter_value: Test Country
+    - parameter_key: RegDepartment
+      parameter_value: Test Department
+    - parameter_key: RegEmail
+      parameter_value: testemail@example.com
+    - parameter_key: RegFirstName
+      parameter_value: Test First Name
+    - parameter_key: RegIndustry
+      parameter_value: Test Industry
+    - parameter_key: RegLastName
+      parameter_value: Test Last Name
+    - parameter_key: RegPhone
+      parameter_value: Test Phone
+    - parameter_key: RegState
+      parameter_value: Test State
+    - parameter_key: RegTitle
+      parameter_value: Test Title
+    - parameter_key: RegZip
+      parameter_value: Test Zip
+    - parameter_key: SourceCIDR
+      parameter_value: 0.0.0.0/0
+    - parameter_key: TableauServerAdminPassword
+      parameter_value: _get_ssm_secure_string_/qs/genericpw/12ANS
+    - parameter_key: TableauServerAdminUser
+      parameter_value: admin
+    - parameter_key: TableauServerLicenseKey
+      parameter_value: ""
+    - parameter_key: Username
+      parameter_value: tsmadmin
+    - parameter_key: VPCCIDR
+      parameter_value: 10.0.0.0/16
+    deploy_method: stack_set
+    deployment_targets:
+      organizational_units:
+        - Workloads
+    regions:
+      - us-east-1
