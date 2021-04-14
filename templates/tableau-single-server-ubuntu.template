@@ -116,34 +116,43 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   RegCity:
     Description: City
+    Default: London
     Type: String
   RegCompany:
     Description: Company
+    Default: mycompany
     Type: String
   RegCountry:
     Description: Country
     Type: String
+    Default: India
   RegDepartment:
     Description: Department
     Type: String
+    Default: IT
   RegEmail:
     Description: Email
     MinLength: '1'
     Type: String
+    Default: dileepctr87@gmail.com
   RegFirstName:
     Description: First Name
     MinLength: '1'
     Type: String
+    Default: Dileep
   RegIndustry:
     Description: Industry
     Type: String
+    Default: Healthcare
   RegLastName:
     Description: Last Name
     MinLength: '1'
     Type: String
+    Default: ricky
   RegPhone:
     Description: Phone
     Type: String
+    Default: 99999999
   RegState:
     Description: State
     Type: String
