@@ -12,7 +12,7 @@ Metadata:
           - InstanceType
           - KeyPairName
           - SourceCIDR
-          - CloudFormationLogs
+          - TableauCloudFormationLogs
       - Label:
           default: Secrets
         Parameters:
@@ -183,7 +183,7 @@ Parameters:
   VPCId:
     Description: The ID of the VPC into which to deploy the cluster
     Type: AWS::EC2::VPC::Id
-  CloudFormationLogs:
+  TableauCloudFormationLogs:
     Description: Cloudwatch LogsGroup
     Type: String
 Mappings:
@@ -300,31 +300,23 @@ Resources:
                     - DefaultConfiguration
                     - InstallationConfig
                     - PostgreSqlJdbc
-            /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json:
+            /var/awslogs/etc/awslogs.conf:
               content: !Sub |
-                  {
-                          "agent": {
-                                  "run_as_user": "root"
-                          },
-                          "logs": {
-                                  "logs_collected": {
-                                          "files": {
-                                                  "collect_list": [
-                                                          {
-                                                                  "file_path": "/var/log/cloud-init-output.log",
-                                                                  "log_group_name": "${CloudFormationLogs}",
-                                                                  "log_stream_name": "{instance_id}"
-                                                          },
-                                                          {
-                                                                  "file_path": "/var/log/cfn-init.log",
-                                                                  "log_group_name": "${CloudFormationLogs}",
-                                                                  "log_stream_name": "{instance_id}"
-                                                          }
-                                                  ]
-                                          }
-                                  }
-                          }
-                  } 
+                [general]
+                state_file = /var/awslogs/state/agent-state
+                [logstream1]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream2]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream3]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/opt/tableau/tableau_server/logs/**
+
               mode: '000444'
               owner: root
               group: root
@@ -334,7 +326,7 @@ Resources:
                 enabled: "true"
                 ensureRunning: "true"
                 files: 
-                      - "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+                      - "/var/awslogs/etc/awslogs.conf"
     Properties:
       SecurityGroupIds:
         - !Ref 'ServerSecurityGroup'
