@@ -233,9 +233,9 @@ Conditions:
   InfaOnWindows: !Equals
     - !Ref 'AMIOS'
     - Windows
-  InfaOnCentos: !Equals
+  InfaOnUbuntu: !Equals
     - !Ref 'AMIOS'
-    - CentOS-7-HVM
+    - Ubuntu-Server-16.04-LTS-HVM
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   TableauIAMRole:
@@ -289,10 +289,11 @@ Resources:
             - InfaOnWindows
             - tableau-single-server-windows.template
             - !If
-              - InfaOnCentos
-              - tableau-single-server-centos.template
+              - InfaOnUbuntu
               - tableau-single-server-ubuntu.template
+              - tableau-single-server-centos.template
       Parameters:
+        AMIOS: !Ref AMIOS
         PublicSubnetId: !Ref 'PublicSubnetID'
         AcceptEULA: !Ref 'AcceptEULA'
         InstanceType: !Ref 'InstanceType'
