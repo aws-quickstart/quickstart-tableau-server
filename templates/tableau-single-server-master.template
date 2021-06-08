@@ -271,6 +271,7 @@ Resources:
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         CreatePrivateSubnets: 'false'
+        CreateNATGateways: 'false'
         VPCCIDR: !Ref 'VPCCIDR'
   WorkloadStack:
     Type: AWS::CloudFormation::Stack
