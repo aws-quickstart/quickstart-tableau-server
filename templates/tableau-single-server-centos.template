@@ -12,6 +12,7 @@ Metadata:
           - InstanceType
           - KeyPairName
           - SourceCIDR
+          - TableauCloudFormationLogs
       - Label:
           default: Secrets
         Parameters:
@@ -84,6 +85,14 @@ Metadata:
       VPCId:
         default: Target VPC
 Parameters:
+  AMIOS:
+    AllowedValues:
+      - Windows
+      - CentOS-7-HVM
+      - Ubuntu-Server-16.04-LTS-HVM
+    Default: CentOS-7-HVM
+    Description: Operating System on which Tableau Server will be deployed
+    Type: String
   AcceptEULA:
     AllowedPattern: 'yes'
     AllowedValues:
@@ -182,6 +191,12 @@ Parameters:
   VPCId:
     Description: The ID of the VPC into which to deploy the cluster
     Type: AWS::EC2::VPC::Id
+  LatestAmazonLinux2Id:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+  TableauCloudFormationLogs:
+    Description: Cloudwatch LogsGroup
+    Type: String
 Mappings:
   AWSAMIRegionMap:
     AMI:
@@ -221,8 +236,9 @@ Mappings:
 
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
-      AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
+      TableauServerInstaller: https://www.tableau.com/downloads/server/rpm
+      AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/linux/automated-installer/automated-installer
+      PostgreSqlJdbc: https://downloads.tableau.com/drivers/linux/postgresql/postgresql-42.2.14.jar
     MachineConfiguration:
       SystemVolumeSize: 100
       CentosVersion: TABCENTOS7HVM
@@ -239,7 +255,6 @@ Resources:
           packages:
             rpm:
               epel-release: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-              postgresql-odbc: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
             yum:
               awscli: []
           files:
@@ -294,6 +309,38 @@ Resources:
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
                 eula: !Ref 'AcceptEULA'
+            /opt/tableau/tableau_driver/jdbc:
+              mode: '550'
+              source: !FindInMap
+                - DefaultConfiguration
+                - InstallationConfig
+                - PostgreSqlJdbc
+            /var/awslogs/etc/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file = /var/awslogs/state/agent-state
+                [logstream1]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream2]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream3]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/opt/tableau/tableau_server/logs/**
+              mode: '000444'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              awslogs:
+                enabled: "true"
+                ensureRunning: "true"
+                files:
+                  - "/var/awslogs/etc/awslogs.conf"
     Properties:
       SecurityGroupIds:
         - !Ref 'ServerSecurityGroup'
@@ -321,9 +368,18 @@ Resources:
         Fn::Sub:
         - |
             #!/bin/bash -x
+            yum install -y git
+            # install CFN scripts and cloudwatch agent
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git; do echo "Retrying"; done
+            cd /quickstart-linux-utilities
+            source quickstart-cfn-tools.source
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            qs_cloudwatch_install || qs_err
             # Call Init
-            /usr/bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
+            /bin/cfn-init --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
+
             # Various machine configs
             hostnamectl set-hostname $(hostnamectl --static)
             setup_sftp() {
@@ -341,7 +397,7 @@ Resources:
             install
             unset -f install
             # Signal successful completion
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
+            /bin/cfn-signal -e $? --stack ${AWS::StackName} --resource TableauServer --region ${AWS::Region}
             # Cleanup
             rm -f /tmp/config.json
             rm -f /tmp/registration.json

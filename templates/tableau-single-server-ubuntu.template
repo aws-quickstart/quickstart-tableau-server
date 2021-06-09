@@ -92,6 +92,14 @@ Parameters:
       - 'no'
     Description: 'View the EULA at the Link: https://www.tableau.com/eula'
     Type: String
+  AMIOS:
+    AllowedValues:
+      - Windows
+      - CentOS-7-HVM
+      - Ubuntu-Server-16.04-LTS-HVM
+    Default: CentOS-7-HVM
+    Description: Operating System on which Tableau Server will be deployed
+    Type: String
   InstanceType:
     AllowedValues:
       - m4.2xlarge
