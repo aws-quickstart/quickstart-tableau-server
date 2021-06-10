@@ -354,9 +354,10 @@ Mappings:
       Code: US1604HVM
   DefaultConfiguration:
     InstallationConfig:
-      TableauServerInstallerOnCentos: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0.x86_64.rpm
-      TableauServerInstallerOnUbuntu: https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-server-2020-1-0_amd64.deb
-      AutomatedInstaller: https://s3-us-west-2.amazonaws.com/tableau-quickstart/automated-installer
+      TableauServerInstallerOnCentos: https://www.tableau.com/downloads/server/rpm
+      TableauServerInstallerOnUbuntu: https://www.tableau.com/downloads/server/deb
+      AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/linux/automated-installer/automated-installer
+      PostgreSqlJdbc: https://downloads.tableau.com/drivers/linux/postgresql/postgresql-42.2.14.jar
     MachineConfiguration:
       SystemVolumeSize: 100
 Conditions:
@@ -388,8 +389,11 @@ Conditions:
       - !Ref 'AWSPublicFQDN'
   CreateDNSEntry: !Not
     - !Condition 'NoDNSEntry'
-  IsCentos: !Equals
-    - CentOS-7-HVM
+#  IsCentos: !Equals
+#    - CentOS-7-HVM
+#    - !Ref 'AMIOS'
+  IsUbuntu: !Equals
+    - Ubuntu-Server-16.04-LTS-HVM
     - !Ref 'AMIOS'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
@@ -584,6 +588,11 @@ Resources:
       Count: 1
       Handle: !Ref 'TopologyWaitHandle'
       Timeout: '2100'
+  TableauCloudFormationLogs:
+    Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy: Retain
+    Properties:
+      RetentionInDays: 7
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -660,15 +669,15 @@ Resources:
                   tableau_server_admin_pass='${TableauServerAdminPassword}'
             /tmp/tableau-server:
               source: !If
-                - IsCentos
-                - !FindInMap
-                  - DefaultConfiguration
-                  - InstallationConfig
-                  - TableauServerInstallerOnCentos
+                - IsUbuntu
                 - !FindInMap
                   - DefaultConfiguration
                   - InstallationConfig
                   - TableauServerInstallerOnUbuntu
+                - !FindInMap
+                  - DefaultConfiguration
+                  - InstallationConfig
+                  - TableauServerInstallerOnCentos
             /tmp/automated-installer:
               mode: '550'
               source: !FindInMap
@@ -682,6 +691,13 @@ Resources:
                 - !Sub |
                     #!/bin/bash -ex
                     # Wait for workers
+                    if [[ $(ls /etc/*-release) ]]; then
+                    OS=$( cat /etc/*-release \
+                    | grep ^ID= |awk -F= '{print $2}'\
+                    | tr -cd [:alpha:])
+                    else
+                    return 1
+                    fi
                     sleep 30
                     wait_json=$(aws cloudformation describe-stack-resource --stack-name "${AWS::StackName}" --region "${AWS::Region}" --logical-resource-id WorkerWaitCondition)
                     while [ $(echo $wait_json | jq -r '.StackResourceDetail.ResourceStatus') != 'CREATE_COMPLETE' ]; do
@@ -745,13 +761,17 @@ Resources:
                           tsm start
                         fi
                     }
-                    send_singal_to_topologyWaitHandle() {
+                    send_signal_to_topologyWaitHandle() {
                         # Signal successful completion
-                        /opt/aws/bin/cfn-signal -e $? "${TopologyWaitHandle}"
+                        if [ "$OS" == "ubuntu" ]; then
+                          /usr/local/bin/cfn-signal -e $? "${TopologyWaitHandle}"
+                        else
+                          /bin/cfn-signal -e $? "${TopologyWaitHandle}"
+                        fi
                     }
                     set_topology
                     unset -f set_topology
-                    trap send_singal_to_topologyWaitHandle EXIT
+                    trap send_signal_to_topologyWaitHandle EXIT
                 - No action needed
             /tmp/config.json:
               content:
@@ -783,6 +803,38 @@ Resources:
                 state: !Ref 'RegState'
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
+            /opt/tableau/tableau_driver/jdbc:
+              mode: '550'
+              source: !FindInMap
+                - DefaultConfiguration
+                - InstallationConfig
+                - PostgreSqlJdbc
+            /var/awslogs/etc/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file = /var/awslogs/state/agent-state
+                [logstream1]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream2]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream3]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/opt/tableau/tableau_server/logs/**
+              mode: '000444'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              awslogs:
+                enabled: "true"
+                ensureRunning: "true"
+                files:
+                  - "/var/awslogs/etc/awslogs.conf"
     Properties:
       SubnetId: !Select
         - '0'
@@ -823,23 +875,34 @@ Resources:
             if [ "$OS" == "ubuntu" ]; then
                 apt-get update
                 apt-get install -y python-setuptools
-
-                wget https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc_9.5.3_amd64.deb
-                dpkg -i tableau-postgresql-odbc_9.5.3_amd64.deb
                 apt-get install awscli -y
                 apt-get install jq -y
                 apt-get install expect -y
             else
                 yum update -y
-                rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
+                yum install -y git
                 yum install epel-release -y
                 yum install awscli -y
                 yum install jq -y
                 yum install expect -y
             fi
+
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git; do echo "Retrying"; done
+            cd /quickstart-linux-utilities
+            source quickstart-cfn-tools.source
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            # qs_cloudwatch_install works for CentOS and Ubuntu, but doesn't work for Amazon Linux 2
+            qs_cloudwatch_install || qs_err
+
             # Call Init
-            /usr/bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource PrimaryServer  --region ${AWS::Region}
+            if [ "$OS" == "ubuntu" ]; then
+              /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource PrimaryServer  --region ${AWS::Region}
+            else
+              /bin/cfn-init --stack ${AWS::StackName} --resource PrimaryServer  --region ${AWS::Region}
+            fi
+
             # Various machine configs
             hostnamectl set-hostname $(hostnamectl --static)
             setup_sftp() {
@@ -872,12 +935,18 @@ Resources:
                 tsm topology nodes get-bootstrap-file --file bootstrap.cfg -u "$tsm_admin_user" -p "$tsm_admin_pass"
             }
             install
+            signal_code=$?
             unset -f install
             # publish the Primary xml
             mv bootstrap.cfg /restricted/
             chmod 555 /restricted/bootstrap.cfg
             # Signal successful completion
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource PrimaryServer --region ${AWS::Region}
+            if [ "$OS" == "ubuntu" ]; then
+              /usr/local/bin/cfn-signal -e $signal_code --stack ${AWS::StackName} --resource PrimaryServer --region ${AWS::Region}
+            else
+              /bin/cfn-signal -e $signal_code --stack ${AWS::StackName} --resource PrimaryServer --region ${AWS::Region}
+            fi
+
             # Wait for workers
             /tmp/workers.sh
             # Cleanup
@@ -950,15 +1019,15 @@ Resources:
           files:
             /tmp/tableau-server:
               source: !If
-                - IsCentos
-                - !FindInMap
-                  - DefaultConfiguration
-                  - InstallationConfig
-                  - TableauServerInstallerOnCentos
+                - IsUbuntu
                 - !FindInMap
                   - DefaultConfiguration
                   - InstallationConfig
                   - TableauServerInstallerOnUbuntu
+                - !FindInMap
+                  - DefaultConfiguration
+                  - InstallationConfig
+                  - TableauServerInstallerOnCentos
             /tmp/automated-installer:
               mode: '550'
               source: !FindInMap
@@ -973,6 +1042,38 @@ Resources:
                   tsm_admin_pass='${Password}'
                   tableau_server_admin_user='${TableauServerAdminUser}'
                   tableau_server_admin_pass='${TableauServerAdminPassword}'
+            /opt/tableau/tableau_driver/jdbc:
+              mode: '550'
+              source: !FindInMap
+                - DefaultConfiguration
+                - InstallationConfig
+                - PostgreSqlJdbc
+            /var/awslogs/etc/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file = /var/awslogs/state/agent-state
+                [logstream1]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream2]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/log/cloud-init-output.log
+                [logstream3]
+                log_group_name = ${TableauCloudFormationLogs}
+                log_stream_name = {instance_id}
+                file = /var/opt/tableau/tableau_server/logs/**
+              mode: '000444'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              awslogs:
+                enabled: "true"
+                ensureRunning: "true"
+                files:
+                  - "/var/awslogs/etc/awslogs.conf"
     Properties:
       ImageId: !FindInMap
         - AWSAMIRegionMap
@@ -1010,22 +1111,34 @@ Resources:
             if [ "$OS" == "ubuntu" ]; then
                 apt-get update
                 apt-get install -y python-setuptools
-
-                wget https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc_9.5.3_amd64.deb
-                dpkg -i tableau-postgresql-odbc_9.5.3_amd64.deb
                 apt-get install awscli -y
                 apt-get install jq -y
                 apt-get install expect -y
             else
-                rpm -i https://s3-us-west-2.amazonaws.com/tableau-quickstart/tableau-postgresql-odbc-9.5.3-1.x86_64.rpm
+                yum install -y git
                 yum install epel-release -y
                 yum install awscli -y
                 yum install jq -y
                 yum install expect -y
             fi
+
             # Call Init
-            /usr/bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-            /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource WorkerLaunchConfig  --region ${AWS::Region}
+            until git clone https://github.com/aws-quickstart/quickstart-linux-utilities.git; do echo "Retrying"; done
+            cd /quickstart-linux-utilities
+            source quickstart-cfn-tools.source
+            qs_update-os || qs_err
+            qs_bootstrap_pip || qs_err
+            qs_aws-cfn-bootstrap || qs_err
+            # qs_cloudwatch_install works for CentOS and Ubuntu, but doesn't work for Amazon Linux 2
+            qs_cloudwatch_install || qs_err
+
+            # Call Init
+            if [ "$OS" == "ubuntu" ]; then
+              /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource WorkerLaunchConfig  --region ${AWS::Region}
+            else
+              /bin/cfn-init --stack ${AWS::StackName} --resource WorkerLaunchConfig  --region ${AWS::Region}
+            fi
+
             # Various machine configs
             hostnamectl set-hostname $(hostnamectl --static)
             # Wait for Primary (use a random sleep to split up the requests and avoid throttling)
@@ -1058,9 +1171,15 @@ Resources:
                 /tmp/automated-installer -a $tsm_admin_user -f /dev/zero -r /dev/zero -s /tmp/secrets.properties -b bootstrap.cfg -v --accepteula --force /tmp/tableau-server*
             }
             install
+            signal_code=$?
             unset -f install
             # Signal successful completion
-            /opt/aws/bin/cfn-signal -e $? "${WorkerWaitHandle}"
+            if [ "$OS" == "ubuntu" ]; then
+              /usr/local/bin/cfn-signal -e $signal_code "${WorkerWaitHandle}"
+            else
+              /bin/cfn-signal -e $signal_code "${WorkerWaitHandle}"
+            fi
+
             # Cleanup
             rm -f /tmp/secrets.properties
             rm -f /tmp/tableau-server*
