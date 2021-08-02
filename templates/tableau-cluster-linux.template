@@ -764,9 +764,9 @@ Resources:
                     send_signal_to_topologyWaitHandle() {
                         # Signal successful completion
                         if [ "$OS" == "ubuntu" ]; then
-                          /usr/local/bin/cfn-signal -e $? "${TopologyWaitHandle}"
+                          /usr/local/bin/cfn-signal -e 0 "${TopologyWaitHandle}"
                         else
-                          /bin/cfn-signal -e $? "${TopologyWaitHandle}"
+                          /bin/cfn-signal -e 0 "${TopologyWaitHandle}"
                         fi
                     }
                     set_topology
