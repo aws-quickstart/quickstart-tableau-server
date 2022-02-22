@@ -14,7 +14,7 @@ LatestConfig=$(aws s3 ls $BUCKET_NAME/$S3_PREFIX --recursive | grep '.*settings.
 LatestTsbak=$(aws s3 ls $BUCKET_NAME/$S3_PREFIX --recursive | grep '.*tsbak' | sort | tail -n 1 | awk '{print $4}')
 
 # Restore from S3 config file
-if [ -z "$LatestConfig" ]
+if [ -n "${LatestConfig}" ];
 then
     aws s3 cp $LatestConfig "/tmp/config-$TODAY.json";
     "$TSM_PATH"/tsm settings import --config-only --force-keys -f "/tmp/config-$TODAY.json";
@@ -22,7 +22,7 @@ then
 fi
 
 # Restore from S3 backup file
-if [ -z "$LatestTsbak" ]
+if [ -n "$LatestTsbak" ];
 then
     aws s3 cp $LatestTsbak "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
     "$TSM_PATH"/tsm maintenance restore -f "$TODAY.tsbak";
