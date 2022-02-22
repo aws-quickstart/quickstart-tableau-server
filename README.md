@@ -1,5 +1,9 @@
 # quickstart-tableau-server
 
+#   To Do
+* Cloudwatch logs (create log group, and stream tableau server logs)
+* TSM UI (load balancer, and updating registered targets)
+* No SSL option?
 #   Customizing the cloudformation template
 
 ##  Log locations for the automation scripts
