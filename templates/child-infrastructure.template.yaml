@@ -1,0 +1,265 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  This template creates the minimum infrasture needed to run Tableau Server in AWS
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'AWS Configuration'
+        Parameters:
+          - Route53HostedZone
+          - Route53DomainName
+          - S3BucketName
+      - Label:
+          default: 'Quickstart'
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+    ParameterLabels:
+      Route53HostedZone:
+        default: Hosted Zone
+      Route53DomainName:
+        default: Domain name for your hosted zone
+      S3BucketName:
+        default: Name of S3 bucket for Tableau Server files
+      QSS3BucketName:
+        default: S3 Bucket for quickstart files
+      QSS3KeyPrefix:
+        default: Prefix for quickstart files in S3 bucket
+Parameters:
+  Route53HostedZone:
+    Description: Hosted Zone from Route53
+    Type: AWS::Route53::HostedZone::Id
+  Route53DomainName:
+    Default: example.com
+    Description: Domain name for your Route53 Hosted Zone
+    Type: String
+  S3BucketName:
+    Default: tableau-server-data-bucket
+    Description: S3 bucket to Tableau Server files
+    Type: String
+  QSS3BucketName:
+    Default: quickstart-bucket
+    Description: Operating System on which Tableau Server will be deployed
+    Type: String
+  QSS3KeyPrefix:
+    Default: quickstart
+    Description: Operating System on which Tableau Server will be deployed
+    Type: String
+Mappings: 
+  VPC:
+    props:
+      CidrBlock: 10.0.0.0/16
+  Subnets:
+    a:
+      CidrBlock: 10.0.1.0/24
+    b:
+      CidrBlock: 10.0.2.0/24
+  SecurityGroup:
+    props:
+      name: Tableau Security Group
+      desc: Security Group for Tableau Server
+  ALB:
+    names:
+      TableauServer: Tableau-Server
+      Tsm: Tableau-TSM 
+  Route53:
+    names:
+      TableauServer: tableau-server-rs
+      Tsm: tsm-rs
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !FindInMap ["VPC", "props", "CidrBlock"]
+      InstanceTenancy: dedicated
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ["Subnets", "a", "CidrBlock"]
+      AvailabilityZone: !Sub '${AWS::Region}a'
+      Tags:
+        - Key: Name
+          Value: Public subnet a
+      MapPublicIpOnLaunch: true
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ["Subnets", "b", "CidrBlock"]
+      AvailabilityZone: !Sub '${AWS::Region}b'
+      Tags:
+        - Key: Name
+          Value: Public subnet b
+      MapPublicIpOnLaunch: true
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+        GroupName: !FindInMap ["SecurityGroup", "props", "name"]
+        GroupDescription: !FindInMap ["SecurityGroup", "props", "desc"]
+        SecurityGroupEgress: 
+            - CidrIp: "0.0.0.0/0"
+              IpProtocol: "-1"
+        SecurityGroupIngress: 
+            - CidrIp: "0.0.0.0/0"
+              FromPort: "80"
+              ToPort: "80"
+              IpProtocol: "tcp"
+            - CidrIp: "0.0.0.0/0"
+              FromPort: "443"
+              ToPort: "443"
+              IpProtocol: "tcp"
+        Tags: 
+          - Key: Name
+            Value: !FindInMap ["SecurityGroup", "props", "name"]
+        VpcId: !Ref VPC
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3BucketName
+  TableauIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
+      Policies:
+        - PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3BucketName}/'
+                  - !Sub 'arn:aws:s3:::${S3BucketName}/*'
+                Effect: Allow
+          PolicyName: s3-tableau-backup-storage
+  TableauServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref 'TableauIAMRole'
+  SslCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref Route53DomainName
+      SubjectAlternativeNames: 
+        - !Sub '*.${Route53DomainName}'
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref Route53DomainName
+          HostedZoneId: !Ref Route53HostedZone
+  TableauServerRoute53:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt TableauServerAlb.CanonicalHostedZoneID
+        DNSName: !GetAtt TableauServerAlb.DNSName
+      HostedZoneId: !Ref Route53HostedZone
+      Name: 
+        Fn::Sub:
+          - "${p1}.${Route53DomainName}"
+          - p1: !FindInMap ["Route53", "names", "TableauServer"]
+  TableauServerAlb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+        Scheme: "internet-facing"
+        Type: "application"
+        Name: 
+          Fn::Sub:
+          - "${p1}-LB"
+          - p1: !FindInMap ["ALB", "names", "TableauServer"]
+        SecurityGroups: 
+            - !Ref SecurityGroup
+        Subnets: 
+            - !Ref PublicSubnetA
+            - !Ref PublicSubnetB
+  TableauServerTG:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+        Port: 80
+        Protocol: "HTTP"
+        TargetType: "instance"
+        VpcId: !Ref VPC
+        Name: 
+          Fn::Sub:
+          - "${p1}-TG"
+          - p1: !FindInMap ["ALB", "names", "TableauServer"]
+        TargetGroupAttributes: 
+            - Key: "stickiness.enabled"
+              Value: "true"
+            - Key: "stickiness.type"
+              Value: "lb_cookie"
+  TableauServerListenerHttps:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+        LoadBalancerArn: !Ref TableauServerAlb
+        Port: 443
+        Protocol: "HTTPS"
+        SslPolicy: "ELBSecurityPolicy-2016-08"
+        Certificates: 
+          - CertificateArn: !Ref SslCertificate
+        DefaultActions: 
+          - Order: 1
+            TargetGroupArn: !Ref TableauServerTG
+            Type: "forward"
+  TableauServerListenerHttp:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - TableauServerAlb
+    Properties:
+      DefaultActions:
+        - RedirectConfig:
+            Host: "#{host}"
+            Path: "/#{path}"
+            Port: 443
+            Protocol: "HTTPS"
+            Query: "#{query}"
+            StatusCode: HTTP_301
+          Type: redirect
+      LoadBalancerArn: !Ref 'TableauServerAlb'
+      Port: 80
+      Protocol: HTTP
+Outputs:
+  TableauServerUrl:
+    Description: URL of your Tableau Server
+    Value: 
+      Fn::Sub:
+        - "${p1}.${Route53DomainName}"
+        - p1: !FindInMap ["Route53", "names", "TableauServer"]
+  TableauServerTargetGroupArn:
+    Description: ARN of the Tableau Server load balancer's target group
+    Value: !Ref TableauServerTG
+  S3Bucket:
+    Description: S3 bucket for Tableau Server backups
+    Value: !GetAtt 'S3Bucket.WebsiteURL'
