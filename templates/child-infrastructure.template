@@ -59,14 +59,18 @@ Mappings:
     props:
       name: Tableau Security Group
       desc: Security Group for Tableau Server
+  IAM:
+    names:
+      role: tableau-server-ec2-iam-role
+      profile: tableau-server-ec2-iam-profile
   ALB:
     names:
       TableauServer: Tableau-Server
       Tsm: Tableau-TSM 
   Route53:
     names:
-      TableauServer: tableau-server-rs
-      Tsm: tsm-rs
+      TableauServer: tableau
+      Tsm: tsm
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -89,6 +93,22 @@ Resources:
     Properties:
       VpcId: !Ref 'VPC'
       InternetGatewayId: !Ref 'InternetGateway'
+  PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+      Tags:
+        - Key: Name
+          Value: Public Subnets
+        - Key: Network
+          Value: Public
+  PublicSubnetRoute:
+    DependsOn: VPCGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref 'PublicSubnetRouteTable'
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -99,6 +119,11 @@ Resources:
         - Key: Name
           Value: Public subnet a
       MapPublicIpOnLaunch: true
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'PublicSubnetA'
+      RouteTableId: !Ref 'PublicSubnetRouteTable'
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
@@ -109,6 +134,11 @@ Resources:
         - Key: Name
           Value: Public subnet b
       MapPublicIpOnLaunch: true
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'PublicSubnetB'
+      RouteTableId: !Ref 'PublicSubnetRouteTable'
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -138,6 +168,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: /
+      RoleName: !FindInMap ["IAM", "names", "role"]
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -158,13 +189,14 @@ Resources:
                   - s3:PutObject
                   - s3:ListBucket
                 Resource:
-                  - !Sub 'arn:aws:s3:::${S3BucketName}/'
+                  - !Sub 'arn:aws:s3:::${S3BucketName}'
                   - !Sub 'arn:aws:s3:::${S3BucketName}/*'
                 Effect: Allow
           PolicyName: s3-tableau-backup-storage
   TableauServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
+      InstanceProfileName: !FindInMap ["IAM", "names", "profile"]
       Path: /
       Roles:
         - !Ref 'TableauIAMRole'
