@@ -1,4 +1,16 @@
 # quickstart-tableau-server
+
+#   Customizing the cloudformation template
+
+##  Log locations for the automation scripts
+###   Userdata logs
+sudo cat /var/log/cloud-init-output.log
+###   ConfigSet logs
+sudo cat /var/log/cfn-init-cmd.log
+sudo tail -f /var/log/cfn-init-cmd.log
+sudo cat /var/log/cfn-init.log
+sudo tail -f /var/log/cfn-init.log
+
 ## Tableau Server on the AWS Cloud
 
 This Quick Start helps you deploy a fully functional Tableau Server environment on the AWS Cloud, following best practices from AWS and Tableau Software. 
