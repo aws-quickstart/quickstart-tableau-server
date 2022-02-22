@@ -17,7 +17,7 @@ LatestTsbak=$(aws s3 ls $BUCKET_NAME/$S3_PREFIX --recursive | grep '.*tsbak' | s
 if [ -z "$LatestConfig" ]
 then
     aws s3 cp $LatestConfig "/tmp/config-$TODAY.json";
-    "$TSM_PATH"/tsm settings import -f "/tmp/config-$TODAY.json";
+    "$TSM_PATH"/tsm settings import --config-only --force-keys -f "/tmp/config-$TODAY.json";
     rm "/tmp/config-$TODAY.json"
 fi
 
