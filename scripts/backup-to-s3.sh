@@ -18,6 +18,6 @@ aws s3 cp /var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak
 rm "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
 
 # Backup site settings
-"$TSM_PATH"/tsm settings export -f "/tmp/backup/$TODAY.json";
-aws s3 cp "/tmp/backup/$TODAY.json" s3://$BUCKET_NAME/$S3_PREFIX/$TODAY-settings.json;
-rm "/tmp/backup/$TODAY.json";
+"$TSM_PATH"/tsm settings export -f "/tmp/$TODAY.json";
+aws s3 cp "/tmp/$TODAY.json" s3://$BUCKET_NAME/$S3_PREFIX/$TODAY-settings.json;
+rm "/tmp/$TODAY.json";
