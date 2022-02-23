@@ -10,11 +10,6 @@ Metadata:
           - Route53HostedZone
           - Route53DomainName
           - S3BucketName
-      - Label:
-          default: 'Quickstart'
-        Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
     ParameterLabels:
       Route53HostedZone:
         default: Hosted Zone
@@ -22,10 +17,6 @@ Metadata:
         default: Domain name for your hosted zone
       S3BucketName:
         default: Name of S3 bucket for Tableau Server files
-      QSS3BucketName:
-        default: S3 Bucket for quickstart files
-      QSS3KeyPrefix:
-        default: Prefix for quickstart files in S3 bucket
 Parameters:
   Route53HostedZone:
     Description: Hosted Zone from Route53
@@ -37,14 +28,6 @@ Parameters:
   S3BucketName:
     Default: tableau-server-data-bucket
     Description: S3 bucket to Tableau Server files
-    Type: String
-  QSS3BucketName:
-    Default: quickstart-bucket
-    Description: Operating System on which Tableau Server will be deployed
-    Type: String
-  QSS3KeyPrefix:
-    Default: quickstart
-    Description: Operating System on which Tableau Server will be deployed
     Type: String
 Mappings: 
   VPC:
