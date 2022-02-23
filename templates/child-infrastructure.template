@@ -181,18 +181,50 @@ Resources:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMDirectoryServiceAccess'
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
       Policies:
-        - PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                  - s3:ListBucket
-                Resource:
-                  - !Sub 'arn:aws:s3:::${S3BucketName}'
-                  - !Sub 'arn:aws:s3:::${S3BucketName}/*'
-                Effect: Allow
-          PolicyName: s3-tableau-backup-storage
+      - PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:ListBucket
+              Resource:
+                - !Sub 'arn:aws:s3:::${S3BucketName}'
+                - !Sub 'arn:aws:s3:::${S3BucketName}/*'
+              Effect: Allow
+        PolicyName: back-to-s3
+      - PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Action: ec2:CreateTags
+              Effect: Allow
+              Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+        PolicyName: ec2-tagging
+      - PolicyDocument:
+          Version: '2012-10-17'  
+          Statement:
+            - Action: elasticloadbalancing:DescribeTargetHealth
+              Effect: Allow
+              Resource: '*'
+        PolicyName: elb-query-targets
+      - PolicyDocument:
+          Version: '2012-10-17'  
+          Statement:
+            - Action: 
+              - elasticloadbalancing:RegisterTargets
+              - elasticloadbalancing:DeregisterTargets
+              Effect: Allow
+              Resource:
+              - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/Tableau-Server*/*'
+              - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/Tableau-TSM */*'
+        PolicyName: elb-register-targets
+      - PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Action: ec2:StopInstances
+              Effect: Allow
+              Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+        PolicyName: ec2-stop
   TableauServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
