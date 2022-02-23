@@ -16,7 +16,7 @@ LatestTsbak=$(aws s3 ls $BUCKET_NAME/$S3_PREFIX --recursive | grep '.*tsbak' | s
 # Restore from S3 config file
 if [ -n "${LatestConfig}" ];
 then
-    aws s3 cp $LatestConfig "/tmp/config-$TODAY.json";
+    aws s3 cp s3://$BUCKET_NAME/$LatestConfig "/tmp/config-$TODAY.json";
     "$TSM_PATH"/tsm settings import --config-only --force-keys -f "/tmp/config-$TODAY.json";
     rm "/tmp/config-$TODAY.json"
 fi
@@ -24,7 +24,7 @@ fi
 # Restore from S3 backup file
 if [ -n "$LatestTsbak" ];
 then
-    aws s3 cp $LatestTsbak "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
+    aws s3 cp s3://$BUCKET_NAME/$LatestTsbak "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
     "$TSM_PATH"/tsm maintenance restore -f "$TODAY.tsbak";
     rm "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
 fi
