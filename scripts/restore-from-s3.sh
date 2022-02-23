@@ -13,18 +13,22 @@ echo ""; echo "Starting Restore process at $TODAY";
 LatestConfig=$(aws s3 ls $BUCKET_NAME/$S3_PREFIX --recursive | grep '.*settings.json' | sort | tail -n 1 | awk '{print $4}')
 LatestTsbak=$(aws s3 ls $BUCKET_NAME/$S3_PREFIX --recursive | grep '.*tsbak' | sort | tail -n 1 | awk '{print $4}')
 
+# Restore from S3 backup file
+if [ -n "$LatestTsbak" ];
+then
+    aws s3 cp s3://$BUCKET_NAME/$LatestTsbak "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
+    "$TSM_PATH"/tsm maintenance restore -f "$TODAY.tsbak" ;
+    rm "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
+fi
+
 # Restore from S3 config file
 if [ -n "${LatestConfig}" ];
 then
     aws s3 cp s3://$BUCKET_NAME/$LatestConfig "/tmp/config-$TODAY.json";
     "$TSM_PATH"/tsm settings import --config-only --force-keys -f "/tmp/config-$TODAY.json";
+    "$TSM_PATH"/tsm pending-changes apply --ignore-prompt;
     rm "/tmp/config-$TODAY.json"
 fi
 
-# Restore from S3 backup file
-if [ -n "$LatestTsbak" ];
-then
-    aws s3 cp s3://$BUCKET_NAME/$LatestTsbak "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
-    "$TSM_PATH"/tsm maintenance restore -f "$TODAY.tsbak";
-    rm "/var/opt/tableau/tableau_server/data/tabsvc/files/backups/$TODAY.tsbak";
-fi
+#   Ensure the server is running
+"$TSM_PATH"/tsm start
