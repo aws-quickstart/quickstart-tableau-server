@@ -1,0 +1,344 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation Template: Tableau Server running on Windows (WindowsServer2016)'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: AWS Environment and Machine Configuration
+        Parameters:
+          - PublicSubnetId
+          - InstanceType
+          - LatestAmiId
+          - KeyPairName
+          - IamInstanceProfile
+          - SecurityGroup
+          - S3BucketName
+          - TableauServerHostname
+          - TableauServerTargetGroupArn
+          - TsmTargetGroupArn
+      - Label:
+          default: Secrets
+        Parameters:
+          - TableauServerAdminUser
+          - TableauServerAdminPassword
+          - TsmUsername
+          - TsmPassword
+          - LicenseKey
+      - Label:
+          default: Registration
+        Parameters:
+          - AcceptEULA
+          - RegFirstName
+          - RegLastName
+          - RegEmail
+          - RegCompany
+          - RegTitle
+          - RegDepartment
+          - RegIndustry
+          - RegPhone
+          - RegCity
+          - RegState
+          - RegZip
+          - RegCountry
+    ParameterLabels:
+      PublicSubnetId:
+        default: Target Public Subnet
+      InstanceType:
+        default: EC2 instance type for Tableau Server
+      LatestAmiId: 
+        default: Use the latest version of Amazon Linux 2 (don't change this)
+      KeyPairName:
+        default: Key Pair Name
+      IamInstanceProfile:
+        default: IAM Role/Profile for the EC2 instance
+      SecurityGroup:
+        default: Security Group for EC2 instance
+      TableauServerHostname:
+        default: FQDN or IP address for Tableau Server
+      TableauServerTargetGroupArn:
+        default: Load Balancer (Tableau Server) Target Group ARN
+      TsmTargetGroupArn:
+        default: Load Balancer (Tableau TSM) Target Group ARN
+      S3BucketName:
+        default: S3 bucket for Tableau Server files
+      TableauServerAdminPassword:
+        default: Tableau Server administrator password
+      TableauServerAdminUser:
+        default: Tableau Server administrator username
+      TsmUsername:
+        default: Tableau Services Manager (TSM) administrator username
+      TsmPassword:
+        default: Tableau Services Manager (TSM) administrator password
+      LicenseKey:
+        default: Tableau Activation Key
+      AcceptEULA:
+        default: Accept Tableau End User License Agreement
+      RegCity:
+        default: City
+      RegCompany:
+        default: Company
+      RegCountry:
+        default: Country
+      RegDepartment:
+        default: Department
+      RegEmail:
+        default: Email Address
+      RegFirstName:
+        default: First Name
+      RegIndustry:
+        default: Industry
+      RegLastName:
+        default: Last Name
+      RegPhone:
+        default: Phone
+      RegState:
+        default: State
+      RegTitle:
+        default: Title
+      RegZip:
+        default: Zip/Postal Code
+Parameters:
+  AcceptEULA:
+    AllowedPattern: 'yes'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: 'View the EULA at the Link: https://www.tableau.com/eula'
+    Type: String
+  InstanceType:
+    AllowedValues:
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+    Default: m5.8xlarge
+    Description: Amazon EC2 instance type
+    Type: String
+  KeyPairName:
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+  S3BucketName:
+    Description: Name of the S3 bucket for Tableau Server
+    Type: String
+  SecurityGroup:
+    Description: Security Group for Tableau Server
+    Type: AWS::EC2::SecurityGroup::Id
+  IamInstanceProfile:
+    Description: Tableau server IAM Instance Profile name
+    Type: String
+  PublicSubnetId:
+    Description: The public subnet to use
+    Type: AWS::EC2::Subnet::Id
+  TableauServerHostname:
+    Description: Fully Qualified Domain Name or IP address users should use to access Tableau Server
+    Type: String
+  TableauServerTargetGroupArn:
+    Description: ARN for Tableau Server's load balancer target group
+    Type: String
+  TsmTargetGroupArn:
+    Description: ARN for Tableau TSM's load balancer target group
+    Type: String
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base'
+  TableauServerAdminPassword:
+    Description: The password of the initial administrator for Tableau Server
+    MinLength: '1'
+    NoEcho: 'true'
+    Type: String
+  TableauServerAdminUser:
+    Description: The name of the initial administrator for Tableau Server
+    MinLength: '1'
+    Type: String
+  LicenseKey:
+    Description: License Key (leave blank for trial)
+    Type: String
+  TsmUsername:
+    AllowedPattern: ^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$
+    Description: Tableau Services Manager (TSM) administrator username (cannot be
+      'tableau' or 'tsmagent' or 'admin' or 'root')
+    MaxLength: '30'
+    Type: String
+  TsmPassword:
+    Description: Tableau Services Manager (TSM) administrator password
+    MinLength: '6'
+    NoEcho: 'true'
+    Type: String
+  RegCity:
+    Description: City
+    Type: String
+  RegCompany:
+    Description: Company
+    Type: String
+  RegCountry:
+    Description: Country
+    Type: String
+  RegDepartment:
+    Description: Department
+    Type: String
+  RegEmail:
+    Description: Email
+    MinLength: '1'
+    Type: String
+  RegFirstName:
+    Description: First Name
+    MinLength: '1'
+    Type: String
+  RegIndustry:
+    Description: Industry
+    Type: String
+  RegLastName:
+    Description: Last Name
+    MinLength: '1'
+    Type: String
+  RegPhone:
+    Description: Phone
+    Type: String
+  RegState:
+    Description: State
+    Type: String
+  RegTitle:
+    Description: Title
+    Type: String
+  RegZip:
+    Description: ZIP/Postal Code
+    Type: String
+Mappings:
+  DefaultConfiguration:
+    Aws:
+      CloudwatchLogGroup: TableauServerLogs
+      S3BackupPath: backups
+    InstallationConfig:
+      TableauServerInstaller: https://www.tableau.com/downloads/server/windows
+      AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/windows/tsm/SilentInstaller/SilentInstaller.py
+      InstallationTimeout: PT1H45M
+    Scripts:
+      Backup: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-to-s3.sh
+      Restore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/restore-from-s3.sh
+      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.sh
+    MachineConfiguration:
+      SystemVolumeSize: 100
+      Name: Tableau Server Quickstart
+Conditions:
+  UsingElasticIp: !Equals
+    - ''
+    - !Ref TableauServerTargetGroupArn
+  IsTrial: !Equals
+    - ''
+    - !Ref LicenseKey
+Resources:
+  TableauServerEC2:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          setup:
+            - step1
+        step1:
+          files:
+            c:\tabsetup\secrets.json:
+              content:
+                local_admin_user: !Ref 'TsmUsername'
+                local_admin_pass: !Ref 'TsmPassword'
+                content_admin_user: !Ref 'TableauServerAdminUser'
+                content_admin_pass: !Ref 'TableauServerAdminPassword'
+                product_keys:
+                  - !If
+                    - IsTrial
+                    - trial
+                    - !Sub '${LicenseKey}'
+            c:\tabsetup\registration.json:
+              content:
+                first_name: !Ref 'RegFirstName'
+                last_name: !Ref 'RegLastName'
+                email: !Ref 'RegEmail'
+                company: !Join
+                  - ;
+                  - - !Ref 'RegCompany'
+                    - AWSQuickStart-Win
+                title: !Ref 'RegTitle'
+                department: !Ref 'RegDepartment'
+                industry: !Ref 'RegIndustry'
+                phone: !Ref 'RegPhone'
+                city: !Ref 'RegCity'
+                state: !Ref 'RegState'
+                zip: !Ref 'RegZip'
+                country: !Ref 'RegCountry'
+                eula: !Ref 'AcceptEULA'
+            c:\tabsetup\SilentInstaller.py:
+              source:
+                - !FindInMap
+                  - DefaultConfiguration
+                  - InstallationConfig
+                  - AutomatedInstaller
+            c:\tabsetup\config.json:
+              content:
+                !Sub
+                  - '{"configEntities": {
+                      "gatewaySettings": {
+                          "_type": "gatewaySettingsType",
+                          "port": 80,
+                          "firewallOpeningEnabled": true,
+                          "sslRedirectEnabled": true,
+                          "publicHost": "${host}",
+                          "publicPort": "${port}"
+                      },
+                      "identityStore": {
+                          "_type": "identityStoreType",
+                          "type": "local"
+                      }
+                  }}'
+                  - port: !If [UsingElasticIp, '80', '443']
+                    host: !Ref TableauServerHostname
+            c:\tabsetup\python-3.6.4-amd64.exe:
+              source: https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe
+            c:\tabsetup\tableau-server-webapp-installer.exe:
+              source: !Join
+                - ''
+                - - https://
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - InstallationBucket
+                  - .s3-us-west-2.amazonaws.com/
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - InstallationExecutable
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: !FindInMap ["DefaultConfiguration", "InstallationConfig", "InstallationTimeout"]
+    Properties:
+      SecurityGroupIds:
+        - !Ref 'SecurityGroup'
+      SubnetId: !Ref 'PublicSubnetId'
+      InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref 'IamInstanceProfile'
+      ImageId: !Ref LatestAmiId
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvdsda1a
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: !FindInMap
+              - DefaultConfiguration
+              - MachineConfiguration
+              - SystemVolumeSize
+      EbsOptimized: true
+      KeyName: !Ref 'KeyPairName'
+      UserData: 
+        Base64: !Sub |
+          <script>
+          cfn-init.exe -v -s ${AWS::StackId} -r TableauServerEC2 --configsets setup --region ${AWS::Region}
+          cfn-signal.exe -e %ERRORLEVEL% --stack ${AWS::StackId} --resource TableauServerEC2 --region ${AWS::Region}
+          </script>
+Outputs:
+  InstanceID:
+    Description: EC2 InstanceID of the instance running Tableau Server
+    Value: !Ref 'TableauServerEC2'
+  PublicIPAddress:
+    Description: Public IP Address of instance running Tableau Server
+    Value: !GetAtt 'TableauServerEC2.PublicIp'
