@@ -22,11 +22,9 @@ Parameters:
     Description: Hosted Zone from Route53
     Type: AWS::Route53::HostedZone::Id
   Route53DomainName:
-    Default: example.com
     Description: Domain name for your Route53 Hosted Zone
     Type: String
   S3BucketName:
-    Default: tableau-server-data-bucket
     Description: S3 bucket to Tableau Server files
     Type: String
 Mappings: 

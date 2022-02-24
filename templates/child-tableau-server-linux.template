@@ -105,7 +105,6 @@ Parameters:
       - 'no'
     Description: 'View the EULA at the Link: https://www.tableau.com/eula'
     Type: String
-    Default: 'yes'
   InstanceType:
     AllowedValues:
       - m6i.4xlarge
@@ -122,35 +121,27 @@ Parameters:
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: AWS::EC2::KeyPair::KeyName
-    Default: Takashi-terraform
   S3Bucket:
     Description: Name of the S3 bucket for Tableau Server
     Type: String
-    Default: tableau-server-data-bucket
   SecurityGroup:
     Description: Security Group for Tableau Server
     Type: AWS::EC2::SecurityGroup::Id
-    Default: sg-072811ddfd09a87c2
   IamInstanceProfile:
     Description: Tableau server IAM Instance Profile name
     Type: String
-    Default: tableau-server-ec2-iam-profile
   VPCId:
     Description: The ID of the VPC into which to deploy the cluster
     Type: AWS::EC2::VPC::Id
-    Default: vpc-052f5d9004acf9698
   PublicSubnetId:
     Description: The public subnet to use
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-03cd6fd1afe19da42
   TableauServerTargetGroupArn:
     Description: ARN for Tableau Server's load balancer target group
     Type: String
-    Default: arn:aws:elasticloadbalancing:us-west-2:068985051027:targetgroup/Tableau-Server-TG/ff8e731518af64f1
   TsmTargetGroupArn:
     Description: ARN for Tableau TSM's load balancer target group
     Type: String
-    Default: arn:aws:elasticloadbalancing:us-west-2:068985051027:targetgroup/TSM-TG/a8a696b772bf75f8
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
@@ -159,80 +150,63 @@ Parameters:
     MinLength: '1'
     NoEcho: 'true'
     Type: String
-    Default: tableau
   TableauServerAdminUser:
     Description: The name of the initial administrator for Tableau Server
     MinLength: '1'
     Type: String
-    Default: tabmin
   LicenseKey:
     Description: License Key (leave blank for trial)
     Type: String
-    Default: ''
   TsmUsername:
     AllowedPattern: ^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$
     Description: Tableau Services Manager (TSM) administrator username (cannot be
       'tableau' or 'tsmagent' or 'admin' or 'root')
     MaxLength: '30'
     Type: String
-    Default: tabmin
   TsmPassword:
     Description: Tableau Services Manager (TSM) administrator password
     MinLength: '6'
     NoEcho: 'true'
     Type: String
-    Default: tableau
   RegCity:
     Description: City
     Type: String
-    Default: Hoboken
   RegCompany:
     Description: Company
     Type: String
-    Default: Salesforce
   RegCountry:
     Description: Country
     Type: String
-    Default: USA
   RegDepartment:
     Description: Department
     Type: String
-    Default: quickstart
   RegEmail:
     Description: Email
     MinLength: '1'
     Type: String
-    Default: tbinns@salesforce.com
   RegFirstName:
     Description: First Name
     MinLength: '1'
     Type: String
-    Default: T
   RegIndustry:
     Description: Industry
     Type: String
-    Default: tech
   RegLastName:
     Description: Last Name
     MinLength: '1'
     Type: String
-    Default: B
   RegPhone:
     Description: Phone
     Type: String
-    Default: 1234567890
   RegState:
     Description: State
     Type: String
-    Default: NJ
   RegTitle:
     Description: Title
     Type: String
-    Default: None
   RegZip:
     Description: ZIP/Postal Code
     Type: String
-    Default: 00000
 Mappings:
   DefaultConfiguration:
     Aws:
