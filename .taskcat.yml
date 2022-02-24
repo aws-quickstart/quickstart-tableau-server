@@ -1,33 +1,26 @@
 project:
   name: quickstart-tableau-server
   owner: quickstart-eng@amazon.com
-  package_lambda: false
+  s3_bucket: quickstart-testing-public
   regions:
-  - ap-northeast-1
-  - ap-northeast-2
-  - ap-south-1
-  - ap-southeast-1
-  - ap-southeast-2
-  - ca-central-1
-  - eu-central-1
-  - eu-west-1
-  - eu-west-2
-  - sa-east-1
-  - us-east-1
-  - us-east-2
-  - us-west-1
   - us-west-2
-  s3_bucket: ''
 tests:
   linux:
-    parameters:
+    parameters: 
+      OS: Linux
+      Route53HostedZone: Z03034441712JY0KSJGD1
+      Route53DomainName: awsquickstart.tableau.com
+      S3BucketName: tableau-server-data-bucket2
       AcceptEULA: 'yes'
       InstanceType: m6i.4xlarge
-      OS: Linux
-      KeyPairName: $[alfred_getkeypair]
-      Route53: a
-      DomainName: tableau
-      QSS3BucketName: $[taskcat_autobucket]
+      KeyPairName: Takashi-terraform
+      LatestAmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+      TableauServerAdminPassword: $[alfred_genpass_32]
+      TableauServerAdminUser: admin
+      LicenseKey: ''
+      TsmUsername: tsmadmin
+      TsmPassword: $[alfred_genpass_32]
+      QSS3BucketName: quickstart-testing-public
       QSS3KeyPrefix: quickstart-tableau-server/
       QSS3BucketRegion: us-west-2
       RegCity: Test City
@@ -42,12 +35,4 @@ tests:
       RegState: Test State
       RegTitle: Test Title
       RegZip: Test Zip
-      TableauServerAdminPassword: $[alfred_genpass_32]
-      TableauServerAdminUser: admin
-      TableauServerLicenseKey: ''
-      TsmUsername: tsmadmin
-      TsmPassword: $[alfred_genpass_32]
-    regions:
-    - us-west-2
-    s3_bucket: ''
     template: templates/parent-stack.template
