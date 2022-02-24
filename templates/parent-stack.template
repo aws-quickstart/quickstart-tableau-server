@@ -12,7 +12,6 @@ Metadata:
           - OS
           - KeyPairName
           - S3BucketName
-          - LatestAmiId
       - Label:
           default: Secrets
         Parameters:
@@ -50,8 +49,6 @@ Metadata:
         default: Operating System for Tableau Server
       KeyPairName:
         default: Key Pair for EC2
-      LatestAmiId: 
-        default: Use the latest version of Amazon Linux 2 (don't change this)
       TableauServerAdminPassword:
         default: Tableau Server administrator password
       TableauServerAdminUser:
@@ -130,9 +127,6 @@ Parameters:
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: AWS::EC2::KeyPair::KeyName
-  LatestAmiId:
-    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
   TableauServerAdminPassword:
     Description: The password of the initial administrator for Tableau Server
     MinLength: '1'
@@ -205,6 +199,11 @@ Parameters:
   RegZip:
     Description: ZIP/Postal Code
     Type: String
+Mappings:
+  Names:
+    Route53:
+      TableauServer: tableau
+      Tsm: tsm
 Conditions:
   InfaOnWindows: !Equals
     - !Ref 'OS'
@@ -224,7 +223,59 @@ Resources:
         Route53HostedZone: !Ref 'Route53HostedZone'
         Route53DomainName: !Ref 'Route53DomainName'
         S3BucketName: !Ref 'S3BucketName'
+        TableauServerSubdomain: !FindInMap ["Names", "Route53", "TableauServer"]
+        TsmSubdomain: !FindInMap ["Names", "Route53", "Tsm"]
+  TableauServer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      #TemplateURL: !Sub 'https://quickstart-testing-public.s3.us-west-2.${AWS::URLSuffix}/quickstart-tableau-server/templates/child-tableau-server-linux.template'
+      TemplateURL: 
+        Fn::Sub:
+          - 'https://${p1}.s3.${p2}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/child-tableau-server-{p3}}.template'
+          - p2: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            p1: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${QSS3BucketRegion}', !Ref QSS3BucketName]
+            p3: !If [InfaOnWindows, 'windows', 'linux']
+      Parameters:
+        AcceptEULA: !Ref 'AcceptEULA'
+        InstanceType: !Ref 'InstanceType'
+        KeyPairName: !Ref 'KeyPairName'
+        S3BucketName: !Ref 'S3BucketName'
+        TableauServerHostname: 
+          Fn::Sub:
+            - '{prefix}.${Route53DomainName}'
+            - prefix: !FindInMap ["Names", "Route53", "TableauServer"]
+        SecurityGroup: !GetAtt Infrastructure.Outputs.SecurityGroup
+        IamInstanceProfile: !GetAtt Infrastructure.Outputs.IamInstanceProfile
+        PublicSubnetId: !GetAtt Infrastructure.Outputs.PublicSubnetId
+        TableauServerTargetGroupArn: !GetAtt Infrastructure.Outputs.TableauServerTargetGroupArn
+        TsmTargetGroupArn: !GetAtt Infrastructure.Outputs.TsmTargetGroupArn
+        TableauServerAdminPassword: !Ref 'TableauServerAdminPassword'
+        TableauServerAdminUser: !Ref 'TableauServerAdminUser'
+        LicenseKey: !Ref 'LicenseKey'
+        TsmUsername: !Ref 'TsmUsername'
+        TsmPassword: !Ref 'TsmPassword'
+        RegCity: !Ref 'RegCity'
+        RegCompany: !Ref 'RegCompany'
+        RegCountry: !Ref 'RegCountry'
+        RegDepartment: !Ref 'RegDepartment'
+        RegEmail: !Ref 'RegEmail'
+        RegFirstName: !Ref 'RegFirstName'
+        RegIndustry: !Ref 'RegIndustry'
+        RegLastName: !Ref 'RegLastName'
+        RegPhone: !Ref 'RegPhone'
+        RegState: !Ref 'RegState'
+        RegTitle: !Ref 'RegTitle'
+        RegZip: !Ref 'RegZip'
 Outputs:
   TableauServerUrl:
     Description: Tableau Server URL (Load Balancer)
-    Value: !Sub 'tableau.${Route53DomainName}'
+    Value: 
+      Fn::Sub:
+        - '{prefix}.${Route53DomainName}'
+        - prefix: !FindInMap ["Names", "Route53", "TableauServer"]
+  TableauServerTsmUrl:
+    Description: Tableau Server TSM URL (Load Balancer)
+    Value: 
+      Fn::Sub:
+        - '{prefix}.${Route53DomainName}'
+        - prefix: !FindInMap ["Names", "Route53", "Tsm"]

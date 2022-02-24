@@ -9,12 +9,18 @@ Metadata:
         Parameters:
           - Route53HostedZone
           - Route53DomainName
+          - TableauServerSubdomain
+          - TsmSubdomain
           - S3BucketName
     ParameterLabels:
       Route53HostedZone:
         default: Hosted Zone
       Route53DomainName:
         default: Domain name for your hosted zone
+      TableauServerSubdomain:
+        default: Subdomain for Tableau Server's URL
+      TsmSubdomain:
+        default: Subdomain for TSM UI's URL
       S3BucketName:
         default: Name of S3 bucket for Tableau Server files
 Parameters:
@@ -26,6 +32,12 @@ Parameters:
     Type: String
   S3BucketName:
     Description: S3 bucket to Tableau Server files
+    Type: String
+  TableauServerSubdomain:
+    Description: Subdomain for Tableau Server URL
+    Type: String
+  TsmSubdomain:
+    Description: Subdomain for TSM UI URL
     Type: String
 Mappings: 
   VPC:
@@ -48,10 +60,6 @@ Mappings:
     names:
       TableauServer: Tableau-Server
       Tsm: Tableau-TSM 
-  Route53:
-    names:
-      TableauServer: tableau
-      Tsm: tsm
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -196,8 +204,12 @@ Resources:
               - elasticloadbalancing:DeregisterTargets
               Effect: Allow
               Resource:
-              - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/Tableau-Server*/*'
-              - !Sub 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/Tableau-TSM */*'
+              - Fn::Sub:
+                - 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
+                - tgName: !FindInMap ["ALB", "names", "TableauServer"]
+              - Fn::Sub:
+                - 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
+                - tgName: !FindInMap ["ALB", "names", "Tsm"]
         PolicyName: elb-register-targets
       - PolicyDocument:
           Version: '2012-10-17'
@@ -234,7 +246,7 @@ Resources:
       Name: 
         Fn::Sub:
           - "${p1}.${Route53DomainName}"
-          - p1: !FindInMap ["Route53", "names", "TableauServer"]
+          - p1: !Ref TableauServerSubdomain
   TableauServerAlb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties: 
@@ -295,16 +307,98 @@ Resources:
       LoadBalancerArn: !Ref 'TableauServerAlb'
       Port: 80
       Protocol: HTTP
+  TsmRoute53:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt TsmAlb.CanonicalHostedZoneID
+        DNSName: !GetAtt TsmAlb.DNSName
+      HostedZoneId: !Ref Route53HostedZone
+      Name: 
+        Fn::Sub:
+          - "${p1}.${Route53DomainName}"
+          - p1: !Ref TsmSubdomain
+  TsmAlb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+        Scheme: "internet-facing"
+        Type: "application"
+        Name: 
+          Fn::Sub:
+          - "${p1}-LB"
+          - p1: !FindInMap ["ALB", "names", "Tsm"]
+        SecurityGroups: 
+            - !Ref SecurityGroup
+        Subnets: 
+            - !Ref PublicSubnetA
+            - !Ref PublicSubnetB
+  TsmTG:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+        Port: 8850
+        Protocol: "HTTPS"
+        TargetType: "instance"
+        VpcId: !Ref VPC
+        Name: 
+          Fn::Sub:
+          - "${p1}-TG"
+          - p1: !FindInMap ["ALB", "names", "Tsm"]
+        TargetGroupAttributes: 
+            - Key: "stickiness.enabled"
+              Value: "true"
+            - Key: "stickiness.type"
+              Value: "lb_cookie"
+  TsmListenerHttps:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+        LoadBalancerArn: !Ref TsmAlb
+        Port: 443
+        Protocol: "HTTPS"
+        SslPolicy: "ELBSecurityPolicy-2016-08"
+        Certificates: 
+          - CertificateArn: !Ref SslCertificate
+        DefaultActions: 
+          - Order: 1
+            TargetGroupArn: !Ref TsmTG
+            Type: "forward"
+  TsmListenerHttp:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - TsmAlb
+    Properties:
+      DefaultActions:
+        - RedirectConfig:
+            Host: "#{host}"
+            Path: "/#{path}"
+            Port: 443
+            Protocol: "HTTPS"
+            Query: "#{query}"
+            StatusCode: HTTP_301
+          Type: redirect
+      LoadBalancerArn: !Ref 'TsmAlb'
+      Port: 80
+      Protocol: HTTP
 Outputs:
   TableauServerUrl:
     Description: URL of your Tableau Server
     Value: 
       Fn::Sub:
         - "${p1}.${Route53DomainName}"
-        - p1: !FindInMap ["Route53", "names", "TableauServer"]
+        - p1: !Ref TableauServerSubdomain
+  SecurityGroup:
+    Description: Security Group ARN
+    Value: !Ref SecurityGroup
+  IamInstanceProfile:
+    Description: IAM Instance Profile
+    Value: !FindInMap ["IAM", "names", "profile"]
+  PublicSubnetId:
+    Description: Subnet ID
+    Value: !Ref PublicSubnetA
   TableauServerTargetGroupArn:
-    Description: ARN of the Tableau Server load balancer's target group
+    Description: Tableau Server ALB TG
     Value: !Ref TableauServerTG
-  S3Bucket:
-    Description: S3 bucket for Tableau Server backups
-    Value: !GetAtt 'S3Bucket.WebsiteURL'
+  TsmTargetGroupArn:
+    Description: TSM UI ALB TG
+    Value: !Ref TsmTG
+  

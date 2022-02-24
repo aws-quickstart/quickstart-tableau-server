@@ -6,14 +6,14 @@ Metadata:
       - Label:
           default: AWS Environment and Machine Configuration
         Parameters:
-          - VPCId
           - PublicSubnetId
           - InstanceType
           - LatestAmiId
           - KeyPairName
           - IamInstanceProfile
           - SecurityGroup
-          - S3Bucket
+          - S3BucketName
+          - TableauServerHostname
           - TableauServerTargetGroupArn
           - TsmTargetGroupArn
       - Label:
@@ -41,8 +41,6 @@ Metadata:
           - RegZip
           - RegCountry
     ParameterLabels:
-      VPCId:
-        default: Target VPC
       PublicSubnetId:
         default: Target Public Subnet
       InstanceType:
@@ -55,11 +53,13 @@ Metadata:
         default: IAM Role/Profile for the EC2 instance
       SecurityGroup:
         default: Security Group for EC2 instance
+      TableauServerHostname:
+        default: FQDN or IP address for Tableau Server
       TableauServerTargetGroupArn:
         default: Load Balancer (Tableau Server) Target Group ARN
       TsmTargetGroupArn:
         default: Load Balancer (Tableau TSM) Target Group ARN
-      S3Bucket:
+      S3BucketName:
         default: S3 bucket for Tableau Server files
       TableauServerAdminPassword:
         default: Tableau Server administrator password
@@ -121,7 +121,7 @@ Parameters:
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: AWS::EC2::KeyPair::KeyName
-  S3Bucket:
+  S3BucketName:
     Description: Name of the S3 bucket for Tableau Server
     Type: String
   SecurityGroup:
@@ -130,12 +130,12 @@ Parameters:
   IamInstanceProfile:
     Description: Tableau server IAM Instance Profile name
     Type: String
-  VPCId:
-    Description: The ID of the VPC into which to deploy the cluster
-    Type: AWS::EC2::VPC::Id
   PublicSubnetId:
     Description: The public subnet to use
     Type: AWS::EC2::Subnet::Id
+  TableauServerHostname:
+    Description: Fully Qualified Domain Name or IP address users should use to access Tableau Server
+    Type: String
   TableauServerTargetGroupArn:
     Description: ARN for Tableau Server's load balancer target group
     Type: String
@@ -226,9 +226,12 @@ Mappings:
       AmazonLinux: AmazonLinux2
       Name: Tableau Server Quickstart
 Conditions:
+  UsingElasticIp: !Equals
+    - ''
+    - !Ref TableauServerTargetGroupArn
   IsTrial: !Equals
     - ''
-    - !Ref 'LicenseKey'
+    - !Ref LicenseKey
 Resources:
   TableauServerEC2:
     Type: AWS::EC2::Instance
@@ -249,14 +252,12 @@ Resources:
           commands:
             a: 
               command: hostnamectl set-hostname $(hostnamectl --static) && echo "Setting static hostname"
-            b: 
-              command: hostnamectl set-hostname $(hostnamectl --static) && echo "Setting static hostname"
-            c:
+            b:
               command: source /tmp/secrets.properties && echo "sourcing the secrets to env variables"
+            c:
+              command: !Sub useradd ${TsmUsername} && echo "Creating TSM user"
             d:
-              command: !Sub useradd ${TableauServerAdminUser} && echo "Creating TSM user"
-            e:
-              command:  !Sub echo ${TableauServerAdminPassword} | passwd ${TableauServerAdminUser} --stdin && echo "Setting password for TSM user"
+              command:  !Sub echo ${TsmPassword} | passwd ${TsmUsername} --stdin && echo "Setting password for TSM user"
           files:
             /tmp/secrets.properties:
               mode: '640'
@@ -283,21 +284,23 @@ Resources:
                 eula: !Ref 'AcceptEULA'
             /tmp/config.json:
               content:
-                !Sub |
-                  {"configEntities": {
+                !Sub
+                  - '{"configEntities": {
                       "gatewaySettings": {
                           "_type": "gatewaySettingsType",
                           "port": 80,
                           "firewallOpeningEnabled": true,
                           "sslRedirectEnabled": true,
-                          "publicHost": "localhost",
-                          "publicPort": 80
+                          "publicHost": "${host}",
+                          "publicPort": "${port}"
                       },
                       "identityStore": {
                           "_type": "identityStoreType",
                           "type": "local"
                       }
-                  }}
+                  }}'
+                  - port: !If [UsingElasticIp, '80', '443']
+                    host: !Ref TableauServerHostname
             /tmp/tableau-server.rpm:
               source: !FindInMap
                 - DefaultConfiguration
@@ -336,15 +339,17 @@ Resources:
         step2:
           commands:
             a: 
-              command: !Sub /tmp/automated-installer -a ${TableauServerAdminUser} -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseKey} -v --accepteula --force /tmp/tableau-server.rpm  && echo "Installing Tableau Server"
+              command: !Sub /tmp/automated-installer -a ${TsmUsername} -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseKey} -v --accepteula --force /tmp/tableau-server.rpm  && echo "Installing Tableau Server"
         step3:
           commands: 
             a: 
-              command: !Join [' ', ['./tmp/restore-from-s3.sh', !Ref S3Bucket, !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPath"] ] ] 
+              command: !Join [' ', ['./tmp/restore-from-s3.sh', !Ref S3BucketName, !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPath"] ] ] 
         step4:
           commands: 
             a: 
               command: !Join [' ', ['./tmp/update-load-balancer.sh', !Ref TableauServerTargetGroupArn, !Ref AWS::Region, "true" ] ]
+            b: 
+              command: !Join [' ', ['./tmp/update-load-balancer.sh', !Ref TsmTargetGroupArn, !Ref AWS::Region, "true" ] ]
         step5:
           commands:
             a: 
