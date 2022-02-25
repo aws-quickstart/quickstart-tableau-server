@@ -49,3 +49,4 @@ Temporary Items
 .taskcat/*
 taskcat_outputs/*
 .taskcat_overrides.yaml
+.taskcat_overrides.yml

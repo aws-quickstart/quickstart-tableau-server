@@ -7,7 +7,7 @@ project:
 tests:
   linux:
     parameters: 
-      OS: Linux
+      OS: Windows
       Route53HostedZone: Z03034441712JY0KSJGD1
       Route53DomainName: awsquickstart.tableau.com
       S3BucketName: tableau-server-data-bucket2
