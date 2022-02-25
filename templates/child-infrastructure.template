@@ -149,6 +149,12 @@ Resources:
           - Key: Name
             Value: !FindInMap ["SecurityGroup", "props", "name"]
         VpcId: !Ref VPC
+  SecurityGroupRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroup
+      SourceSecurityGroupId: !Ref SecurityGroup
+      IpProtocol: "-1"
   S3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
@@ -249,6 +255,8 @@ Resources:
           - p1: !Ref TableauServerSubdomain
   TableauServerAlb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
     Properties: 
         Scheme: "internet-facing"
         Type: "application"
@@ -321,6 +329,8 @@ Resources:
           - p1: !Ref TsmSubdomain
   TsmAlb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    DependsOn:
+      - VPCGatewayAttachment
     Properties: 
         Scheme: "internet-facing"
         Type: "application"

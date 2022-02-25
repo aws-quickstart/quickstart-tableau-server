@@ -231,7 +231,7 @@ Resources:
       #TemplateURL: !Sub 'https://quickstart-testing-public.s3.us-west-2.${AWS::URLSuffix}/quickstart-tableau-server/templates/child-tableau-server-linux.template'
       TemplateURL: 
         Fn::Sub:
-          - 'https://${p1}.s3.${p2}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/child-tableau-server-{p3}}.template'
+          - 'https://${p1}.s3.${p2}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/child-tableau-server-${p3}.template'
           - p2: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             p1: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${QSS3BucketRegion}', !Ref QSS3BucketName]
             p3: !If [InfaOnWindows, 'windows', 'linux']
@@ -242,7 +242,7 @@ Resources:
         S3BucketName: !Ref 'S3BucketName'
         TableauServerHostname: 
           Fn::Sub:
-            - '{prefix}.${Route53DomainName}'
+            - '${prefix}.${Route53DomainName}'
             - prefix: !FindInMap ["Names", "Route53", "TableauServer"]
         SecurityGroup: !GetAtt Infrastructure.Outputs.SecurityGroup
         IamInstanceProfile: !GetAtt Infrastructure.Outputs.IamInstanceProfile
@@ -271,11 +271,11 @@ Outputs:
     Description: Tableau Server URL (Load Balancer)
     Value: 
       Fn::Sub:
-        - '{prefix}.${Route53DomainName}'
+        - '${prefix}.${Route53DomainName}'
         - prefix: !FindInMap ["Names", "Route53", "TableauServer"]
   TableauServerTsmUrl:
     Description: Tableau Server TSM URL (Load Balancer)
     Value: 
       Fn::Sub:
-        - '{prefix}.${Route53DomainName}'
+        - '${prefix}.${Route53DomainName}'
         - prefix: !FindInMap ["Names", "Route53", "Tsm"]
