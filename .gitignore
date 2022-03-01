@@ -50,3 +50,5 @@ Temporary Items
 taskcat_outputs/*
 .taskcat_overrides.yaml
 .taskcat_overrides.yml
+.vscode/launch.json
+tableau-helper.log
