@@ -1,9 +1,7 @@
 from ast import arg
 import boto3
 from botocore.exceptions import ClientError
-import argparse
-import os, glob, logging, json, sys
-from subprocess import check_output
+import argparse, requests, os, logging, json, sys
 from datetime import datetime
 
 #########################
@@ -85,7 +83,8 @@ def get_tmp_path():
 #   Get this EC2 instance's ID
 def get_this_instance_id():
 
-    id = "i-033654e3508943ac1"
+    response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
+    id = response.text
 
     log(message=f"This instance has an ID of ${id}")
     return id
