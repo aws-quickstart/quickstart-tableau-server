@@ -13,7 +13,7 @@ tests:
       S3BucketName: tableau-server-data-bucket2
       AcceptEULA: 'yes'
       InstanceType: m6i.4xlarge
-      KeyPairName: Takashi-terraform
+      KeyPairName: takashi-quickstart
       LatestAmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
       TableauServerAdminPassword: $[alfred_genpass_32]
       TableauServerAdminUser: admin
@@ -44,7 +44,7 @@ tests:
       S3BucketName: tableau-server-data-bucket2
       AcceptEULA: 'yes'
       InstanceType: m6i.4xlarge
-      KeyPairName: Takashi-terraform
+      KeyPairName: takashi-quickstart
       LatestAmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
       TableauServerAdminPassword: $[alfred_genpass_32]
       TableauServerAdminUser: admin
