@@ -155,6 +155,15 @@ Resources:
       GroupId: !Ref SecurityGroup
       SourceSecurityGroupId: !Ref SecurityGroup
       IpProtocol: "-1"
+  SecurityGroupRule2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroup
+      CidrIp: "192.195.4.0/24"
+      IpProtocol: "tcp"
+      FromPort: "3389"
+      ToPort: "3389"
+      Description: "RDP"
   S3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:

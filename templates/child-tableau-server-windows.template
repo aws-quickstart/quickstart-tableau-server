@@ -238,10 +238,60 @@ Resources:
         configSets:
           setup:
             - step1
+            - step2
         step1:
           commands:
             a: 
-              command: powershell.exe -Command "Install-Module -name AWSPowerShell.NetCore"
+              command: msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /quiet
+            b:
+              cwd: c:\Windows\System32
+              command: netsh advfirewall set allprofiles state off
+              waitAfterCompletion: '0'
+            c: 
+              command: c:\tabsetup\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            d: 
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python36\python.exe"'
+                  - get-pip.py
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            e:
+              command: !Join
+                - ' '
+                - - net
+                  - user
+                  - !Sub '${TsmUsername}'
+                  - !Sub '${TsmPassword}'
+                  - /add
+                  - /y
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            f:
+              command: !Join
+                - ' '
+                - - net
+                  - localgroup
+                  - Administrators
+                  - !Sub '${TsmUsername}'
+                  - /add
+                  - /y
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            g:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - SilentInstaller.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - AutomatedInstaller
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
           files:
             c:\tabsetup\secrets.json:
               content:
@@ -272,12 +322,6 @@ Resources:
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
                 eula: !Ref 'AcceptEULA'
-            c:\tabsetup\SilentInstaller.py:
-              source:
-                - !FindInMap
-                  - DefaultConfiguration
-                  - InstallationConfig
-                  - AutomatedInstaller
             c:\tabsetup\config.json:
               content:
                 !Sub
@@ -299,12 +343,36 @@ Resources:
                     host: !Ref TableauServerHostname
             c:\tabsetup\python-3.6.4-amd64.exe:
               source: https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe
+            c:\tabsetup\get-pip.py:
+              source: https://bootstrap.pypa.io/get-pip.py
             c:\tabsetup\tableau-server-webapp-installer.exe:
               source:
                 - !FindInMap
                   - DefaultConfiguration
                   - InstallationConfig
                   - TableauServerInstaller
+        step2:
+          commands:
+            a:
+              cwd: c:\tabsetup
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python36\python.exe"'
+                  - SilentInstaller.py
+                  - install
+                  - --secretsFile c:\tabsetup\secrets.json
+                  - --registrationFile c:\tabsetup\registration.json
+                  - --configFile c:\tabsetup\config.json
+                  - --installDir d:\tableau
+                  - c:\tabsetup\tableau-server-webapp-installer.exe
+                  - ' > c:\tabsetup\tsm_installer-output.txt 2>&1'
+              waitAfterCompletion: '0'
+        step5:
+          commands:
+            a:
+              cwd: c:\tabsetup
+              command: del c:\tabsetup\secrets.json
+              waitAfterCompletion: '0'
     CreationPolicy:
       ResourceSignal:
         Timeout: !FindInMap ["DefaultConfiguration", "InstallationConfig", "InstallationTimeout"]
