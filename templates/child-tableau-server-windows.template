@@ -248,13 +248,13 @@ Resources:
               command: netsh advfirewall set allprofiles state off
               waitAfterCompletion: '0'
             c: 
-              command: c:\tabsetup\python-3.6.4-amd64.exe /quiet InstallAllUsers=1 PrependPath=1
+              command: c:\tabsetup\python-3.exe /quiet InstallAllUsers=1 PrependPath=1
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
             d: 
               command: !Join
                 - ' '
-                - - '"C:\Program Files\Python36\python.exe"'
+                - - '"C:\Program Files\Python310\python.exe"'
                   - get-pip.py
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
@@ -292,6 +292,19 @@ Resources:
                     - AutomatedInstaller
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
+            h:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - tableau-server-webapp-installer.exe
+                  - "-L"
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - TableauServerInstaller
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
           files:
             c:\tabsetup\secrets.json:
               content:
@@ -324,46 +337,33 @@ Resources:
                 eula: !Ref 'AcceptEULA'
             c:\tabsetup\config.json:
               content:
-                !Sub
-                  - '{"configEntities": {
-                      "gatewaySettings": {
-                          "_type": "gatewaySettingsType",
-                          "port": 80,
-                          "firewallOpeningEnabled": true,
-                          "sslRedirectEnabled": true,
-                          "publicHost": "${host}",
-                          "publicPort": "${port}"
-                      },
-                      "identityStore": {
-                          "_type": "identityStoreType",
-                          "type": "local"
-                      }
-                  }}'
-                  - port: !If [UsingElasticIp, '80', '443']
-                    host: !Ref TableauServerHostname
-            c:\tabsetup\python-3.6.4-amd64.exe:
-              source: https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe
+                configEntities:
+                  gatewaySettings:
+                    _type: gatewaySettingsType
+                    port: 80
+                    publicHost: !Ref TableauServerHostname
+                    publicPort: !If [UsingElasticIp, '80', '443']
+                  identityStore:
+                    _type: identityStoreType
+                    type: local
+                topologyVersion: {}
+            c:\tabsetup\python-3.exe:
+              source: https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe
             c:\tabsetup\get-pip.py:
               source: https://bootstrap.pypa.io/get-pip.py
-            c:\tabsetup\tableau-server-webapp-installer.exe:
-              source:
-                - !FindInMap
-                  - DefaultConfiguration
-                  - InstallationConfig
-                  - TableauServerInstaller
         step2:
           commands:
             a:
               cwd: c:\tabsetup
               command: !Join
                 - ' '
-                - - '"C:\Program Files\Python36\python.exe"'
+                - - '"C:\Program Files\Python310\python.exe"'
                   - SilentInstaller.py
                   - install
                   - --secretsFile c:\tabsetup\secrets.json
                   - --registrationFile c:\tabsetup\registration.json
                   - --configFile c:\tabsetup\config.json
-                  - --installDir d:\tableau
+                  - --installDir c:\tableau
                   - c:\tabsetup\tableau-server-webapp-installer.exe
                   - ' > c:\tabsetup\tsm_installer-output.txt 2>&1'
               waitAfterCompletion: '0'
