@@ -284,23 +284,16 @@ Resources:
                 eula: !Ref 'AcceptEULA'
             /tmp/config.json:
               content:
-                !Sub
-                  - '{"configEntities": {
-                      "gatewaySettings": {
-                          "_type": "gatewaySettingsType",
-                          "port": 80,
-                          "firewallOpeningEnabled": true,
-                          "sslRedirectEnabled": true,
-                          "publicHost": "${host}",
-                          "publicPort": "${port}"
-                      },
-                      "identityStore": {
-                          "_type": "identityStoreType",
-                          "type": "local"
-                      }
-                  }}'
-                  - port: !If [UsingElasticIp, '80', '443']
-                    host: !Ref TableauServerHostname
+                configEntities:
+                  gatewaySettings:
+                    _type: gatewaySettingsType
+                    port: 80
+                    publicHost: !Ref TableauServerHostname
+                    publicPort: !If [UsingElasticIp, '80', '443']
+                  identityStore:
+                    _type: identityStoreType
+                    type: local
+                topologyVersion: {}
             /tmp/tableau-server.rpm:
               source: !FindInMap
                 - DefaultConfiguration
