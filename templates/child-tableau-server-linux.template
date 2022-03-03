@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AWS CloudFormation Template: Tableau Server running on Linux (AmazonLinux2)'
+Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 instance with Tableau Server installed (AmazonLinux2)'
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AWS CloudFormation Template: Single-node Tableau Server running on Windows or AmazonLinux2'
+Description: 'AWS Quickstart: CloudFormation stack (parent) for creating a new Tableau Server environment'
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

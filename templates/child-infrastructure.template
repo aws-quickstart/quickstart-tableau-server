@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  This template creates the minimum infrasture needed to run Tableau Server in AWS
+  AWS Quickstart: CloudFormation stack (nested) for creating the infrastructure for Tableau Server to run in
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
