@@ -86,7 +86,7 @@ def get_this_instance_id():
     response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
     id = response.text
 
-    log(message=f"This instance has an ID of ${id}")
+    log(message=f"This instance has an ID of {id}")
     return id
 
 #   Backup Tableau Server, and save to S3
