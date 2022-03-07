@@ -211,15 +211,16 @@ Mappings:
   DefaultConfiguration:
     Aws:
       CloudwatchLogGroup: TableauServerLogs
-      S3BackupPath: backups
+      S3BackupPrefix: backups/
+      InstanceName: Tableau Server (windows)
     InstallationConfig:
       TableauServerInstaller: https://www.tableau.com/downloads/server/pc64
       AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/windows/tsm/SilentInstaller/SilentInstaller.py
       InstallationTimeout: PT1H45M
     Scripts:
-      Backup: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-to-s3.sh
-      Restore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/restore-from-s3.sh
+      BackupRestore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-restore-s2.py
       UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.py
+      TagInstance: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/tag-instance.py
     MachineConfiguration:
       SystemVolumeSize: 100
       Name: Tableau Server Quickstart
@@ -239,6 +240,7 @@ Resources:
           setup:
             - step1
             - step2
+            - step3
             - step4
         step1:
           commands:
@@ -286,6 +288,30 @@ Resources:
                 - ' '
                 - - curl
                   - "-o"
+                  - tag_instance.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - TagInstance
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            h:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - backup-restore-s3.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - BackupRestore
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            i:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
                   - update-load-balancer.py
                   - !FindInMap
                     - DefaultConfiguration
@@ -293,7 +319,7 @@ Resources:
                     - UpdateLoadBalancer
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            h:
+            j:
               command: !Join
                 - ' '
                 - - curl
@@ -305,7 +331,7 @@ Resources:
                     - AutomatedInstaller
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            i:
+            k:
               command: !Join
                 - ' '
                 - - curl
@@ -318,7 +344,7 @@ Resources:
                     - TableauServerInstaller
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            j:
+            l:
               cwd: c:\tabsetup
               command: !Join
                 - ' '
@@ -393,6 +419,33 @@ Resources:
                   - c:\tabsetup\tableau-server-webapp-installer.exe
                   - ' > c:\tabsetup\tsm_installer-output.txt 2>&1'
               waitAfterCompletion: '0'
+        step3:
+          commands: 
+            a: 
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --instancename
+                  - !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
+                  - --region
+                  - !Ref AWS::Region
+            b: 
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - backup-restore-s3.py
+                  - --command restore
+                  - --region
+                  - !Ref AWS::Region
+                  - --s3bucket
+                  - !Ref S3BucketName
+                  - --s3prefix
+                  - !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"]
         step4:
           commands: 
             a: 
