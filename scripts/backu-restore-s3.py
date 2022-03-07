@@ -128,7 +128,7 @@ def backup_full_path(tsm):
 #########################
 
 #   Backup Tableau Server, and save to S3
-def backup(tsm, bucket_name, s3_prefix, region):
+def backup(tsm, bucket_name, s3_prefix):
 
     #   Generate a filename for the tsbak
     today = datetime.now().strftime('%Y-%m-%d')
@@ -158,6 +158,11 @@ def backup(tsm, bucket_name, s3_prefix, region):
     except ClientError as e:
         log(message=f"Error uploading ${key} to {bucket_name}", details_json=e, level="error")
         return False
+
+    #   Cleanup backup files locally
+    os.remove(settings_fullpath)
+    os.remove(tsbak_fullpath)
+
     return True
 
 #   Restore Tableau Server, from a backup in S3
@@ -182,6 +187,7 @@ def restore(tsm, bucket_name, s3_prefix):
         def sort_key(obj):
             return obj.get("LastModified")
         tsbaks.sort(key=sort_key)
+        settings.sort(key=sort_key)
 
         #   Get an S3 resource reference
         s3_resource = boto3.resource('s3')
@@ -194,14 +200,14 @@ def restore(tsm, bucket_name, s3_prefix):
             #   Download the file
             s3_resource.Bucket(bucket_name).download_file(s3_backup_path, local_backup_path)
             #   Restore from the backup
-            exec_tsm(tsm, "maintenance", "backup", "--file", "backup.tsbak" , "--ignore-prompts")
+            exec_tsm(tsm, "maintenance", "restore", "--file", "backup.tsbak")
             #   Cleanup file
             os.remove(local_backup_path)
         
         #   Download/Restore from settings.json
         if len(settings)>0:
             #   Get the local and remote paths
-            local_backup_path = os.path.join(get_tsm_path(), "settings.json")
+            local_backup_path = os.path.join(get_tmp_path(), "settings.json")
             s3_backup_path = settings[0]['Key']
             #   Download the file
             s3_resource.Bucket(bucket_name).download_file(s3_backup_path, local_backup_path)
@@ -215,7 +221,7 @@ def restore(tsm, bucket_name, s3_prefix):
         exec_tsm(tsm, "start")
 
     except ClientError as e:
-        log(message=f"Error uploading backups to {bucket_name}", details_json=e, level="error")
+        log(message=f"Error restoring backups from {bucket_name}", details_json=e, level="error")
         return False
     return True
 
@@ -225,7 +231,7 @@ def restore(tsm, bucket_name, s3_prefix):
 def main():
 
      #   Setup logging
-    setup_logging(log_file_path="tableau-helper.log",additional_modules=["boto3","botocore"])
+    setup_logging(log_file_path="tableau-backup-restore-s3.log",additional_modules=["boto3","botocore"])
 
     #   Parse parameters
     parser = argparse.ArgumentParser()
@@ -246,13 +252,11 @@ def main():
     if command == 'backup':
 
         #   Take a backup using TSM and upload to S3
-        status = backup(tsm=tsm, bucket_name=s3_bucket, s3_prefix=s3_prefix, region=region)
+        status = backup(tsm=tsm, bucket_name=s3_bucket, s3_prefix=s3_prefix)
 
     elif command == 'restore':
 
         #   Find the latest backup in S3 and use TSM to restore from it
-        status = restore(tsm=tsm, bucket_name=s3_bucket, s3_prefix=s3_prefix, region=region)
-
-    
+        status = restore(tsm=tsm, bucket_name=s3_bucket, s3_prefix=s3_prefix)
 
 main()

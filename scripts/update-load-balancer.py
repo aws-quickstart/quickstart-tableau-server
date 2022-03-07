@@ -164,7 +164,7 @@ def stop_instance(instance_id, region):
 def main():
 
     #   Setup logging
-    setup_logging(log_file_path="tableau-helper.log",additional_modules=["boto3","botocore"])
+    setup_logging(log_file_path="tableau-update-load-balancer.log",additional_modules=["boto3","botocore"])
 
     #   Parse parameters
     parser = argparse.ArgumentParser()
