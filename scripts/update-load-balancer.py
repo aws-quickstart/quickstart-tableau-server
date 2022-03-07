@@ -168,9 +168,9 @@ def main():
 
     #   Parse parameters
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target_group_arn", help="The ARN of your load balancer's target group", type=str)
-    parser.add_argument("--region", help="The AWS region", type=str)
-    parser.add_argument("--stop_instances", help="Should we stop any other instances that are attached to the load balancer?", type=str)
+    parser.add_argument("--target_group_arn", help="The ARN of your load balancer's target group", type=str, required=True)
+    parser.add_argument("--region", help="The AWS region", type=str, required=True)
+    parser.add_argument("--stop_instances", help="Should we stop any other instances that are attached to the load balancer?", type=str, required=True)
     args = parser.parse_args()
     target_group_arn = args.target_group_arn  
     region=args.region
