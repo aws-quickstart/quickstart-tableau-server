@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AWS CloudFormation Template: Tableau Server running on Windows (WindowsServer2016)'
+Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 instance with Tableau Server installed (Windows Server 2016)'
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -219,7 +219,7 @@ Mappings:
     Scripts:
       Backup: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-to-s3.sh
       Restore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/restore-from-s3.sh
-      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.sh
+      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.py
     MachineConfiguration:
       SystemVolumeSize: 100
       Name: Tableau Server Quickstart
@@ -239,6 +239,7 @@ Resources:
           setup:
             - step1
             - step2
+            - step4
         step1:
           commands:
             a: 
@@ -285,6 +286,18 @@ Resources:
                 - ' '
                 - - curl
                   - "-o"
+                  - update-load-balancer.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - UpdateLoadBalancer
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            h:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
                   - SilentInstaller.py
                   - !FindInMap
                     - DefaultConfiguration
@@ -292,7 +305,7 @@ Resources:
                     - AutomatedInstaller
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            h:
+            i:
               command: !Join
                 - ' '
                 - - curl
@@ -304,6 +317,15 @@ Resources:
                     - InstallationConfig
                     - TableauServerInstaller
               cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            j:
+              cwd: c:\tabsetup
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\Scripts\pip.exe"'
+                  - install
+                  - -r
+                  - requirements.txt
               waitAfterCompletion: '0'
           files:
             c:\tabsetup\secrets.json:
@@ -351,6 +373,10 @@ Resources:
               source: https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe
             c:\tabsetup\get-pip.py:
               source: https://bootstrap.pypa.io/get-pip.py
+            c:\tabsetup\requirements.txt:
+              content: |
+                boto3
+                requests
         step2:
           commands:
             a:
@@ -366,6 +392,33 @@ Resources:
                   - --installDir c:\tableau
                   - c:\tabsetup\tableau-server-webapp-installer.exe
                   - ' > c:\tabsetup\tsm_installer-output.txt 2>&1'
+              waitAfterCompletion: '0'
+        step4:
+          commands: 
+            a: 
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - update-load-balancer.py
+                  - --target_group_arn
+                  - !Ref TableauServerTargetGroupArn
+                  - --region
+                  - !Ref AWS::Region
+                  - --stop_instances True
+              
+            b: 
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - update-load-balancer.py
+                  - --target_group_arn
+                  - !Ref TsmTargetGroupArn
+                  - --region
+                  - !Ref AWS::Region
+                  - --stop_instances False
+              cwd: c:\tabsetup
               waitAfterCompletion: '0'
         step5:
           commands:

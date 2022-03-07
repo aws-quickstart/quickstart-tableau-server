@@ -1,7 +1,7 @@
 from ast import arg
 import boto3
 from botocore.exceptions import ClientError
-import os, glob, logging, json, sys
+import argparse, os, glob, logging, json, sys
 from subprocess import check_output
 from datetime import datetime
 
@@ -35,7 +35,7 @@ def log(message, details_json=None, level=None):
     log_message = {
         "message": message,
         "source" : source,
-        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
     #   Safely parse any JSON object included with the log request
@@ -73,7 +73,7 @@ def is_windows():
 #   Define where the tmp directory is
 def get_tmp_path():
     if is_windows():
-        return "C:\\temp\\"
+        return "C:\\tabsetup\\"
     else:
         return "/tmp/"
 
@@ -83,7 +83,7 @@ def get_tsm_path():
     #   Define the glob expression, based on the OS
     glob_exp = ""
     if is_windows():
-        glob_exp = "C:\\Program Files\\Tableau\\Tableau Server\\packages\\[b][i][n][.]*\\[t][s][m][.]*"
+        glob_exp = "C:\\tableau\\packages\\[b][i][n][.]*\\[t][s][m][.]*"
     else: 
         glob_exp = "/opt/tableau/tableau_server/packages/[b][i][n][.]*/[t][s][m]*"
     
@@ -97,28 +97,31 @@ def get_tsm_path():
 def exec_tsm(*args):
 
     # #   Create a subprocess, and execute the given command
-    # log(level="Info", message=f"Running the following tsm command: ${' '.join(args)}")
-    # tsm_output = check_output(args)
+    log(level="Info", message=f"Running the following tsm command: {' '.join(args)}")
+    tsm_output = check_output(args).decode('UTF-8')
     
     # #   Log, then return the output of the TSM command
-    # log(message=tsm_output, level="Info")
-    # return tsm_output
+    log(message=tsm_output, level="Info")
+    return tsm_output
 
-    print(" ".join(args))
-    return ""
+    #print(" ".join(args))
+    #return ""
 
 #   Get the path for the backups, based on the OS
-def backup_full_path(tsm, filename):
+def backup_full_path(tsm):
 
     #   Get the path to backup files from TSM
-    path = exec_tsm(tsm, "configuration", "get" "-k", "basefilepath.backuprestore")
+    path = exec_tsm(tsm, "configuration", "get", "-k", "basefilepath.backuprestore")
+
+    #   Clean up the response text
+    clean_path = path.replace("\r","").replace("\n","")
 
     #if is_windows():
     #    return os.path.join("C:\\ProgramData", "Tableau", "Tableau Server", "data", "tabsvc", "files", "backups",filename)
     #else:
     #    return os.path.join("/var","opt","tableau","tableau_server","data","tabsvc","files","backups",filename)
 
-    return path
+    return clean_path
 
 #########################
 #   Business Logic      #
@@ -134,22 +137,22 @@ def backup(tsm, bucket_name, s3_prefix, region):
     exec_tsm(tsm, "maintenance", "cleanup", "--all")
 
     #   export the tsm settings
-    settings_filename = f"${today}-settings.json"
-    settings_fullpath = os.join(get_tmp_path(),settings_filename)
+    settings_filename = f"{today}-settings.json"
+    settings_fullpath = os.path.join(get_tmp_path(),settings_filename)
     exec_tsm(tsm, "settings", "export", "--output-config-file", settings_fullpath)
 
     #   perform the backup
     tsbak_filename = f"{today}-backup.tsbak"
-    exec_tsm(tsm, "maintenance", "backup", "--file",tsbak_filename , "--ignore-prompts")
+    exec_tsm(tsm, "maintenance", "backup", "--file",tsbak_filename , "--ignore-prompt")
 
     #   Get the full path to the backup file
-    tsbak_fullpath = os.join(backup_full_path(tsm=tsm),tsbak_filename)
+    tsbak_fullpath = os.path.join(backup_full_path(tsm=tsm),tsbak_filename)
 
     #   Upload the backup files to S3 bucket
     s3_client = boto3.client('s3')
     try:
         key = f"{s3_prefix}{settings_filename}"
-        response_settings = s3_client.upload_file(settings_filename, bucket_name, key)
+        response_settings = s3_client.upload_file(settings_fullpath, bucket_name, key)
         key =  f"{s3_prefix}{tsbak_filename}"
         response_tsbak = s3_client.upload_file(tsbak_fullpath, bucket_name,key)
     except ClientError as e:
@@ -186,7 +189,7 @@ def restore(tsm, bucket_name, s3_prefix):
         #   Download/Restore from tsbak
         if len(tsbaks)>0:
             #   Get the local and remote paths
-            local_backup_path = os.join(backup_full_path(tsm=tsm), "backup.tsbak")
+            local_backup_path = os.path.join(backup_full_path(tsm=tsm), "backup.tsbak")
             s3_backup_path = tsbaks[0]['Key']
             #   Download the file
             s3_resource.Bucket(bucket_name).download_file(s3_backup_path, local_backup_path)
@@ -198,7 +201,7 @@ def restore(tsm, bucket_name, s3_prefix):
         #   Download/Restore from settings.json
         if len(settings)>0:
             #   Get the local and remote paths
-            local_backup_path = os.join(get_tsm_path(), "settings.json")
+            local_backup_path = os.path.join(get_tsm_path(), "settings.json")
             s3_backup_path = settings[0]['Key']
             #   Download the file
             s3_resource.Bucket(bucket_name).download_file(s3_backup_path, local_backup_path)
@@ -221,18 +224,35 @@ def restore(tsm, bucket_name, s3_prefix):
 #########################
 def main():
 
-    #   Setup logging
+     #   Setup logging
     setup_logging(log_file_path="tableau-helper.log",additional_modules=["boto3","botocore"])
 
-    #   What command to run?
-
-
     #   Parse parameters
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--command", help="Options are 'backup' or 'restore'", type=str, required=True)
+    parser.add_argument("--region", help="The AWS region", type=str, required=True)
+    parser.add_argument("--s3bucket", help="The S3 bucket, where the backup files live", type=str,required=True)
+    parser.add_argument("--s3prefix", help="The prefix used to query for backup files in S3", type=str,required=True)
+    args = parser.parse_args()
+    command = args.command.lower()
+    region=args.region
+    s3_bucket=args.s3bucket.lower()
+    s3_prefix=args.s3prefix.lower()
 
     #   Get a reference to tsm
     tsm = get_tsm_path()
 
-    #   Execute
+    #   Execute the command
+    if command == 'backup':
 
+        #   Take a backup using TSM and upload to S3
+        status = backup(tsm=tsm, bucket_name=s3_bucket, s3_prefix=s3_prefix, region=region)
+
+    elif command == 'restore':
+
+        #   Find the latest backup in S3 and use TSM to restore from it
+        status = restore(tsm=tsm, bucket_name=s3_bucket, s3_prefix=s3_prefix, region=region)
+
+    
 
 main()
