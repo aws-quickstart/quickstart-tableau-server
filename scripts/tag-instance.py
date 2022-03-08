@@ -74,22 +74,41 @@ def log(message, details_json=None, level=None):
 #   Get this EC2 instance's ID
 def get_this_instance_id():
 
+    #   Get the ID for this EC2 instance
     response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
     id = response.text
-
+    
     log(message=f"This instance has an ID of {id}")
     return id
 
+#   Derive the root volume's id from an ec2 instance
+def get_instance_volumes(instance_id, region):
+
+    #   Get an EC2 client
+    ec2_client = boto3.client('ec2', region_name=region)
+
+    #   Get all volumes associated with this instance
+    volumes = ec2_client.describe_instance_attribute(InstanceId=instance_id, Attribute='blockDeviceMapping')
+
+    #   Parse out just the IDs for each volume
+    volume_ids = []
+    for volume in volumes['BlockDeviceMappings']:
+        if volume['Ebs']:
+            volume_ids.append(volume['Ebs']['VolumeId'])
+    
+    #   Return a list of volume IDs
+    return volume_ids
+
 #   Apply a tag for a given EC2 instance
-def apply_tag(instance_id, tag_name, tag_value, region):
+def apply_tag(id, tag_name, tag_value, region):
 
     #   Get an E2 client
     ec2_client = boto3.client('ec2', region_name=region)
 
     #   Create a tag
-    status = ec2_client.create_tags(Resources=[instance_id], Tags=[ { 'Key': tag_name, 'Value': tag_value } ])
+    status = ec2_client.create_tags(Resources=[id], Tags=[ { 'Key': tag_name, 'Value': tag_value } ])
 
-    log(message=f"Applying the following tag to instance {instance_id} - {tag_name}:{tag_value}")
+    log(message=f"Applying the following tag to {id} - {tag_name}:{tag_value}")
 
 
 #########################
@@ -102,16 +121,21 @@ def main():
 
     #   Parse parameters
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instancename", help="What should this instance be named? (applied as a tag in aws)", type=str, required=True)
+    parser.add_argument("--tagname", help="What is the name of the tag?", type=str, required=True)
+    parser.add_argument("--tagvalue", help="What is the value of the tag?", type=str, required=True)
     parser.add_argument("--region", help="AWS Region the Ec2 instance lives in", type=str, required=True)
     args = parser.parse_args()
-    tag_value = args.instancename
+    tag_name = args.tagname
+    tag_value = args.tagvalue
     region = args.region
 
     #   Get Instance ID
     instance_id = get_this_instance_id()
+    instance_volumes_ids = get_instance_volumes(instance_id=instance_id, region=region)
 
     #   Apply a Name tag
-    status = apply_tag(instance_id=instance_id, tag_name="Name", tag_value=tag_value, region=region)
+    status = apply_tag(id=instance_id, tag_name=tag_name, tag_value=tag_value, region=region)
+    for volume_id in instance_volumes_ids:
+        apply_tag(id=volume_id, tag_name=tag_name, tag_value=tag_value, region=region)
 
 main()
