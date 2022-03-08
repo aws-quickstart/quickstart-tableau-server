@@ -4,6 +4,14 @@ project:
   s3_bucket: quickstart-testing-public
   regions:
   - us-west-2
+  tags:
+    Name: Tableau Server Quickstart
+    Creator: tbinns@tableau.com
+    Group: tbinns@tableau.com  
+    DeptCode: "429"
+    Environment: Dev
+    Application: AWS Quickstarts
+    Description: Resources used by Tableau Server Quickstart testing
 tests:
   linux:
     parameters: 
