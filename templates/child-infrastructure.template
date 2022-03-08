@@ -12,6 +12,8 @@ Metadata:
           - TableauServerSubdomain
           - TsmSubdomain
           - S3BucketName
+          - TableauServerLogGroup
+          - QuickstartLogGroup
     ParameterLabels:
       Route53HostedZone:
         default: Hosted Zone
@@ -23,6 +25,10 @@ Metadata:
         default: Subdomain for TSM UI's URL
       S3BucketName:
         default: Name of S3 bucket for Tableau Server files
+      TableauServerLogGroup:
+        default: Cloudwatch log group name for Tableau Server logs
+      QuickstartLogGroup:
+        default: Cloudwatch log group name for this Quickstart
 Parameters:
   Route53HostedZone:
     Description: Hosted Zone from Route53
@@ -38,6 +44,12 @@ Parameters:
     Type: String
   TsmSubdomain:
     Description: Subdomain for TSM UI URL
+    Type: String
+  TableauServerLogGroup:
+    Description: Name of the Cloudwatch log group for Tableau Server
+    Type: String
+  QuickstartLogGroup:
+    Description: Name of the Cloudwatch log group for this quickstart
     Type: String
 Mappings: 
   VPC:
@@ -398,6 +410,16 @@ Resources:
       LoadBalancerArn: !Ref 'TsmAlb'
       Port: 80
       Protocol: HTTP
+  TableauServerCloudwatch:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Ref TableauServerLogGroup
+      RetentionInDays: 90
+  QuickstartCloudwatch:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Ref QuickstartLogGroup
+      RetentionInDays: 3653
 Outputs:
   TableauServerUrl:
     Description: URL of your Tableau Server

@@ -204,6 +204,9 @@ Mappings:
     Route53:
       TableauServer: tableau
       Tsm: tsm
+    CloudWatch:
+      TableauServerLogGroup: TableauServerLogs
+      QuickstartLogGroup: TableauQuickstartSetup
 Conditions:
   InfaOnWindows: !Equals
     - !Ref 'OS'
@@ -225,6 +228,8 @@ Resources:
         S3BucketName: !Ref 'S3BucketName'
         TableauServerSubdomain: !FindInMap ["Names", "Route53", "TableauServer"]
         TsmSubdomain: !FindInMap ["Names", "Route53", "Tsm"]
+        TableauServerLogGroup: !FindInMap ["Names", "CloudWatch", "TableauServerLogGroup"]
+        QuickstartLogGroup: !FindInMap ["Names", "CloudWatch", "QuickstartLogGroup"]
   TableauServer:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -266,6 +271,8 @@ Resources:
         RegState: !Ref 'RegState'
         RegTitle: !Ref 'RegTitle'
         RegZip: !Ref 'RegZip'
+        TableauServerLogGroup: !FindInMap ["Names", "CloudWatch", "TableauServerLogGroup"]
+        QuickstartLogGroup: !FindInMap ["Names", "CloudWatch", "QuickstartLogGroup"]
 Outputs:
   TableauServerUrl:
     Description: Tableau Server URL (Load Balancer)
