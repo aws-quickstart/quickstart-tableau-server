@@ -16,6 +16,8 @@ Metadata:
           - TableauServerHostname
           - TableauServerTargetGroupArn
           - TsmTargetGroupArn
+          - TableauServerLogGroup
+          - QuickstartLogGroup
       - Label:
           default: Secrets
         Parameters:
@@ -73,6 +75,10 @@ Metadata:
         default: Tableau Activation Key
       AcceptEULA:
         default: Accept Tableau End User License Agreement
+      TableauServerLogGroup:
+        default: Cloudwatch log group name for Tableau Server logs
+      QuickstartLogGroup:
+        default: Cloudwatch log group name for this Quickstart
       RegCity:
         default: City
       RegCompany:
@@ -168,6 +174,12 @@ Parameters:
     MinLength: '6'
     NoEcho: 'true'
     Type: String
+  TableauServerLogGroup:
+    Description: Name of the Cloudwatch log group for Tableau Server
+    Type: String
+  QuickstartLogGroup:
+    Description: Name of the Cloudwatch log group for this quickstart
+    Type: String
   RegCity:
     Description: City
     Type: String
@@ -210,17 +222,18 @@ Parameters:
 Mappings:
   DefaultConfiguration:
     Aws:
-      CloudwatchLogGroup: TableauServerLogs
-      S3BackupPath: backups
+      InstanceName: Tableau-Server-Linux
+      S3BackupPrefix: backups/
     InstallationConfig:
       TableauServerInstaller: https://www.tableau.com/downloads/server/rpm
       AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/linux/automated-installer/automated-installer
       PostgreSqlJdbc: https://downloads.tableau.com/drivers/linux/postgresql/postgresql-42.2.14.jar
       InstallationTimeout: PT1H45M
     Scripts:
-      Backup: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-to-s3.sh
-      Restore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/restore-from-s3.sh
-      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.sh
+      BackupRestore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-restore-s3.py
+      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.py
+      TagInstance: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/tag-instance.py
+      Requirements: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/requirements.txt
     MachineConfiguration:
       SystemVolumeSize: 100
       AmazonLinux: AmazonLinux2
@@ -243,7 +256,10 @@ Resources:
             - step2
             - step3
             - step4
-        step1:
+            - step5
+            - step6
+            - step7
+        step1:  # Create files and local user needed for Tableau installation
           packages:
             rpm:
               epel-release: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -257,7 +273,10 @@ Resources:
             c:
               command: !Sub useradd ${TsmUsername} && echo "Creating TSM user"
             d:
-              command:  !Sub echo ${TsmPassword} | passwd ${TsmUsername} --stdin && echo "Setting password for TSM user"
+              command: !Sub echo ${TsmPassword} | passwd ${TsmUsername} --stdin && echo "Setting password for TSM user"
+            e:
+              cwd: /tmp
+              command: pip3 install -r requirements.txt
           files:
             /tmp/secrets.properties:
               mode: '640'
@@ -305,45 +324,141 @@ Resources:
                 - DefaultConfiguration
                 - InstallationConfig
                 - AutomatedInstaller
-            /tmp/update-load-balancer.sh:
+            /tmp/update-load-balancer.py:
               mode: 550
               source: !FindInMap
                 - DefaultConfiguration
                 - Scripts
                 - UpdateLoadBalancer
-            /tmp/backup-to-s3.sh:
+            /tmp/backup-restore-s3.py:
               mode: 550
               source: !FindInMap
                 - DefaultConfiguration
                 - Scripts
-                - Backup  
-            /tmp/restore-from-s3.sh:
-              mode: 550
+                - BackupRestore 
+            /tmp/requirements.txt:
               source: !FindInMap
                 - DefaultConfiguration
                 - Scripts
-                - Restore  
+                - Requirements  
             /opt/tableau/tableau_driver/jdbc/postgresql-42.2.22.jar:
               mode: '550'
               source: !FindInMap
                 - DefaultConfiguration
                 - InstallationConfig
                 - PostgreSqlJdbc
-        step2:
+        step2:  # Some companies have strict tagging policies in AWS, modify the tagname and tagvalue attributes to apply tags to the EC2 instance + its root volume
+          files:
+            /tmp/tag-instance.py:
+              mode: 550
+              source: !FindInMap
+                - DefaultConfiguration
+                - Scripts
+                - TagInstance
+          commands:
+            a: 
+              cwd: /tmp
+              command: !Join
+                - ' '
+                - - 'python3'
+                  - tag-instance.py
+                  - --tagname
+                  - Name
+                  - --tagvalue
+                  - !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
+                  - --region
+                  - !Ref AWS::Region
+            b: 
+              cwd: /tmp
+              command: !Sub python3 tag-instance.py --tagname Description --tagvalue TableauQuickstartResource --region ${AWS::Region}
+            c: 
+              cwd: /tmp
+              command: !Sub python3 tag-instance.py --tagname Creator --tagvalue tbinns@tableau.com --region ${AWS::Region}
+            d: 
+              cwd: /tmp
+              command: !Sub python3 tag-instance.py --tagname Group --tagvalue tbinns@tableau.com --region ${AWS::Region}
+            e: 
+              cwd: /tmp
+              command: !Sub python3 tag-instance.py --tagname DeptCode --tagvalue 429 --region ${AWS::Region}
+            f: 
+              cwd: /tmp
+              command: !Sub python3 tag-instance.py --tagname Environment --tagvalue Development --region ${AWS::Region}
+            g: 
+              cwd: /tmp
+              command: !Sub python3 tag-instance.py --tagname Application --tagvalue AwsQuickstart --region ${AWS::Region}
+        step3:  # Setup CloudWatch logging
+          files:
+            /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json:
+              content: !Sub |
+                {
+                  "logs": {
+                    "logs_collected": {
+                      "files": {
+                        "collect_list": [
+                          {
+                            "file_path": "/var/opt/tableau/tableau_server/data/tabsvc/logs/tabadmincontroller/tabadmincontroller_node*.log",
+                            "log_group_name": "${TableauServerLogGroup}",
+                            "log_stream_name": "tsm.log",
+                            "timestamp_format": "%H: %M: %S%y%b%-d"
+                          },
+                          {
+                            "file_path": "/var/opt/tableau/tableau_server/data/tabsvc/logs/httpd/access.*.log",
+                            "log_group_name": "${TableauServerLogGroup}",
+                            "log_stream_name": "apache-access.log",
+                            "timestamp_format": "%H: %M: %S%y%b%-d"
+                          },
+                          {
+                            "file_path": "/var/opt/tableau/tableau_server/data/tabsvc/logs/httpd/error.log",
+                            "log_group_name": "${TableauServerLogGroup}",
+                            "log_stream_name": "apache-error.log",
+                            "timestamp_format": "%H: %M: %S%y%b%-d"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "metrics": {
+                    "append_dimensions": {
+                      "InstanceId": "${!aws:InstanceId}",
+                      "InstanceType": "${!aws:InstanceType}"
+                    },
+                    "metrics_collected": {
+                      "mem": {
+                        "measurement": [
+                          "mem_used_percent"
+                        ]
+                      },
+                      "swap": {
+                        "measurement": [
+                          "swap_used_percent"
+                        ]
+                      }
+                    }
+                  }
+                }
+          commands:
+            a:
+              command: rpm -Uvh https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+            b:
+              command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a stop
+            c:
+              command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+        step4:  # Install Tableau Server and restore from backups living in S3 (if available)
           commands:
             a: 
               command: !Sub /tmp/automated-installer -a ${TsmUsername} -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseKey} -v --accepteula --force /tmp/tableau-server.rpm  && echo "Installing Tableau Server"
-        step3:
-          commands: 
-            a: 
-              command: !Join [' ', ['./tmp/restore-from-s3.sh', !Ref S3BucketName, !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPath"] ] ] 
-        step4:
-          commands: 
-            a: 
-              command: !Join [' ', ['./tmp/update-load-balancer.sh', !Ref TableauServerTargetGroupArn, !Ref AWS::Region, "true" ] ]
             b: 
-              command: !Join [' ', ['./tmp/update-load-balancer.sh', !Ref TsmTargetGroupArn, !Ref AWS::Region, "true" ] ]
-        step5:
+              cwd: /tmp
+              command: !Join [' ', ['python3', 'backup-restore-s3.py', '--command', 'restore', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ] 
+        step5:  # Make Tableau Server and TSM Web accessible via Load Balancers
+          commands: 
+            a: 
+              cwd: /tmp
+              command: !Join [' ', ['python3', 'update-load-balancer.py', '--target_group_arn', !Ref TableauServerTargetGroupArn, '--region', !Ref AWS::Region, '--stop_instances', "true" ] ]
+            b: 
+              cwd: /tmp
+              command: !Join [' ', ['python3', 'update-load-balancer.py', '--target_group_arn', !Ref TsmTargetGroupArn, '--region', !Ref AWS::Region, '--stop_instances', "false" ] ]
+        step6:  # Clean up the environment
           commands:
             a: 
               command: rm -f /tmp/secrets.properties && echo "Cleanup secrets.properties"
@@ -355,6 +470,19 @@ Resources:
               command: rm -f /tmp/automated-installer && echo "Cleanup automated-installer"
             e:  
               command: rm -f /tmp/registration.json && echo "Cleanup registration.json"
+        step7:  # Schedule automated Tableau server backups to S3
+          files:
+            /tmp/backup.sh:
+              mode: 550
+              content: !Join [' ', ['python3', 'backup-restore-s3.py', '--command', 'backup', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ] 
+            /etc/cron.d/tableau-server-backup:
+              mode: 550
+              content: |
+                "#  Backup Tableau Server to S3, every sunday"
+                "SHELL=/bin/bash"
+                "PATH=/sbin:/bin:/user/sbin:/usr/bin"
+                "MAILTO=root"
+                "10 5 * * 7  root /tmp/backup.sh"
     CreationPolicy:
       ResourceSignal:
         Timeout: !FindInMap ["DefaultConfiguration", "InstallationConfig", "InstallationTimeout"]
@@ -375,6 +503,9 @@ Resources:
               - SystemVolumeSize
       EbsOptimized: true
       KeyName: !Ref 'KeyPairName'
+      Tags:
+        - Key: Name
+          Value: !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
       UserData: 
         Fn::Base64: !Sub |
           #!/bin/bash -xe
@@ -382,11 +513,6 @@ Resources:
           # Install/upgrade OS and dependencies
           yum -y upgrade
           yum install -y aws-cfn-bootstrap
-
-          # Rename the ec2 instance
-          AWS_INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-          NEW_NAME="Tableau Server Quickstart ($(date +%m-%d-%Y))"
-          aws ec2 create-tags --resources $AWS_INSTANCE_ID --region ${AWS::Region} --tags Key=Name,Value="$NEW_NAME"
           
           # Run ConfigSet to install Tableau Server
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource TableauServerEC2 --configsets setup --region ${AWS::Region}
