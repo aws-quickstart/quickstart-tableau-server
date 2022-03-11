@@ -16,6 +16,8 @@ Metadata:
           - TableauServerHostname
           - TableauServerTargetGroupArn
           - TsmTargetGroupArn
+          - TableauServerLogGroup
+          - QuickstartLogGroup
       - Label:
           default: Secrets
         Parameters:
@@ -73,6 +75,10 @@ Metadata:
         default: Tableau Activation Key
       AcceptEULA:
         default: Accept Tableau End User License Agreement
+      TableauServerLogGroup:
+        default: Cloudwatch log group name for Tableau Server logs
+      QuickstartLogGroup:
+        default: Cloudwatch log group name for this Quickstart
       RegCity:
         default: City
       RegCompany:
@@ -168,6 +174,12 @@ Parameters:
     MinLength: '6'
     NoEcho: 'true'
     Type: String
+  TableauServerLogGroup:
+    Description: Name of the Cloudwatch log group for Tableau Server
+    Type: String
+  QuickstartLogGroup:
+    Description: Name of the Cloudwatch log group for this quickstart
+    Type: String
   RegCity:
     Description: City
     Type: String
@@ -210,17 +222,18 @@ Parameters:
 Mappings:
   DefaultConfiguration:
     Aws:
-      CloudwatchLogGroup: TableauServerLogs
       S3BackupPrefix: backups/
-      InstanceName: Tableau Server (windows)
+      InstanceName: Tableau-Server-Windows
     InstallationConfig:
       TableauServerInstaller: https://www.tableau.com/downloads/server/pc64
       AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/windows/tsm/SilentInstaller/SilentInstaller.py
       InstallationTimeout: PT1H45M
     Scripts:
-      BackupRestore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-restore-s2.py
+      BackupRestore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-restore-s3.py
       UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.py
       TagInstance: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/tag-instance.py
+      Requirements: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/requirements.txt
+      ChromeInstaller: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/install-chrome.ps1
     MachineConfiguration:
       SystemVolumeSize: 100
       Name: Tableau Server Quickstart
@@ -242,117 +255,209 @@ Resources:
             - step2
             - step3
             - step4
-        step1:
+            - step5
+            - step6
+            - step7
+            - step8
+        step1:  # Install Python, pip, python libs, awscli
           commands:
-            a: 
-              command: msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /quiet
-            b:
+            a:
               cwd: c:\Windows\System32
               command: netsh advfirewall set allprofiles state off
               waitAfterCompletion: '0'
-            c: 
+            b: 
               command: c:\tabsetup\python-3.exe /quiet InstallAllUsers=1 PrependPath=1
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            d: 
+            c: 
               command: !Join
                 - ' '
                 - - '"C:\Program Files\Python310\python.exe"'
                   - get-pip.py
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            e:
-              command: !Join
-                - ' '
-                - - net
-                  - user
-                  - !Sub '${TsmUsername}'
-                  - !Sub '${TsmPassword}'
-                  - /add
-                  - /y
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
-            f:
-              command: !Join
-                - ' '
-                - - net
-                  - localgroup
-                  - Administrators
-                  - !Sub '${TsmUsername}'
-                  - /add
-                  - /y
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
-            g:
+            d:
               command: !Join
                 - ' '
                 - - curl
                   - "-o"
-                  - tag_instance.py
+                  - requirements.txt
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - Requirements
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            e:
+              cwd: c:\tabsetup
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\Scripts\pip3.exe"'
+                  - install
+                  - -r
+                  - requirements.txt
+              waitAfterCompletion: '0'
+            f: 
+              command: msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /quiet    
+          files:
+            c:\tabsetup\python-3.exe:
+              source: https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe
+            c:\tabsetup\get-pip.py:
+              source: https://bootstrap.pypa.io/get-pip.py
+        step2:  # Some companies have strict tagging policies in AWS, modify the tagname and tagvalue attributes to apply tags to the EC2 instance + its root volume
+            a:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - tag-instance.py
                   - !FindInMap
                     - DefaultConfiguration
                     - Scripts
                     - TagInstance
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            h:
-              command: !Join
-                - ' '
-                - - curl
-                  - "-o"
-                  - backup-restore-s3.py
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - BackupRestore
+            b: 
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            i:
               command: !Join
                 - ' '
-                - - curl
-                  - "-o"
-                  - update-load-balancer.py
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - UpdateLoadBalancer
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname
+                  - Name
+                  - --tagvalue
+                  - !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
+                  - --region
+                  - !Ref AWS::Region
+            c: 
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            j:
               command: !Join
                 - ' '
-                - - curl
-                  - "-o"
-                  - SilentInstaller.py
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - InstallationConfig
-                    - AutomatedInstaller
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname Creator
+                  - --tagvalue tbinns@tableau.com
+                  - --region
+                  - !Ref AWS::Region
+            d: 
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            k:
               command: !Join
                 - ' '
-                - - curl
-                  - "-o"
-                  - tableau-server-webapp-installer.exe
-                  - "-L"
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - InstallationConfig
-                    - TableauServerInstaller
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname Application
+                  - --tagvalue AwsQuickstarts
+                  - --region
+                  - !Ref AWS::Region
+            e: 
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            l:
-              cwd: c:\tabsetup
               command: !Join
                 - ' '
-                - - '"C:\Program Files\Python310\Scripts\pip.exe"'
-                  - install
-                  - -r
-                  - requirements.txt
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname Description
+                  - --tagvalue TableauQuickstartResource
+                  - --region
+                  - !Ref AWS::Region
+            f: 
+              cwd: c:\tabsetup
               waitAfterCompletion: '0'
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname Group
+                  - --tagvalue tbinns@tableau.com
+                  - --region
+                  - !Ref AWS::Region
+            g: 
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname DeptCode
+                  - --tagvalue 429
+                  - --region
+                  - !Ref AWS::Region
+            h: 
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - tag-instance.py
+                  - --tagname Environment
+                  - --tagvalue Development
+                  - --region
+                  - !Ref AWS::Region
+        step3:  # Install and setup CloudWatch logging
+          commands:
+            a: 
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: install-cloudwatch-agent.msi /quiet
+            b: 
+              cwd: C:\Program Files\Amazon\AmazonCloudWatchAgent
+              waitAfterCompletion: '0'
+              command: powershell.exe -File amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -s -c file:C:\tabsetup\amazon-cloudwatch-agent.json
+          files: 
+            c:\tabsetup\install-cloudwatch-agent.msi:
+              source: https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi
+            c:\tabsetup\amazon-cloudwatch-agent.json:
+              content: !Sub |
+                {
+                  "logs": {
+                    "logs_collected": {
+                      "files": {
+                        "collect_list": [
+                          {
+                            "file_path": "C:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\tabadmincontroller\\tabadmincontroller_node*.log",
+                            "log_group_name": "${TableauServerLogGroup}",
+                            "log_stream_name": "tsm.log",
+                            "timestamp_format": "%H: %M: %S%y%b%-d"
+                          },
+                          {
+                            "file_path": "C:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\httpd\\access.*.log",
+                            "log_group_name": "${TableauServerLogGroup}",
+                            "log_stream_name": "apache-access.log",
+                            "timestamp_format": "%H: %M: %S%y%b%-d"
+                          },
+                          {
+                            "file_path": "C:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\httpd\\error.log",
+                            "log_group_name": "${TableauServerLogGroup}",
+                            "log_stream_name": "apache-error.log",
+                            "timestamp_format": "%H: %M: %S%y%b%-d"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "metrics": {
+                    "append_dimensions": {
+                      "InstanceId": "${!aws:InstanceId}",
+                      "InstanceType": "${!aws:InstanceType}"
+                    },
+                    "metrics_collected": {
+                      "mem": {
+                        "measurement": [
+                          "mem_used_percent"
+                        ]
+                      },
+                      "swap": {
+                        "measurement": [
+                          "swap_used_percent"
+                        ]
+                      }
+                    }
+                  }
+                }
+        step4:  # Download all files/scripts needed to install tableau server
           files:
             c:\tabsetup\secrets.json:
               content:
@@ -395,15 +500,80 @@ Resources:
                     _type: identityStoreType
                     type: local
                 topologyVersion: {}
-            c:\tabsetup\python-3.exe:
-              source: https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe
-            c:\tabsetup\get-pip.py:
-              source: https://bootstrap.pypa.io/get-pip.py
-            c:\tabsetup\requirements.txt:
-              content: |
-                boto3
-                requests
-        step2:
+          commands:
+            a:
+              command: !Join
+                - ' '
+                - - net
+                  - user
+                  - !Sub '${TsmUsername}'
+                  - !Sub '${TsmPassword}'
+                  - /add
+                  - /y
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            b:
+              command: !Join
+                - ' '
+                - - net
+                  - localgroup
+                  - Administrators
+                  - !Sub '${TsmUsername}'
+                  - /add
+                  - /y
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            c:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - backup-restore-s3.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - BackupRestore
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            d:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - update-load-balancer.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - UpdateLoadBalancer
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            e:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - SilentInstaller.py
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - AutomatedInstaller
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            f:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - tableau-server-webapp-installer.exe
+                  - "-L"
+                  - "--retry-all-errors"
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - InstallationConfig
+                    - TableauServerInstaller
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+        step5:  # Install Tableau Server and restore from any backups in S3
           commands:
             a:
               cwd: c:\tabsetup
@@ -419,19 +589,6 @@ Resources:
                   - c:\tabsetup\tableau-server-webapp-installer.exe
                   - ' > c:\tabsetup\tsm_installer-output.txt 2>&1'
               waitAfterCompletion: '0'
-        step3:
-          commands: 
-            a: 
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
-              command: !Join
-                - ' '
-                - - '"C:\Program Files\Python310\python.exe"'
-                  - tag-instance.py
-                  - --instancename
-                  - !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
-                  - --region
-                  - !Ref AWS::Region
             b: 
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
@@ -446,7 +603,7 @@ Resources:
                   - !Ref S3BucketName
                   - --s3prefix
                   - !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"]
-        step4:
+        step6:  # Update load balancers to make Tableau Server and TSM Web accessible
           commands: 
             a: 
               cwd: c:\tabsetup
@@ -473,12 +630,52 @@ Resources:
                   - --stop_instances False
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-        step5:
+        step7:  # Cleanup sensistive/large files, and schedule tableau backups to s3
           commands:
             a:
               cwd: c:\tabsetup
               command: del c:\tabsetup\secrets.json
               waitAfterCompletion: '0'
+            b:
+              cwd: c:\tabsetup
+              command: del c:\tabsetup\tableau-server-webapp-installer.exe
+              waitAfterCompletion: '0'
+            c:
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+              command: SCHTASKS /CREATE /SC WEEKLY /D SUN /TN "Tableau\Backup to S3" /TR "C:\tabsetup\backup.bat" /ST 11:00
+          files:
+            c:\tabsetup\backup.bat:
+              content: 
+                !Join
+                - ' '
+                - - '"C:\Program Files\Python310\python.exe"'
+                  - backup-restore-s3.py
+                  - --command backup
+                  - --region
+                  - !Ref AWS::Region
+                  - --s3bucket
+                  - !Ref S3BucketName
+                  - --s3prefix
+                  - !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"]
+        step8:  # Download and install chrome
+          commands:
+            a:
+              command: !Join
+                - ' '
+                - - curl
+                  - "-o"
+                  - install-chrome.ps1
+                  - !FindInMap
+                    - DefaultConfiguration
+                    - Scripts
+                    - ChromeInstaller
+              cwd: c:\tabsetup
+              waitAfterCompletion: '0'
+            b:
+              cwd: c:\tabsetup
+              command: powershell.exe -File install-chrome.ps1
+        
     CreationPolicy:
       ResourceSignal:
         Timeout: !FindInMap ["DefaultConfiguration", "InstallationConfig", "InstallationTimeout"]
@@ -499,6 +696,9 @@ Resources:
               - SystemVolumeSize
       EbsOptimized: true
       KeyName: !Ref 'KeyPairName'
+      Tags:
+        - Key: Name
+          Value: !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
       UserData: 
         'Fn::Base64': !Sub |
           <script>
