@@ -474,15 +474,15 @@ Resources:
           files:
             /tmp/backup.sh:
               mode: 550
-              content: !Join [' ', ['python3', 'backup-restore-s3.py', '--command', 'backup', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ] 
+              content: !Join [' ', ['python3', '/tmp/backup-restore-s3.py', '--command', 'backup', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ] 
             /etc/cron.d/tableau-server-backup:
-              mode: 550
+              mode: 644
               content: |
-                "#  Backup Tableau Server to S3, every sunday"
-                "SHELL=/bin/bash"
-                "PATH=/sbin:/bin:/user/sbin:/usr/bin"
-                "MAILTO=root"
-                "10 5 * * 7  root /tmp/backup.sh"
+                #  Backup Tableau Server to S3, every sunday at 11pm
+                SHELL=/bin/bash
+                PATH=/sbin:/bin:/user/sbin:/usr/bin
+                MAILTO=root
+                0 23 * * 0  root /tmp/backup.sh
     CreationPolicy:
       ResourceSignal:
         Timeout: !FindInMap ["DefaultConfiguration", "InstallationConfig", "InstallationTimeout"]
