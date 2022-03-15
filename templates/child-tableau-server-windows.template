@@ -630,7 +630,7 @@ Resources:
                   - --stop_instances False
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-        step7:  # Cleanup sensistive/large files, and schedule tableau backups to s3
+        step7:  # Cleanup sensistive/large files, and schedule tableau backups to s3 every sunday at 11pm
           commands:
             a:
               cwd: c:\tabsetup
@@ -643,14 +643,14 @@ Resources:
             c:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-              command: SCHTASKS /CREATE /SC WEEKLY /D SUN /TN "Tableau\Backup to S3" /TR "C:\tabsetup\backup.bat" /ST 11:00
+              command: SCHTASKS /CREATE /SC WEEKLY /D SUN /TN "Tableau\Backup to S3" /TR "C:\tabsetup\backup.bat" /ST 23:00 /RU system
           files:
             c:\tabsetup\backup.bat:
               content: 
                 !Join
                 - ' '
                 - - '"C:\Program Files\Python310\python.exe"'
-                  - backup-restore-s3.py
+                  - '"C:\tabsetup\backup-restore-s3.py"'
                   - --command backup
                   - --region
                   - !Ref AWS::Region
