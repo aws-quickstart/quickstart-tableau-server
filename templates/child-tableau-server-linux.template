@@ -301,6 +301,8 @@ Resources:
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
                 eula: !Ref 'AcceptEULA'
+                company_employees: "5"
+                opt_in: "No"
             /tmp/config.json:
               content:
                 configEntities:
@@ -312,7 +314,6 @@ Resources:
                   identityStore:
                     _type: identityStoreType
                     type: local
-                topologyVersion: {}
             /tmp/tableau-server.rpm:
               source: !FindInMap
                 - DefaultConfiguration
