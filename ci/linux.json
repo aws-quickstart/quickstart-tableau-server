@@ -28,6 +28,10 @@
         "ParameterValue": "$[alfred_getkeypair]"
     },
     {
+        "ParameterKey": "SourceCIDR",
+        "ParameterValue": "10.0.0.0/0"
+    },
+    {
         "ParameterKey": "LatestAmiId",
         "ParameterValue": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
     },
@@ -110,5 +114,13 @@
     {
         "ParameterKey": "RegZip",
         "ParameterValue": "Test Zip"
+    },
+    {
+        "ParameterKey": "RegCompanyEmployees",
+        "ParameterValue": "5"
+    },
+    {
+        "ParameterKey": "RegOptIn",
+        "ParameterValue": "false"
     }
 ]

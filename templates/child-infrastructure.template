@@ -9,6 +9,7 @@ Metadata:
         Parameters:
           - Route53HostedZone
           - Route53DomainName
+          - SourceCIDR
           - TableauServerSubdomain
           - TsmSubdomain
           - S3BucketName
@@ -19,6 +20,8 @@ Metadata:
         default: Hosted Zone
       Route53DomainName:
         default: Domain name for your hosted zone
+      SourceCIDR:
+        default: CIDR block for Ingress rule
       TableauServerSubdomain:
         default: Subdomain for Tableau Server's URL
       TsmSubdomain:
@@ -183,6 +186,8 @@ Resources:
       Description: "RDP"
   TableauS3Bucket:
     Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3BucketName
   TableauIAMRole:
     Type: AWS::IAM::Role
     Properties:

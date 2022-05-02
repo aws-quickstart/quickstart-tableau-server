@@ -18,13 +18,14 @@ project:
 tests:
   linux:
     parameters: 
-      OS: Linux
+      OS: Windows
       Route53HostedZone: Z03034441712JY0KSJGD1
       Route53DomainName: awsquickstart.tableau.com
       S3BucketName: tableau-data-$[taskcat_random-string]
       AcceptEULA: 'yes'
       InstanceType: m6i.4xlarge
       KeyPairName: $[taskcat_getkeypair]
+      SourceCIDR: 10.0.0.0/0
       LatestAmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
       TableauServerAdminPassword: $[taskcat_genpass_32]
       TableauServerAdminUser: admin
@@ -46,35 +47,40 @@ tests:
       RegState: Test State
       RegTitle: Test Title
       RegZip: Test Zip
+      RegOptIn: "false"
+      RegCompanyEmployees: "5"
     template: templates/parent-stack.template
-#  windows:
-#    parameters:
-#      OS: Windows
-#      Route53HostedZone: Z03034441712JY0KSJGD1
-#      Route53DomainName: awsquickstart.tableau.com
-#      S3BucketName: tableau-server-data-bucket2
-#      AcceptEULA: 'yes'
-#      InstanceType: m6i.4xlarge
-#      KeyPairName: takashi-quickstart
-#      LatestAmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-#      TableauServerAdminPassword: $[alfred_genpass_32]
-#      TableauServerAdminUser: admin
-#      LicenseKey: ''
-#      TsmUsername: tsmadmin
-#      TsmPassword: $[alfred_genpass_32]
-#      QSS3BucketName: quickstart-testing-public
-#      QSS3KeyPrefix: quickstart-tableau-server/
-#      QSS3BucketRegion: us-west-2
-#      RegCity: Test City
-#      RegCompany: Test Company
-#      RegCountry: Test Country
-#      RegDepartment: Test Department
-#      RegEmail: testemail@example.com
-#      RegFirstName: Test First Name
-#      RegIndustry: Test Industry
-#      RegLastName: Test Last Name
-#      RegPhone: Test Phone
-#      RegState: Test State
-#      RegTitle: Test Title
-#      RegZip: Test Zip
-#    template: templates/parent-stack.template
+  # windows:
+  #   parameters:
+  #     OS: Windows
+  #     Route53HostedZone: Z03034441712JY0KSJGD1
+  #     Route53DomainName: awsquickstart.tableau.com
+  #     S3BucketName: tableau-data-$[taskcat_random-string]
+  #     AcceptEULA: 'yes'
+  #     InstanceType: m6i.4xlarge
+  #     KeyPairName: $[taskcat_getkeypair]
+  #     SourceCIDR: 10.0.0.0/0
+  #     LatestAmiId: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  #     TableauServerAdminPassword: $[alfred_genpass_32]
+  #     TableauServerAdminUser: admin
+  #     LicenseKey: ''
+  #     TsmUsername: tsmadmin
+  #     TsmPassword: $[alfred_genpass_32]
+  #     QSS3BucketName: quickstart-testing-public
+  #     QSS3KeyPrefix: quickstart-tableau-server/
+  #     QSS3BucketRegion: $[taskcat_current_region]
+  #     RegCity: Test City
+  #     RegCompany: Test Company
+  #     RegCountry: Test Country
+  #     RegDepartment: Test Department
+  #     RegEmail: testemail@example.com
+  #     RegFirstName: Test First Name
+  #     RegIndustry: Test Industry
+  #     RegLastName: Test Last Name
+  #     RegPhone: Test Phone
+  #     RegState: Test State
+  #     RegTitle: Test Title
+  #     RegZip: Test Zip
+  #     RegOptIn: "false"
+  #     RegCompanyEmployees: "5"
+  #   template: templates/parent-stack.template

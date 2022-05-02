@@ -42,6 +42,10 @@ Metadata:
           - RegState
           - RegZip
           - RegCountry
+          - RegTitle
+          - RegZip
+          - RegCompanyEmployees
+          - RegOptIn
     ParameterLabels:
       PublicSubnetId:
         default: Target Public Subnet
@@ -103,6 +107,10 @@ Metadata:
         default: Title
       RegZip:
         default: Zip/Postal Code
+      RegCompanyEmployees:
+        default: 5
+      RegOptIn: 
+        default: true
 Parameters:
   AcceptEULA:
     AllowedPattern: 'yes'
@@ -182,6 +190,12 @@ Parameters:
     Type: String
   RegCity:
     Description: City
+    Type: String
+  RegCompanyEmployees:
+    Description: Company Size (# of employees)
+    Type: String
+  RegOptIn: 
+    Description: Opt into marketing communications (true/false)
     Type: String
   RegCompany:
     Description: Company
@@ -487,6 +501,8 @@ Resources:
                 state: !Ref 'RegState'
                 zip: !Ref 'RegZip'
                 country: !Ref 'RegCountry'
+                company_employees: !Ref 'RegCompanyEmployees'
+                opt_in: !Ref 'RegOptIn'
                 eula: !Ref 'AcceptEULA'
             c:\tabsetup\config.json:
               content:
