@@ -36,6 +36,11 @@ Parameters:
   Route53DomainName:
     Description: Domain name for your Route53 Hosted Zone
     Type: String
+  SourceCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: The CIDR address from which you will connect to the instance
+    Type: String
   S3BucketName:
     Description: S3 bucket to Tableau Server files
     Type: String
@@ -149,11 +154,11 @@ Resources:
             - CidrIp: "0.0.0.0/0"
               IpProtocol: "-1"
         SecurityGroupIngress: 
-            - CidrIp: "0.0.0.0/0"
+            - CidrIp: !Ref SourceCIDR
               FromPort: "80"
               ToPort: "80"
               IpProtocol: "tcp"
-            - CidrIp: "0.0.0.0/0"
+            - CidrIp: !Ref SourceCIDR
               FromPort: "443"
               ToPort: "443"
               IpProtocol: "tcp"
@@ -171,15 +176,13 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !Ref SecurityGroup
-      CidrIp: "192.195.4.0/24"
+      CidrIp: !Ref SourceCIDR
       IpProtocol: "tcp"
       FromPort: "3389"
       ToPort: "3389"
       Description: "RDP"
-  S3Bucket:
+  TableauS3Bucket:
     Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Ref S3BucketName
   TableauIAMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -205,8 +208,8 @@ Resources:
                 - s3:PutObject
                 - s3:ListBucket
               Resource:
-                - !Sub 'arn:aws:s3:::${S3BucketName}'
-                - !Sub 'arn:aws:s3:::${S3BucketName}/*'
+                - !Sub 'arn:aws:s3:::${TableauS3Bucket}'
+                - !Sub 'arn:aws:s3:::${TableauS3Bucket}/*'
               Effect: Allow
         PolicyName: back-to-s3
       - PolicyDocument:
