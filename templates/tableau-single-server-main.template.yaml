@@ -300,10 +300,12 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+#      TemplateURL: !Sub
+#        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
+#        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+#          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      TemplateURL:
+        !Sub 'https://aws-quickstart-${AWS::Region}.s3.${AWS::Region}.${AWS::URLSuffix}/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
       Parameters:
         AvailabilityZones: !Join
           - ','
@@ -311,8 +313,8 @@ Resources:
         NumberOfAZs: '2'
         PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
-        CreatePrivateSubnets: 'false'
-        CreateNATGateways: 'false'
+        CreatePrivateSubnets: 'true'
+        CreateNATGateways: 'true'
         VPCCIDR: !Ref 'VPCCIDR'
   TableauStack:
     Type: AWS::CloudFormation::Stack
@@ -361,14 +363,14 @@ Resources:
 
 Outputs:
   TableauServerUrl:
-    Description: Tableau Server URL (Load Balancer)
-    Value: 
+    Description: URL of your Tableau Server
+    Value:
       Fn::Sub:
-        - '${prefix}.${Route53DomainName}'
-        - prefix: !FindInMap ["Names", "Route53", "TableauServer"]
+        - "${p1}.${Route53DomainName}"
+        - p1: !Ref TableauServerSubDomainName
   TableauServerTsmUrl:
     Description: Tableau Server TSM URL (Load Balancer)
-    Value: 
+    Value:
       Fn::Sub:
-        - '${prefix}.${Route53DomainName}'
-        - prefix: !FindInMap ["Names", "Route53", "Tsm"]
+        - "${p1}-tsm.${Route53DomainName}"
+        - p1: !Ref TableauServerSubDomainName

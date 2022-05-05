@@ -311,7 +311,7 @@ Resources:
     Properties:
       TemplateURL:
         Fn::Sub:
-          - 'https://${S3Region}.s3.${S3Bucket}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/tableau-server-${TableauOS}.template.yaml'
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/tableau-server-${TableauOS}.template.yaml'
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${QSS3BucketRegion}', !Ref QSS3BucketName]
             TableauOS: !If [InfaOnWindows, 'windows', 'linux']
@@ -357,6 +357,12 @@ Outputs:
     Value: 
       Fn::Sub:
         - "${p1}.${Route53DomainName}"
+        - p1: !Ref TableauServerSubDomainName
+  TableauServerTsmUrl:
+    Description: Tableau Server TSM URL (Load Balancer)
+    Value:
+      Fn::Sub:
+        - "${p1}-tsm.${Route53DomainName}"
         - p1: !Ref TableauServerSubDomainName
   SecurityGroup:
     Description: Security Group ARN
