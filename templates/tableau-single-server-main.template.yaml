@@ -1,0 +1,374 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Quick Start: CloudFormation stack  for creating a new Tableau Server environment running on Windows or Amazon Linux 2. (qs-1puphiilp)'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'AWS environment and machine configuration'
+        Parameters:
+          - AvailabilityZones
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - VPCCIDR
+          - Route53HostedZone
+          - Route53DomainName
+          - TableauServerSubDomainName
+          - InstanceType
+          - OS
+          - KeyPairName
+          - SourceCIDR
+          - TableauS3BucketName
+      - Label:
+          default: Secrets
+        Parameters:
+          - TableauServerAdminUser
+          - TableauServerAdminPassword
+          - TsmUsername
+          - TsmPassword
+          - LicenseKey
+      - Label:
+          default: Registration
+        Parameters:
+          - AcceptEULA
+          - RegFirstName
+          - RegLastName
+          - RegEmail
+          - RegCompany
+          - RegTitle
+          - RegDepartment
+          - RegIndustry
+          - RegPhone
+          - RegCity
+          - RegState
+          - RegZip
+          - RegCountry
+          - RegCompanyEmployees
+          - RegOptIn
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+          - QSS3BucketRegion
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      PublicSubnet1CIDR:
+        default: Public Subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public Subnet 2 CIDR
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+      Route53HostedZone:
+        default: Hosted Zone
+      Route53DomainName:
+        default: Domain name for your hosted zone
+      TableauServerSubDomainName:
+        default: Tableau Server subdomain
+      TableauS3BucketName:
+        default: Name of S3 bucket for Tableau Server files
+      InstanceType:
+        default: EC2 instance type for Tableau Server
+      OS:
+        default: Operating System for Tableau Server
+      KeyPairName:
+        default: Key Pair for EC2
+      SourceCIDR:
+        default: CIDR block for ingress rules
+      TableauServerAdminPassword:
+        default: Tableau Server administrator password
+      TableauServerAdminUser:
+        default: Tableau Server administrator username
+      TsmUsername:
+        default: Tableau Services Manager (TSM) administrator username
+      TsmPassword:
+        default: Tableau Services Manager (TSM) administrator password
+      LicenseKey:
+        default: Tableau Activation Key
+      AcceptEULA:
+        default: Accept Tableau End User License Agreement
+      RegCity:
+        default: City
+      RegCompany:
+        default: Company
+      RegCountry:
+        default: Country
+      RegDepartment:
+        default: Department
+      RegEmail:
+        default: Email Address
+      RegFirstName:
+        default: First Name
+      RegIndustry:
+        default: Industry
+      RegLastName:
+        default: Last Name
+      RegPhone:
+        default: Phone
+      RegState:
+        default: State
+      RegTitle:
+        default: Title
+      RegZip:
+        default: Zip/Postal Code
+      RegCompanyEmployees:
+        default: 5
+      RegOptIn:
+        default: true
+      VPCCIDR:
+        default: VPC CIDR
+
+Parameters:
+  Route53HostedZone:
+    Description: Hosted Zone from Route53
+    Type: AWS::Route53::HostedZone::Id
+  Route53DomainName:
+    Default: example.com
+    Description: Domain name for your Route53 Hosted Zone
+    Type: String
+  TableauServerSubDomainName:
+    Default: tableau
+    Description: Sub domain name for your Tableau server deployment
+    Type: String
+  TableauS3BucketName:
+    Default: ''
+    Description: A pre-exisitng S3 bucket to use to store Tableau Server files. If left empty, a new bucket is created.
+    Type: String
+  InstanceType:
+    AllowedValues:
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+    Default: m5.8xlarge
+    Description: Amazon EC2 instance type
+    Type: String
+  TsmUsername:
+    AllowedPattern: ^(?!(tableau|tsmagent|admin|root)$)[A-Za-z0-9]+$
+    Description: Tableau Services Manager (TSM) administrator username (cannot be
+      'tableau' or 'tsmagent' or 'admin' or 'root')
+    MaxLength: '30'
+    Type: String
+  TsmPassword:
+    Description: Tableau Services Manager (TSM) administrator password
+    MinLength: '6'
+    NoEcho: 'true'
+    Type: String
+  RegCompanyEmployees:
+    Description: Company Size
+    Type: String
+  RegOptIn:
+    Description: Opt in to receive marketing communications (true/false)
+    Type: String
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
+      The logical order is preserved and 2 AZs will be used for this deployment'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  OS:
+    AllowedValues:
+      - 'Linux'
+      - 'Windows'
+    Default: 'Linux'
+    Description: Operating System on which Tableau Server will be deployed
+    Type: String
+  AcceptEULA:
+    AllowedPattern: 'yes'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: 'View the EULA at the Link: https://www.tableau.com/eula'
+    Type: String
+  KeyPairName:
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+  PublicSubnet1CIDR:
+    AllowedPattern: '[a-zA-Z0-9]+\..+'
+    Default: 10.0.128.0/20
+    Description: CIDR Block for the Public DMZ Subnet located in AZ1
+    Type: String
+  PublicSubnet2CIDR:
+    AllowedPattern: '[a-zA-Z0-9]+\..+'
+    Default: 10.0.144.0/20
+    Description: CIDR Block for the Public DMZ Subnet located in AZ2
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-tableau-server/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
+  RegCity:
+    Description: City
+    Type: String
+  RegCompany:
+    Description: Company
+    Type: String
+  RegCountry:
+    Description: Country
+    Type: String
+  RegDepartment:
+    Description: Department
+    Type: String
+  RegEmail:
+    Description: Email
+    MinLength: '1'
+    Type: String
+  RegFirstName:
+    Description: First Name
+    MinLength: '1'
+    Type: String
+  RegIndustry:
+    Description: Industry
+    Type: String
+  RegLastName:
+    Description: Last Name
+    MinLength: '1'
+    Type: String
+  RegPhone:
+    Description: Phone
+    Type: String
+  RegState:
+    Description: State
+    Type: String
+  RegTitle:
+    Description: Title
+    Type: String
+  RegZip:
+    Description: ZIP/Postal Code
+    Type: String
+  SourceCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: The CIDR address from which you will connect to the instance
+    Type: String
+  TableauServerAdminPassword:
+    Description: The password of the initial administrator for Tableau Server
+    MinLength: '1'
+    NoEcho: 'true'
+    Type: String
+  TableauServerAdminUser:
+    Description: The name of the initial administrator for Tableau Server
+    MinLength: '1'
+    Type: String
+  LicenseKey:
+    Description: License Key (leave blank for trial)
+    Type: String
+  VPCCIDR:
+    AllowedPattern: '[a-zA-Z0-9]+\..+'
+    Default: 10.0.0.0/16
+    Description: CIDR Block for the VPC
+    Type: String
+
+Mappings:
+  Names:
+    #TODO TableauServer and Tsm values should likely be user input or something dynamic such that multiple deployments can be repeatedly done
+    Route53:
+      TableauServer: tableau
+      Tsm: tsm
+    #TODO Same issue here, this will probably cause an error if you tried to have more than one stack in a Region.
+    CloudWatch:
+      TableauServerLogGroup: TableauServerLogs
+      QuickstartLogGroup: TableauQuickstartSetup
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AvailabilityZones: !Join
+          - ','
+          - !Ref 'AvailabilityZones'
+        NumberOfAZs: '2'
+        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
+        CreatePrivateSubnets: 'false'
+        CreateNATGateways: 'false'
+        VPCCIDR: !Ref 'VPCCIDR'
+  TableauStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Sub:
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/tableau-server-existing-vpc.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${QSS3BucketRegion}', !Ref QSS3BucketName]
+      Parameters:
+        AcceptEULA: !Ref AcceptEULA
+        InstanceType: !Ref InstanceType
+        KeyPairName: !Ref KeyPairName
+        LicenseKey: !Ref LicenseKey
+        OS: !Ref OS
+        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+        PrivateSubnet1ID: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'
+        QSS3BucketName: !Ref 'QSS3BucketName'
+        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        QSS3BucketRegion: !Ref 'QSS3BucketRegion'
+        RegCity: !Ref 'RegCity'
+        RegCompany: !Ref 'RegCompany'
+        RegCompanyEmployees: !Ref RegCompanyEmployees
+        RegCountry: !Ref 'RegCountry'
+        RegDepartment: !Ref 'RegDepartment'
+        RegEmail: !Ref 'RegEmail'
+        RegFirstName: !Ref 'RegFirstName'
+        RegIndustry: !Ref 'RegIndustry'
+        RegLastName: !Ref 'RegLastName'
+        RegOptIn: !Ref RegOptIn
+        RegPhone: !Ref 'RegPhone'
+        RegState: !Ref 'RegState'
+        RegTitle: !Ref 'RegTitle'
+        RegZip: !Ref 'RegZip'
+        Route53DomainName: !Ref Route53DomainName
+        Route53HostedZone: !Ref Route53HostedZone
+        TableauServerSubDomainName: !Ref TableauServerSubDomainName
+        TableauS3BucketName: !Ref TableauS3BucketName
+        SourceCIDR: !Ref SourceCIDR
+        TableauServerAdminPassword: !Ref TableauServerAdminPassword
+        TableauServerAdminUser: !Ref TableauServerAdminUser
+        TsmPassword: !Ref TsmPassword
+        TsmUsername: !Ref TsmUsername
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+
+Outputs:
+  TableauServerUrl:
+    Description: Tableau Server URL (Load Balancer)
+    Value: 
+      Fn::Sub:
+        - '${prefix}.${Route53DomainName}'
+        - prefix: !FindInMap ["Names", "Route53", "TableauServer"]
+  TableauServerTsmUrl:
+    Description: Tableau Server TSM URL (Load Balancer)
+    Value: 
+      Fn::Sub:
+        - '${prefix}.${Route53DomainName}'
+        - prefix: !FindInMap ["Names", "Route53", "Tsm"]

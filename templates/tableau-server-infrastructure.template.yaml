@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  AWS Quickstart: CloudFormation stack (nested) for creating the infrastructure for Tableau Server to run in
+  AWS Quick Start: CloudFormation stack (nested) for creating the infrastructure for Tableau Server to run in. (qs-1t14k9mo6)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -12,10 +12,17 @@ Metadata:
           - SourceCIDR
           - TableauServerSubdomain
           - TsmSubdomain
-          - S3BucketName
-          - TableauServerLogGroup
-          - QuickstartLogGroup
+          - TableauS3BucketName
+          - VPCID
+          - PublicSubnet1ID
+          - PublicSubnet2ID
     ParameterLabels:
+      VPCID:
+        default: VPC ID
+      PublicSubnet1ID:
+        default: Public Subnet 1 ID
+      PublicSubnet2ID:
+        default: Public Subnet 2 ID
       Route53HostedZone:
         default: Hosted Zone
       Route53DomainName:
@@ -26,13 +33,18 @@ Metadata:
         default: Subdomain for Tableau Server's URL
       TsmSubdomain:
         default: Subdomain for TSM UI's URL
-      S3BucketName:
+      TableauS3BucketName:
         default: Name of S3 bucket for Tableau Server files
-      TableauServerLogGroup:
-        default: Cloudwatch log group name for Tableau Server logs
-      QuickstartLogGroup:
-        default: Cloudwatch log group name for this Quickstart
 Parameters:
+  VPCID:
+    Description: The ID of your existing VPC for deployment.
+    Type: AWS::EC2::VPC::Id
+  PublicSubnet1ID:
+    Description: ID of public subnet 1 in Availability Zone 1 for the ELB load balancer (for example, subnet-9bc642ac).
+    Type: AWS::EC2::Subnet::Id
+  PublicSubnet2ID:
+    Description: ID of public subnet 2 in Availability Zone 2 for the ELB load balancer (for example, subnet-e3246d8e).
+    Type: AWS::EC2::Subnet::Id
   Route53HostedZone:
     Description: Hosted Zone from Route53
     Type: AWS::Route53::HostedZone::Id
@@ -44,7 +56,7 @@ Parameters:
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
     Description: The CIDR address from which you will connect to the instance
     Type: String
-  S3BucketName:
+  TableauS3BucketName:
     Description: S3 bucket to Tableau Server files
     Type: String
   TableauServerSubdomain:
@@ -53,21 +65,7 @@ Parameters:
   TsmSubdomain:
     Description: Subdomain for TSM UI URL
     Type: String
-  TableauServerLogGroup:
-    Description: Name of the Cloudwatch log group for Tableau Server
-    Type: String
-  QuickstartLogGroup:
-    Description: Name of the Cloudwatch log group for this quickstart
-    Type: String
-Mappings: 
-  VPC:
-    props:
-      CidrBlock: 10.0.0.0/16
-  Subnets:
-    a:
-      CidrBlock: 10.0.1.0/24
-    b:
-      CidrBlock: 10.0.2.0/24
+Mappings:
   SecurityGroup:
     props:
       name: Tableau Security Group
@@ -79,79 +77,16 @@ Mappings:
   ALB:
     names:
       TableauServer: Tableau-Server
-      Tsm: Tableau-TSM 
+      Tsm: Tableau-TSM
+Conditions:
+  CreateS3Bucket: !Equals
+    - !Ref 'TableauS3BucketName'
+    - ''
+
 Resources:
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: !FindInMap ["VPC", "props", "CidrBlock"]
-      InstanceTenancy: dedicated
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-      Tags:
-        - Key: Name
-          Value: !Ref 'AWS::StackName'
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: !Ref 'AWS::StackName'
-  VPCGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref 'VPC'
-      InternetGatewayId: !Ref 'InternetGateway'
-  PublicSubnetRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref 'VPC'
-      Tags:
-        - Key: Name
-          Value: Public Subnets
-        - Key: Network
-          Value: Public
-  PublicSubnetRoute:
-    DependsOn: VPCGatewayAttachment
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref 'PublicSubnetRouteTable'
-      DestinationCidrBlock: '0.0.0.0/0'
-      GatewayId: !Ref 'InternetGateway'
-  PublicSubnetA:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref 'VPC'
-      CidrBlock: !FindInMap ["Subnets", "a", "CidrBlock"]
-      AvailabilityZone: !Sub '${AWS::Region}a'
-      Tags:
-        - Key: Name
-          Value: Public subnet a
-      MapPublicIpOnLaunch: true
-  PublicSubnetARouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref 'PublicSubnetA'
-      RouteTableId: !Ref 'PublicSubnetRouteTable'
-  PublicSubnetB:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref 'VPC'
-      CidrBlock: !FindInMap ["Subnets", "b", "CidrBlock"]
-      AvailabilityZone: !Sub '${AWS::Region}b'
-      Tags:
-        - Key: Name
-          Value: Public subnet b
-      MapPublicIpOnLaunch: true
-  PublicSubnetBRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref 'PublicSubnetB'
-      RouteTableId: !Ref 'PublicSubnetRouteTable'
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
-    Properties: 
-        GroupName: !FindInMap ["SecurityGroup", "props", "name"]
+    Properties:
         GroupDescription: !FindInMap ["SecurityGroup", "props", "desc"]
         SecurityGroupEgress: 
             - CidrIp: "0.0.0.0/0"
@@ -168,7 +103,7 @@ Resources:
         Tags: 
           - Key: Name
             Value: !FindInMap ["SecurityGroup", "props", "name"]
-        VpcId: !Ref VPC
+        VpcId: !Ref VPCID
   SecurityGroupRule:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -185,14 +120,12 @@ Resources:
       ToPort: "3389"
       Description: "RDP"
   TableauS3Bucket:
+    Condition: CreateS3Bucket
     Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Ref S3BucketName
   TableauIAMRole:
     Type: AWS::IAM::Role
     Properties:
       Path: /
-      RoleName: !FindInMap ["IAM", "names", "role"]
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -213,8 +146,14 @@ Resources:
                 - s3:PutObject
                 - s3:ListBucket
               Resource:
-                - !Sub 'arn:aws:s3:::${TableauS3Bucket}'
-                - !Sub 'arn:aws:s3:::${TableauS3Bucket}/*'
+                - Fn::If:
+                    - CreateS3Bucket
+                    - !Sub 'arn:${AWS::Partition}:s3:::${TableauS3Bucket}/*'
+                    - !Sub 'arn:${AWS::Partition}:s3:::${TableauS3BucketName}/*'
+                - Fn::If:
+                    - CreateS3Bucket
+                    - !Sub 'arn:${AWS::Partition}:s3:::${TableauS3Bucket}'
+                    - !Sub 'arn:${AWS::Partition}:s3:::${TableauS3BucketName}'
               Effect: Allow
         PolicyName: back-to-s3
       - PolicyDocument:
@@ -225,8 +164,8 @@ Resources:
                 - ec2:DescribeInstanceAttribute
               Effect: Allow
               Resource: 
-                - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
-                - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:volume/*'
+                - !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+                - !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*'
         PolicyName: ec2-tagging
       - PolicyDocument:
           Version: '2012-10-17'  
@@ -244,10 +183,10 @@ Resources:
               Effect: Allow
               Resource:
               - Fn::Sub:
-                - 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
+                - 'arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
                 - tgName: !FindInMap ["ALB", "names", "TableauServer"]
               - Fn::Sub:
-                - 'arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
+                - 'arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
                 - tgName: !FindInMap ["ALB", "names", "Tsm"]
         PolicyName: elb-register-targets
       - PolicyDocument:
@@ -255,12 +194,11 @@ Resources:
           Statement:
             - Action: ec2:StopInstances
               Effect: Allow
-              Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+              Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
         PolicyName: ec2-stop
   TableauServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !FindInMap ["IAM", "names", "profile"]
       Path: /
       Roles:
         - !Ref 'TableauIAMRole'
@@ -288,32 +226,34 @@ Resources:
           - p1: !Ref TableauServerSubdomain
   TableauServerAlb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties: 
+    Properties:
         Scheme: "internet-facing"
         Type: "application"
-        Name: 
-          Fn::Sub:
-          - "${p1}-LB"
-          - p1: !FindInMap ["ALB", "names", "TableauServer"]
+        Tags:
+          - Key: DeploymentName
+            Value:
+              Fn::Sub:
+              - "${p1}-LB"
+              - p1: !FindInMap ["ALB", "names", "TableauServer"]
         SecurityGroups: 
             - !Ref SecurityGroup
         Subnets: 
-            - !Ref PublicSubnetA
-            - !Ref PublicSubnetB
+            - !Ref PublicSubnet1ID
+            - !Ref PublicSubnet2ID
   TableauServerTG:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
         Port: 80
         Protocol: "HTTP"
         TargetType: "instance"
-        VpcId: !Ref VPC
-        Name: 
-          Fn::Sub:
-          - "${p1}-TG"
-          - p1: !FindInMap ["ALB", "names", "TableauServer"]
-        TargetGroupAttributes: 
+        VpcId: !Ref VPCID
+        Tags:
+          - Key: DeploymentName
+            Value:
+              Fn::Sub:
+                - "${p1}-TG"
+                - p1: !FindInMap ["ALB", "names", "TableauServer"]
+        TargetGroupAttributes:
             - Key: "stickiness.enabled"
               Value: "true"
             - Key: "stickiness.type"
@@ -333,8 +273,6 @@ Resources:
             Type: "forward"
   TableauServerListenerHttp:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - TableauServerAlb
     Properties:
       DefaultActions:
         - RedirectConfig:
@@ -362,31 +300,33 @@ Resources:
           - p1: !Ref TsmSubdomain
   TsmAlb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    DependsOn:
-      - VPCGatewayAttachment
-    Properties: 
+    Properties:
         Scheme: "internet-facing"
         Type: "application"
-        Name: 
-          Fn::Sub:
-          - "${p1}-LB"
-          - p1: !FindInMap ["ALB", "names", "Tsm"]
+        Tags:
+          - Key: DeploymentName
+            Value:
+              Fn::Sub:
+              - "${p1}-LB"
+              - p1: !FindInMap ["ALB", "names", "Tsm"]
         SecurityGroups: 
             - !Ref SecurityGroup
         Subnets: 
-            - !Ref PublicSubnetA
-            - !Ref PublicSubnetB
+            - !Ref PublicSubnet1ID
+            - !Ref PublicSubnet2ID
   TsmTG:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
         Port: 8850
         Protocol: "HTTPS"
         TargetType: "instance"
-        VpcId: !Ref VPC
-        Name: 
-          Fn::Sub:
-          - "${p1}-TG"
-          - p1: !FindInMap ["ALB", "names", "Tsm"]
+        VpcId: !Ref VPCID
+        Tags:
+          - Key: DeploymentName
+            Value:
+              Fn::Sub:
+              - "${p1}-TG"
+              - p1: !FindInMap ["ALB", "names", "Tsm"]
         TargetGroupAttributes: 
             - Key: "stickiness.enabled"
               Value: "true"
@@ -407,8 +347,6 @@ Resources:
             Type: "forward"
   TsmListenerHttp:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - TsmAlb
     Properties:
       DefaultActions:
         - RedirectConfig:
@@ -424,14 +362,9 @@ Resources:
       Protocol: HTTP
   TableauServerCloudwatch:
     Type: AWS::Logs::LogGroup
-    Properties: 
-      LogGroupName: !Ref TableauServerLogGroup
+    Properties:
       RetentionInDays: 90
-  QuickstartCloudwatch:
-    Type: AWS::Logs::LogGroup
-    Properties: 
-      LogGroupName: !Ref QuickstartLogGroup
-      RetentionInDays: 3653
+
 Outputs:
   TableauServerUrl:
     Description: URL of your Tableau Server
@@ -447,11 +380,14 @@ Outputs:
     Value: !FindInMap ["IAM", "names", "profile"]
   PublicSubnetId:
     Description: Subnet ID
-    Value: !Ref PublicSubnetA
+    Value: !Ref PublicSubnet1ID
   TableauServerTargetGroupArn:
     Description: Tableau Server ALB TG
     Value: !Ref TableauServerTG
   TsmTargetGroupArn:
     Description: TSM UI ALB TG
     Value: !Ref TsmTG
+  TableauServerLogGroup:
+    Description: Cloudwatch log group name for Tableau Server logs
+    Value: !Ref TableauServerCloudwatch
   

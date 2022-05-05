@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 instance with Tableau Server installed (AmazonLinux2)'
+Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 instance with Tableau Server installed (Amazon Linux 2). (qs-1puphiilb)'
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -17,7 +17,6 @@ Metadata:
           - TableauServerTargetGroupArn
           - TsmTargetGroupArn
           - TableauServerLogGroup
-          - QuickstartLogGroup
       - Label:
           default: Secrets
         Parameters:
@@ -79,8 +78,6 @@ Metadata:
         default: Accept Tableau End User License Agreement
       TableauServerLogGroup:
         default: Cloudwatch log group name for Tableau Server logs
-      QuickstartLogGroup:
-        default: Cloudwatch log group name for this Quickstart
       RegCity:
         default: City
       RegCompany:
@@ -155,6 +152,7 @@ Parameters:
     Description: ARN for Tableau TSM's load balancer target group
     Type: String
   LatestAmiId:
+    Description: Latest Amazon Linux 2 AMI ID from SSM Parameter Store.
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
   TableauServerAdminPassword:
@@ -182,9 +180,6 @@ Parameters:
     Type: String
   TableauServerLogGroup:
     Description: Name of the Cloudwatch log group for Tableau Server
-    Type: String
-  QuickstartLogGroup:
-    Description: Name of the Cloudwatch log group for this quickstart
     Type: String
   RegCity:
     Description: City
@@ -254,9 +249,6 @@ Conditions:
   UsingElasticIp: !Equals
     - ''
     - !Ref TableauServerTargetGroupArn
-  IsTrial: !Equals
-    - ''
-    - !Ref LicenseKey
 Resources:
   TableauServerEC2:
     Type: AWS::EC2::Instance
