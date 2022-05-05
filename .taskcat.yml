@@ -59,7 +59,7 @@ tests:
       - us-east-2
   tableau-windows:
     parameters:
-      OS: Linux
+      OS: Windows
       TableauServerSubDomainName: tab-linux-$[taskcat_random-string]
     template: templates/tableau-single-server-main.template.yaml
     regions:
