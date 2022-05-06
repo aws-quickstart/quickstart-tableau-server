@@ -133,6 +133,7 @@ Parameters:
     Type: String
   TableauServerSubDomainName:
     Default: tableau
+    MaxLength: '25'
     Description: Sub domain name for your Tableau server deployment
     Type: String
   TableauS3BucketName:
@@ -369,8 +370,8 @@ Outputs:
     Value: !GetAtt Infrastructure.Outputs.SecurityGroup
   TableauServerTargetGroupArn:
     Description: Tableau Server ALB TG
-    Value: !GetAtt Infrastructure.Outputs.TableauServerTG
+    Value: !GetAtt Infrastructure.Outputs.TableauServerTargetGroupArn
   TsmTargetGroupArn:
     Description: TSM UI ALB TG
-    Value: !GetAtt Infrastructure.Outputs.TsmTG
+    Value: !GetAtt Infrastructure.Outputs.TsmTargetGroupArn
   

@@ -60,6 +60,7 @@ Parameters:
     Description: S3 bucket to store Tableau Server files
     Type: String
   TableauServerSubdomain:
+    MaxLength: '25'
     Description: Subdomain for Tableau Server URL
     Type: String
   TsmSubdomain:
@@ -180,10 +181,10 @@ Resources:
               Resource:
               - Fn::Sub:
                 - 'arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
-                - tgName: !FindInMap ["ALB", "names", "TableauServer"]
+                - tgName: !Ref TableauServerSubdomain
               - Fn::Sub:
                 - 'arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/${tgName}*/*'
-                - tgName: !FindInMap ["ALB", "names", "Tsm"]
+                - tgName: !Sub '${TableauServerSubdomain}-tsm'
         PolicyName: elb-register-targets
       - PolicyDocument:
           Version: '2012-10-17'
@@ -243,6 +244,7 @@ Resources:
         Protocol: "HTTP"
         TargetType: "instance"
         VpcId: !Ref VPCID
+        Name: !Sub "${TableauServerSubdomain}-TG"
         Tags:
           - Key: DeploymentName
             Value:
@@ -317,6 +319,7 @@ Resources:
         Protocol: "HTTPS"
         TargetType: "instance"
         VpcId: !Ref VPCID
+        Name: !Sub "${TableauServerSubdomain}-tsm-TG"
         Tags:
           - Key: DeploymentName
             Value:
@@ -389,8 +392,8 @@ Outputs:
   TableauS3Bucket:
     Description: S3 bucket to store Tableau Server files
     Value:
-      - Fn::If:
-          - CreateS3Bucket
-          - !Ref TableauS3Bucket
-          - !Ref TableauS3BucketName
+      Fn::If:
+        - CreateS3Bucket
+        - !Ref TableauS3Bucket
+        - !Ref TableauS3BucketName
   

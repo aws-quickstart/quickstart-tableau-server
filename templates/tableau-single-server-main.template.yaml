@@ -133,6 +133,7 @@ Parameters:
   TableauServerSubDomainName:
     Default: tableau
     Description: Sub domain name for your Tableau server deployment
+    MaxLength: '25'
     Type: String
   TableauS3BucketName:
     Default: ''
@@ -284,16 +285,6 @@ Parameters:
     Description: CIDR Block for the VPC
     Type: String
 
-Mappings:
-  Names:
-    #TODO TableauServer and Tsm values should likely be user input or something dynamic such that multiple deployments can be repeatedly done
-    Route53:
-      TableauServer: tableau
-      Tsm: tsm
-    #TODO Same issue here, this will probably cause an error if you tried to have more than one stack in a Region.
-    CloudWatch:
-      TableauServerLogGroup: TableauServerLogs
-      QuickstartLogGroup: TableauQuickstartSetup
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:

@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 instance with Tableau Server installed (Windows Server 2019). (qs-1puphiiml)'
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks: [ E9101 ]
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -720,6 +723,3 @@ Outputs:
   InstanceID:
     Description: EC2 InstanceID of the instance running Tableau Server
     Value: !Ref 'TableauServerEC2'
-  PublicIPAddress:
-    Description: Public IP Address of instance running Tableau Server
-    Value: !GetAtt 'TableauServerEC2.PublicIp'
