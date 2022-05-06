@@ -21,17 +21,13 @@ project:
     - us-west-1
     - us-west-2
   tags:
-    Name: Tableau Server Quickstart
-    Creator: tbinns@tableau.com
-    Group: tbinns@tableau.com  
-    DeptCode: "429"
-    Environment: Dev
-    Application: AWS Quickstarts
-    Description: Resources used by Tableau Server Quickstart testing
+    Name: Tableau Server Quick Start
+    Application: AWS Quick Starts
+    Description: Resources used by Tableau Server Quick Start testing
   parameters:
     AvailabilityZones: $[taskcat_genaz_2]
-    Route53HostedZone: Z03034441712JY0KSJGD1
-    Route53DomainName: awsquickstart.tableau.com
+    Route53HostedZone: override #Valid Route53 configuration required
+    Route53DomainName: override #Valid FQDN and SSL cert with DNS validation required
     TableauS3BucketName: ''
     AcceptEULA: 'yes'
     InstanceType: m6i.4xlarge
