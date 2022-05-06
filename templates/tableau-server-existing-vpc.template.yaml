@@ -319,7 +319,7 @@ Resources:
         AcceptEULA: !Ref 'AcceptEULA'
         InstanceType: !Ref 'InstanceType'
         KeyPairName: !Ref 'KeyPairName'
-        S3BucketName: !Ref 'TableauS3BucketName'
+        S3BucketName: !GetAtt Infrastructure.Outputs.TableauS3Bucket
         TableauServerHostname:
           Fn::Sub:
             - '${prefix}.${Route53DomainName}'

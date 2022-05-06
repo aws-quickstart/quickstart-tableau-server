@@ -57,7 +57,7 @@ Parameters:
     Description: The CIDR address from which you will connect to the instance
     Type: String
   TableauS3BucketName:
-    Description: S3 bucket to Tableau Server files
+    Description: S3 bucket to store Tableau Server files
     Type: String
   TableauServerSubdomain:
     Description: Subdomain for Tableau Server URL
@@ -70,10 +70,6 @@ Mappings:
     props:
       name: Tableau Security Group
       desc: Security Group for Tableau Server
-  IAM:
-    names:
-      role: tableau-server-ec2-iam-role
-      profile: tableau-server-ec2-iam-profile
   ALB:
     names:
       TableauServer: Tableau-Server
@@ -101,7 +97,7 @@ Resources:
               ToPort: "443"
               IpProtocol: "tcp"
         Tags: 
-          - Key: Name
+          - Key: DeploymentName
             Value: !FindInMap ["SecurityGroup", "props", "name"]
         VpcId: !Ref VPCID
   SecurityGroupRule:
@@ -377,7 +373,7 @@ Outputs:
     Value: !Ref SecurityGroup
   IamInstanceProfile:
     Description: IAM Instance Profile
-    Value: !FindInMap ["IAM", "names", "profile"]
+    Value: !Ref TableauServerInstanceProfile
   PublicSubnetId:
     Description: Subnet ID
     Value: !Ref PublicSubnet1ID
@@ -390,4 +386,11 @@ Outputs:
   TableauServerLogGroup:
     Description: Cloudwatch log group name for Tableau Server logs
     Value: !Ref TableauServerCloudwatch
+  TableauS3Bucket:
+    Description: S3 bucket to store Tableau Server files
+    Value:
+      - Fn::If:
+          - CreateS3Bucket
+          - !Ref TableauS3Bucket
+          - !Ref TableauS3BucketName
   
