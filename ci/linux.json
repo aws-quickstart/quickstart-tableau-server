@@ -1,43 +1,71 @@
 [
     {
-        "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[taskcat_genaz_2]"
+        "ParameterKey": "OS",
+        "ParameterValue": "Linux"
+    },
+    {
+        "ParameterKey": "Route53HostedZone",
+        "ParameterValue": "Z03034441712JY0KSJGD1"
+    },
+    {
+        "ParameterKey": "Route53DomainName",
+        "ParameterValue": "awsquickstart.tableau.com"
+    },
+    {
+        "ParameterKey": "S3BucketName",
+        "ParameterValue": "tableau-server-data"
     },
     {
         "ParameterKey": "AcceptEULA",
         "ParameterValue": "yes"
     },
     {
-        "ParameterKey": "AMIOS",
-        "ParameterValue": "Ubuntu-Server-16.04-LTS-HVM"
-    },
-    {
         "ParameterKey": "InstanceType",
-        "ParameterValue": "m5.4xlarge"
+        "ParameterValue": "m6i.4xlarge"
     },
     {
         "ParameterKey": "KeyPairName",
         "ParameterValue": "$[alfred_getkeypair]"
     },
     {
-        "ParameterKey": "Password",
+        "ParameterKey": "SourceCIDR",
+        "ParameterValue": "10.0.0.0/0"
+    },
+    {
+        "ParameterKey": "LatestAmiId",
+        "ParameterValue": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    },
+    {
+        "ParameterKey": "TableauServerAdminPassword",
         "ParameterValue": "$[alfred_genpass_32]"
     },
     {
-        "ParameterKey": "PublicSubnet1CIDR",
-        "ParameterValue": "10.0.128.0/20"
+        "ParameterKey": "TableauServerAdminUser",
+        "ParameterValue": "tabadmin"
     },
     {
-        "ParameterKey": "PublicSubnet2CIDR",
-        "ParameterValue": "10.0.144.0/20"
+        "ParameterKey": "LicenseKey",
+        "ParameterValue": ""
+    },
+    {
+        "ParameterKey": "TsmUsername",
+        "ParameterValue": "tsmadmin"
+    },
+    {
+        "ParameterKey": "TsmPassword",
+        "ParameterValue": "$[alfred_genpass_32]"
     },
     {
         "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "$[taskcat_autobucket]"
+        "ParameterValue": "quickstart-testing-public"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
         "ParameterValue": "quickstart-tableau-server/"
+    },
+    {
+        "ParameterKey": "QSS3BucketRegion",
+        "ParameterValue": "us-west-2"
     },
     {
         "ParameterKey": "RegCity",
@@ -88,27 +116,11 @@
         "ParameterValue": "Test Zip"
     },
     {
-        "ParameterKey": "SourceCIDR",
-        "ParameterValue": "0.0.0.0/0"
+        "ParameterKey": "RegCompanyEmployees",
+        "ParameterValue": "5"
     },
     {
-        "ParameterKey": "TableauServerAdminPassword",
-        "ParameterValue": "$[alfred_genpass_32]"
-    },
-    {
-        "ParameterKey": "TableauServerAdminUser",
-        "ParameterValue": "admin"
-    },
-    {
-        "ParameterKey": "TableauServerLicenseKey",
-        "ParameterValue": ""
-    },
-    {
-        "ParameterKey": "Username",
-        "ParameterValue": "tsmadmin"
-    },
-    {
-        "ParameterKey": "VPCCIDR",
-        "ParameterValue": "10.0.0.0/16"
+        "ParameterKey": "RegOptIn",
+        "ParameterValue": "false"
     }
 ]
