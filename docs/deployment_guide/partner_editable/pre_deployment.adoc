@@ -1,3 +1,5 @@
 //Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
 
 == Predeployment steps
+
+If you don’t already have a domain managed by Amazon Route 53, follow the instructions in Amazon Route 53 [Developer Guide](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html) to create one.

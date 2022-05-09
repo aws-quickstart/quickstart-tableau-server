@@ -2,5 +2,21 @@
 
 For troubleshooting common Quick Start issues, refer to the https://fwd.aws/rA69w?[AWS Quick Start General Information Guide^] and https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting CloudFormation^].
 
-// == Resources
+== Resources
 // Uncomment section and add links to any external resources that are specified by the partner.
+
+=== Tableau Server on Linux
+* Tableau Server on Linux in the AWS Cloud:
+https://onlinehelp.tableau.com/current/server-linux/en-us/ts_aws_welcome.htm
+* Get Started with Tableau Server on Linux:
+https://help.tableau.com/current/server-linux/en-us/get_started_server.htm
+* Troubleshoot Tableau Server on Linux:
+https://onlinehelp.tableau.com/current/server-linux/en-us/troubleshoot_linux.htm
+
+=== Tableau Server on Windows
+* Tableau Server on Windows in the AWS Cloud:
+https://onlinehelp.tableau.com/current/server/en-us/ts_aws_welcome.htm
+* Get Started with Tableau Server on Windows:
+https://help.tableau.com/current/server/en-us/get_started_server.htm
+* Troubleshoot Tableau Server Install and Upgrade:
+https://help.tableau.com/current/server/en-us/trouble_install_upgrade.htm
