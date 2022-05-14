@@ -1,0 +1,5 @@
+// Include details about any licenses and how to sign up. Provide links as appropriate.
+
+This Quick Start requires a license or product key for Tableau Server. To obtain a product key, contact mailto:sales@tableau.com[sales@tableau.com^]. You can also try a 14-day trial version of Tableau Server for free.
+
+There is no cost to use this Quick Start, but you will be billed for any AWS services or resources that this Quick Start deploys. For more information, refer to the https://fwd.aws/rA69w?[AWS Quick Start General Information Guide^].

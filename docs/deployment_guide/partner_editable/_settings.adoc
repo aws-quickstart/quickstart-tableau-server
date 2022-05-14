@@ -1,0 +1,12 @@
+:quickstart-project-name: quickstart-tableau-server
+:quickstart-github-org: aws-quickstart
+:partner-product-name: Tableau Server
+:partner-product-short-name: Tableau Server
+:partner-company-name: Tableau Software
+:doc-month: May
+:doc-year: 2022
+:partner-contributors: Takashi Binns, Kevin Glover, Shuai Ye, and Michael McConnell, {partner-company-name}
+:aws-ia-contributors: Vinod Shukla, AWS Integration & Automation team
+:deployment_time: 50 minutes
+:default_deployment_region: us-west-2
+// :private_repo:
