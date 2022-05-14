@@ -4,9 +4,9 @@
 
 === Test the deployment
 
-. Navigate to the `TableauServerUrl` showing in the CloudFormation *Outputs* section from an IP address within the `SourceCIDR` you specified.
-. Log in to Tableau Server using the administrator credentials you provided as the `TableauServerAdminUser` and `TableauServerAdminPassword` parameters in the AWS CloudFormation template.
-. Navigate to the Server Status tab and verify that all processes have green checkmarks, as shown in <<serverStatus1>>.
+. In the AWS CloudFormation console, navigate to the  *Outputs* tab  of `TableauServerUrl` from an IP address within the `SourceCIDR` you specified.
+. Log in to Tableau Server using the administrator credentials you specified for both the `TableauServerAdminUser` and `TableauServerAdminPassword` parameters in the AWS CloudFormation template.
+. Navigate to the *Server Status* tab, and verify that all processes have green checkmarks, as shown in <<serverStatus1>>.
 
 [#serverStatus1]
 . {partner-product-short-name} Status
