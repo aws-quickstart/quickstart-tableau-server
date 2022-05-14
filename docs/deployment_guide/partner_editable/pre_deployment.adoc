@@ -2,4 +2,4 @@
 
 == Predeployment steps
 
-If you don’t already have a domain managed by Amazon Route 53, refer to What is Amazon Route 53?[https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html^] to create one.
+If you don’t already have a domain managed by Amazon Route 53, refer to https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html[What is Amazon Route 53?^] to create one.
