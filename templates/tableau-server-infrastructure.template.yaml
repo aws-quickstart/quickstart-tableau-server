@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
   AWS Quick Start: CloudFormation stack (nested) for creating the infrastructure for Tableau Server to run in. (qs-1t14k9mo6)
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W9002
+        - W9003
+        - W9006
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -66,6 +72,30 @@ Parameters:
   TsmSubdomain:
     Description: Subdomain for TSM UI URL
     Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-tableau-server/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
+
 Mappings:
   SecurityGroup:
     props:
@@ -79,16 +109,16 @@ Conditions:
   CreateS3Bucket: !Equals
     - !Ref 'TableauS3BucketName'
     - ''
-
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
         GroupDescription: !FindInMap ["SecurityGroup", "props", "desc"]
-        SecurityGroupEgress: 
+        SecurityGroupEgress:
             - CidrIp: "0.0.0.0/0"
               IpProtocol: "-1"
-        SecurityGroupIngress: 
+        SecurityGroupIngress:
             - CidrIp: !Ref SourceCIDR
               FromPort: "80"
               ToPort: "80"
@@ -97,7 +127,7 @@ Resources:
               FromPort: "443"
               ToPort: "443"
               IpProtocol: "tcp"
-        Tags: 
+        Tags:
           - Key: DeploymentName
             Value: !FindInMap ["SecurityGroup", "props", "name"]
         VpcId: !Ref VPCID
@@ -154,27 +184,41 @@ Resources:
               Effect: Allow
         PolicyName: back-to-s3
       - PolicyDocument:
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: Allow
+              Resource:
+                - !Sub
+                  - arn:${AWS::Partition}:s3:::${S3Bucket}
+                  - S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+                - !Sub
+                  - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
+                  - S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+          Version: 2012-10-17
+        PolicyName: aws-quick-start-s3-policy
+      - PolicyDocument:
           Version: '2012-10-17'
           Statement:
-            - Action: 
+            - Action:
                 - ec2:CreateTags
                 - ec2:DescribeInstanceAttribute
               Effect: Allow
-              Resource: 
+              Resource:
                 - !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
                 - !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*'
         PolicyName: ec2-tagging
       - PolicyDocument:
-          Version: '2012-10-17'  
+          Version: '2012-10-17'
           Statement:
             - Action: elasticloadbalancing:DescribeTargetHealth
               Effect: Allow
               Resource: '*'
         PolicyName: elb-query-targets
       - PolicyDocument:
-          Version: '2012-10-17'  
+          Version: '2012-10-17'
           Statement:
-            - Action: 
+            - Action:
               - elasticloadbalancing:RegisterTargets
               - elasticloadbalancing:DeregisterTargets
               Effect: Allow
@@ -203,7 +247,7 @@ Resources:
     Type: AWS::CertificateManager::Certificate
     Properties:
       DomainName: !Ref Route53DomainName
-      SubjectAlternativeNames: 
+      SubjectAlternativeNames:
         - !Sub '*.${Route53DomainName}'
       ValidationMethod: DNS
       DomainValidationOptions:
@@ -217,7 +261,7 @@ Resources:
         HostedZoneId: !GetAtt TableauServerAlb.CanonicalHostedZoneID
         DNSName: !GetAtt TableauServerAlb.DNSName
       HostedZoneId: !Ref Route53HostedZone
-      Name: 
+      Name:
         Fn::Sub:
           - "${p1}.${Route53DomainName}"
           - p1: !Ref TableauServerSubdomain
@@ -232,9 +276,9 @@ Resources:
               Fn::Sub:
               - "${p1}-LB"
               - p1: !FindInMap ["ALB", "names", "TableauServer"]
-        SecurityGroups: 
+        SecurityGroups:
             - !Ref SecurityGroup
-        Subnets: 
+        Subnets:
             - !Ref PublicSubnet1ID
             - !Ref PublicSubnet2ID
   TableauServerTG:
@@ -263,9 +307,9 @@ Resources:
         Port: 443
         Protocol: "HTTPS"
         SslPolicy: "ELBSecurityPolicy-2016-08"
-        Certificates: 
+        Certificates:
           - CertificateArn: !Ref SslCertificate
-        DefaultActions: 
+        DefaultActions:
           - Order: 1
             TargetGroupArn: !Ref TableauServerTG
             Type: "forward"
@@ -292,7 +336,7 @@ Resources:
         HostedZoneId: !GetAtt TsmAlb.CanonicalHostedZoneID
         DNSName: !GetAtt TsmAlb.DNSName
       HostedZoneId: !Ref Route53HostedZone
-      Name: 
+      Name:
         Fn::Sub:
           - "${p1}.${Route53DomainName}"
           - p1: !Ref TsmSubdomain
@@ -307,9 +351,9 @@ Resources:
               Fn::Sub:
               - "${p1}-LB"
               - p1: !FindInMap ["ALB", "names", "Tsm"]
-        SecurityGroups: 
+        SecurityGroups:
             - !Ref SecurityGroup
-        Subnets: 
+        Subnets:
             - !Ref PublicSubnet1ID
             - !Ref PublicSubnet2ID
   TsmTG:
@@ -326,7 +370,7 @@ Resources:
               Fn::Sub:
               - "${p1}-TG"
               - p1: !FindInMap ["ALB", "names", "Tsm"]
-        TargetGroupAttributes: 
+        TargetGroupAttributes:
             - Key: "stickiness.enabled"
               Value: "true"
             - Key: "stickiness.type"
@@ -338,9 +382,9 @@ Resources:
         Port: 443
         Protocol: "HTTPS"
         SslPolicy: "ELBSecurityPolicy-2016-08"
-        Certificates: 
+        Certificates:
           - CertificateArn: !Ref SslCertificate
-        DefaultActions: 
+        DefaultActions:
           - Order: 1
             TargetGroupArn: !Ref TsmTG
             Type: "forward"
@@ -367,13 +411,16 @@ Resources:
 Outputs:
   TableauServerUrl:
     Description: URL of your Tableau Server
-    Value: 
+    Value:
       Fn::Sub:
         - "${p1}.${Route53DomainName}"
         - p1: !Ref TableauServerSubdomain
   SecurityGroup:
     Description: Security Group ARN
     Value: !Ref SecurityGroup
+  TableauIAMRole:
+    Description: IAM role
+    Value: !Ref TableauIAMRole
   IamInstanceProfile:
     Description: IAM Instance Profile
     Value: !Ref TableauServerInstanceProfile
@@ -396,4 +443,3 @@ Outputs:
         - CreateS3Bucket
         - !Ref TableauS3Bucket
         - !Ref TableauS3BucketName
-  

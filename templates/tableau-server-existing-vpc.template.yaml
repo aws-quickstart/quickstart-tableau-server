@@ -306,6 +306,9 @@ Resources:
         SourceCIDR: !Ref 'SourceCIDR'
         TableauServerSubdomain: !Ref TableauServerSubDomainName
         TsmSubdomain: !Sub '${TableauServerSubDomainName}-tsm'
+        QSS3BucketName: !Ref 'QSS3BucketName'
+        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        QSS3BucketRegion: !Ref 'QSS3BucketRegion'
 
   TableauServer:
     Type: AWS::CloudFormation::Stack
@@ -327,6 +330,7 @@ Resources:
             - prefix: !Ref TableauServerSubDomainName
         SecurityGroup: !GetAtt Infrastructure.Outputs.SecurityGroup
         IamInstanceProfile: !GetAtt Infrastructure.Outputs.IamInstanceProfile
+        TableauIAMRole: !GetAtt Infrastructure.Outputs.TableauIAMRole
         PublicSubnetId: !Ref PrivateSubnet1ID
         TableauServerTargetGroupArn: !GetAtt Infrastructure.Outputs.TableauServerTargetGroupArn
         TsmTargetGroupArn: !GetAtt Infrastructure.Outputs.TsmTargetGroupArn
@@ -350,12 +354,14 @@ Resources:
         RegCompanyEmployees: !Ref 'RegCompanyEmployees'
         RegOptIn: !Ref 'RegOptIn'
         TableauServerLogGroup: !GetAtt Infrastructure.Outputs.TableauServerLogGroup
-
+        QSS3BucketName: !Ref 'QSS3BucketName'
+        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        QSS3BucketRegion: !Ref 'QSS3BucketRegion'
 
 Outputs:
   TableauServerUrl:
     Description: URL of your Tableau Server
-    Value: 
+    Value:
       Fn::Sub:
         - "${p1}.${Route53DomainName}"
         - p1: !Ref TableauServerSubDomainName
@@ -374,4 +380,3 @@ Outputs:
   TsmTargetGroupArn:
     Description: TSM UI ALB TG
     Value: !GetAtt Infrastructure.Outputs.TsmTargetGroupArn
-  

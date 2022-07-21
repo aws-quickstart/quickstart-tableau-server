@@ -3,7 +3,11 @@ Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 
 Metadata:
   cfn-lint:
     config:
-      ignore_checks: [ E9101 ]
+      ignore_checks:
+        - E9101
+        - W9002
+        - W9003
+        - W9006
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -51,7 +55,7 @@ Metadata:
         default: Target Public Subnet
       InstanceType:
         default: EC2 instance type for Tableau Server
-      LatestAmiId: 
+      LatestAmiId:
         default: Use the latest version of Amazon Linux 2 (don't change this)
       KeyPairName:
         default: Key Pair Name
@@ -107,7 +111,7 @@ Metadata:
         default: Zip/Postal Code
       RegCompanyEmployees:
         default: 5
-      RegOptIn: 
+      RegOptIn:
         default: true
 Parameters:
   AcceptEULA:
@@ -139,6 +143,9 @@ Parameters:
   SecurityGroup:
     Description: Security Group for Tableau Server
     Type: AWS::EC2::SecurityGroup::Id
+  TableauIAMRole:
+    Description: Tableau server IAM role name
+    Type: String
   IamInstanceProfile:
     Description: Tableau server IAM Instance Profile name
     Type: String
@@ -226,8 +233,31 @@ Parameters:
   RegCompanyEmployees:
     Description: Company Size (# of employees)
     Type: String
-  RegOptIn: 
+  RegOptIn:
     Description: Opt into marketing communications (true/false)
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-tableau-server/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
     Type: String
 Mappings:
   DefaultConfiguration:
@@ -239,16 +269,12 @@ Mappings:
       AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/linux/automated-installer/automated-installer
       PostgreSqlJdbc: https://downloads.tableau.com/drivers/linux/postgresql/postgresql-42.2.14.jar
       InstallationTimeout: PT1H45M
-    Scripts:
-      BackupRestore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-restore-s3.py
-      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.py
-      TagInstance: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/tag-instance.py
-      Requirements: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/requirements.txt
     MachineConfiguration:
       SystemVolumeSize: 100
       AmazonLinux: AmazonLinux2
       Name: Tableau Server Quickstart
 Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   UsingElasticIp: !Equals
     - ''
     - !Ref TableauServerTargetGroupArn
@@ -256,6 +282,13 @@ Resources:
   TableauServerEC2:
     Type: AWS::EC2::Instance
     Metadata:
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref TableauIAMRole
+          buckets:
+            - !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+            - !Ref S3BucketName
       AWS::CloudFormation::Init:
         configSets:
           setup:
@@ -273,7 +306,7 @@ Resources:
             yum:
               awscli: []
           commands:
-            a: 
+            a:
               command: hostnamectl set-hostname $(hostnamectl --static) && echo "Setting static hostname"
             b:
               command: source /tmp/secrets.properties && echo "sourcing the secrets to env variables"
@@ -334,21 +367,24 @@ Resources:
                 - AutomatedInstaller
             /tmp/update-load-balancer.py:
               mode: 550
-              source: !FindInMap
-                - DefaultConfiguration
-                - Scripts
-                - UpdateLoadBalancer
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/update-load-balancer.py
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
             /tmp/backup-restore-s3.py:
               mode: 550
-              source: !FindInMap
-                - DefaultConfiguration
-                - Scripts
-                - BackupRestore 
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/backup-restore-s3.py
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
             /tmp/requirements.txt:
-              source: !FindInMap
-                - DefaultConfiguration
-                - Scripts
-                - Requirements  
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/requirements.txt
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
             /opt/tableau/tableau_driver/jdbc/postgresql-42.2.22.jar:
               mode: '550'
               source: !FindInMap
@@ -359,12 +395,13 @@ Resources:
           files:
             /tmp/tag-instance.py:
               mode: 550
-              source: !FindInMap
-                - DefaultConfiguration
-                - Scripts
-                - TagInstance
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/tag-instance.py
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
           commands:
-            a: 
+            a:
               cwd: /tmp
               command: !Join
                 - ' '
@@ -376,22 +413,22 @@ Resources:
                   - !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
                   - --region
                   - !Ref AWS::Region
-            b: 
+            b:
               cwd: /tmp
               command: !Sub python3 tag-instance.py --tagname Description --tagvalue TableauQuickstartResource --region ${AWS::Region}
-            c: 
+            c:
               cwd: /tmp
               command: !Sub python3 tag-instance.py --tagname Creator --tagvalue tbinns@tableau.com --region ${AWS::Region}
-            d: 
+            d:
               cwd: /tmp
               command: !Sub python3 tag-instance.py --tagname Group --tagvalue tbinns@tableau.com --region ${AWS::Region}
-            e: 
+            e:
               cwd: /tmp
               command: !Sub python3 tag-instance.py --tagname DeptCode --tagvalue 429 --region ${AWS::Region}
-            f: 
+            f:
               cwd: /tmp
               command: !Sub python3 tag-instance.py --tagname Environment --tagvalue Development --region ${AWS::Region}
-            g: 
+            g:
               cwd: /tmp
               command: !Sub python3 tag-instance.py --tagname Application --tagvalue AwsQuickstart --region ${AWS::Region}
         step3:  # Setup CloudWatch logging
@@ -453,36 +490,36 @@ Resources:
               command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
         step4:  # Install Tableau Server and restore from backups living in S3 (if available)
           commands:
-            a: 
+            a:
               command: !Sub /tmp/automated-installer -a ${TsmUsername} -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseKey} -v --accepteula --force /tmp/tableau-server.rpm  && echo "Installing Tableau Server"
-            b: 
+            b:
               cwd: /tmp
-              command: !Join [' ', ['python3', 'backup-restore-s3.py', '--command', 'restore', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ] 
+              command: !Join [' ', ['python3', 'backup-restore-s3.py', '--command', 'restore', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ]
         step5:  # Make Tableau Server and TSM Web accessible via Load Balancers
-          commands: 
-            a: 
+          commands:
+            a:
               cwd: /tmp
               command: !Join [' ', ['python3', 'update-load-balancer.py', '--target_group_arn', !Ref TableauServerTargetGroupArn, '--region', !Ref AWS::Region, '--stop_instances', "true" ] ]
-            b: 
+            b:
               cwd: /tmp
               command: !Join [' ', ['python3', 'update-load-balancer.py', '--target_group_arn', !Ref TsmTargetGroupArn, '--region', !Ref AWS::Region, '--stop_instances', "false" ] ]
         step6:  # Clean up the environment
           commands:
-            a: 
+            a:
               command: rm -f /tmp/secrets.properties && echo "Cleanup secrets.properties"
-            b:  
+            b:
               command: rm -f /tmp/config.json && echo "Cleanup config.json"
-            c:  
+            c:
               command: rm -f /tmp/tableau-server.rpm && echo "Cleanup tableau-server.rpm"
-            d:  
+            d:
               command: rm -f /tmp/automated-installer && echo "Cleanup automated-installer"
-            e:  
+            e:
               command: rm -f /tmp/registration.json && echo "Cleanup registration.json"
         step7:  # Schedule automated Tableau server backups to S3
           files:
             /tmp/backup.sh:
               mode: 550
-              content: !Join [' ', ['python3', '/tmp/backup-restore-s3.py', '--command', 'backup', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ] 
+              content: !Join [' ', ['python3', '/tmp/backup-restore-s3.py', '--command', 'backup', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ]
             /etc/cron.d/tableau-server-backup:
               mode: 644
               content: |
@@ -514,14 +551,14 @@ Resources:
       Tags:
         - Key: Name
           Value: !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
-      UserData: 
+      UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
 
           # Install/upgrade OS and dependencies
           yum -y upgrade
           yum install -y aws-cfn-bootstrap
-          
+
           # Run ConfigSet to install Tableau Server
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource TableauServerEC2 --configsets setup --region ${AWS::Region}
 
