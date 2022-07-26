@@ -269,7 +269,7 @@ Mappings:
     InstallationConfig:
       TableauServerInstaller: https://www.tableau.com/downloads/server/pc64
       AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/windows/tsm/SilentInstaller/SilentInstaller.py
-      InstallationTimeout: PT1H45M
+      InstallationTimeout: PT3H30M
     MachineConfiguration:
       SystemVolumeSize: 100
       Name: Tableau Server Quickstart
