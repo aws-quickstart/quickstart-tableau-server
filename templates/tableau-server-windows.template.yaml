@@ -3,7 +3,11 @@ Description: 'AWS Quickstart: CloudFormation stack (nested) for creating an EC2 
 Metadata:
   cfn-lint:
     config:
-      ignore_checks: [ E9101 ]
+      ignore_checks:
+        - E9101
+        - W9002
+        - W9003
+        - W9006
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -53,7 +57,7 @@ Metadata:
         default: Target Public Subnet
       InstanceType:
         default: EC2 instance type for Tableau Server
-      LatestAmiId: 
+      LatestAmiId:
         default: Use the latest version of Windows Server 2019 (don't change this)
       KeyPairName:
         default: Key Pair Name
@@ -109,7 +113,7 @@ Metadata:
         default: Zip/Postal Code
       RegCompanyEmployees:
         default: 5
-      RegOptIn: 
+      RegOptIn:
         default: true
 Parameters:
   AcceptEULA:
@@ -141,6 +145,9 @@ Parameters:
   SecurityGroup:
     Description: Security Group for Tableau Server
     Type: AWS::EC2::SecurityGroup::Id
+  TableauIAMRole:
+    Description: Tableau server IAM role name
+    Type: String
   IamInstanceProfile:
     Description: Tableau server IAM Instance Profile name
     Type: String
@@ -192,7 +199,7 @@ Parameters:
   RegCompanyEmployees:
     Description: Company Size (# of employees)
     Type: String
-  RegOptIn: 
+  RegOptIn:
     Description: Opt into marketing communications (true/false)
     Type: String
   RegCompany:
@@ -231,6 +238,29 @@ Parameters:
   RegZip:
     Description: ZIP/Postal Code
     Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-tableau-server/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
 Mappings:
   DefaultConfiguration:
     Aws:
@@ -239,17 +269,12 @@ Mappings:
     InstallationConfig:
       TableauServerInstaller: https://www.tableau.com/downloads/server/pc64
       AutomatedInstaller: https://raw.githubusercontent.com/tableau/server-install-script-samples/master/windows/tsm/SilentInstaller/SilentInstaller.py
-      InstallationTimeout: PT1H45M
-    Scripts:
-      BackupRestore: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/backup-restore-s3.py
-      UpdateLoadBalancer: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/update-load-balancer.py
-      TagInstance: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/tag-instance.py
-      Requirements: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/requirements.txt
-      ChromeInstaller: https://raw.githubusercontent.com/takashibinns/quickstart-tableau-server/main/scripts/install-chrome.ps1
+      InstallationTimeout: PT3H30M
     MachineConfiguration:
       SystemVolumeSize: 100
       Name: Tableau Server Quickstart
 Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   UsingElasticIp: !Equals
     - ''
     - !Ref TableauServerTargetGroupArn
@@ -260,6 +285,13 @@ Resources:
   TableauServerEC2:
     Type: AWS::EC2::Instance
     Metadata:
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref TableauIAMRole
+          buckets:
+            - !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+            - !Ref S3BucketName
       AWS::CloudFormation::Init:
         configSets:
           setup:
@@ -272,32 +304,55 @@ Resources:
             - step7
             - step8
         step1:  # Install Python, pip, python libs, awscli
+          files:
+            c:\tabsetup\backup-restore-s3.py:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/backup-restore-s3.py
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
+            c:\tabsetup\install-chrome.ps1:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/install-chrome.ps1
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
+            c:\tabsetup\requirements.txt:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/requirements.txt
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
+            c:\tabsetup\tag-instance.py:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/tag-instance.py
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
+            c:\tabsetup\update-load-balancer.py:
+              source: !Sub
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/update-load-balancer.py
+                - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+                  S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+              authentication: S3AccessCreds
+            c:\tabsetup\python-3.exe:
+              source: https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe
+            c:\tabsetup\get-pip.py:
+              source: https://bootstrap.pypa.io/get-pip.py
           commands:
             a:
               cwd: c:\Windows\System32
               command: netsh advfirewall set allprofiles state off
               waitAfterCompletion: '0'
-            b: 
+            b:
               command: c:\tabsetup\python-3.exe /quiet InstallAllUsers=1 PrependPath=1
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            c: 
+            c:
               command: !Join
                 - ' '
                 - - '"C:\Program Files\Python310\python.exe"'
                   - get-pip.py
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
-            d:
-              command: !Join
-                - ' '
-                - - curl
-                  - "-o"
-                  - requirements.txt
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - Requirements
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
             e:
@@ -309,27 +364,10 @@ Resources:
                   - -r
                   - requirements.txt
               waitAfterCompletion: '0'
-            f: 
-              command: msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /quiet    
-          files:
-            c:\tabsetup\python-3.exe:
-              source: https://www.python.org/ftp/python/3.10.2/python-3.10.2-amd64.exe
-            c:\tabsetup\get-pip.py:
-              source: https://bootstrap.pypa.io/get-pip.py
+            f:
+              command: msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /quiet
         step2:  # Some companies have strict tagging policies in AWS, modify the tagname and tagvalue attributes to apply tags to the EC2 instance + its root volume
-            a:
-              command: !Join
-                - ' '
-                - - curl
-                  - "-o"
-                  - tag-instance.py
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - TagInstance
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
-            b: 
+            b:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -342,7 +380,7 @@ Resources:
                   - !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
                   - --region
                   - !Ref AWS::Region
-            c: 
+            c:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -353,7 +391,7 @@ Resources:
                   - --tagvalue tbinns@tableau.com
                   - --region
                   - !Ref AWS::Region
-            d: 
+            d:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -364,7 +402,7 @@ Resources:
                   - --tagvalue AwsQuickstarts
                   - --region
                   - !Ref AWS::Region
-            e: 
+            e:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -375,7 +413,7 @@ Resources:
                   - --tagvalue TableauQuickstartResource
                   - --region
                   - !Ref AWS::Region
-            f: 
+            f:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -386,7 +424,7 @@ Resources:
                   - --tagvalue tbinns@tableau.com
                   - --region
                   - !Ref AWS::Region
-            g: 
+            g:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -397,7 +435,7 @@ Resources:
                   - --tagvalue 429
                   - --region
                   - !Ref AWS::Region
-            h: 
+            h:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -410,15 +448,15 @@ Resources:
                   - !Ref AWS::Region
         step3:  # Install and setup CloudWatch logging
           commands:
-            a: 
+            a:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: install-cloudwatch-agent.msi /quiet
-            b: 
+            b:
               cwd: C:\Program Files\Amazon\AmazonCloudWatchAgent
               waitAfterCompletion: '0'
               command: powershell.exe -File amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -s -c file:C:\tabsetup\amazon-cloudwatch-agent.json
-          files: 
+          files:
             c:\tabsetup\install-cloudwatch-agent.msi:
               source: https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi
             c:\tabsetup\amazon-cloudwatch-agent.json:
@@ -537,30 +575,6 @@ Resources:
                   - /y
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
-            c:
-              command: !Join
-                - ' '
-                - - curl
-                  - "-o"
-                  - backup-restore-s3.py
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - BackupRestore
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
-            d:
-              command: !Join
-                - ' '
-                - - curl
-                  - "-o"
-                  - update-load-balancer.py
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - UpdateLoadBalancer
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
             e:
               command: !Join
                 - ' '
@@ -603,7 +617,7 @@ Resources:
                   - c:\tabsetup\tableau-server-webapp-installer.exe
                   - ' > c:\tabsetup\tsm_installer-output.txt 2>&1'
               waitAfterCompletion: '0'
-            b: 
+            b:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -618,8 +632,8 @@ Resources:
                   - --s3prefix
                   - !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"]
         step6:  # Update load balancers to make Tableau Server and TSM Web accessible
-          commands: 
-            a: 
+          commands:
+            a:
               cwd: c:\tabsetup
               waitAfterCompletion: '0'
               command: !Join
@@ -631,8 +645,8 @@ Resources:
                   - --region
                   - !Ref AWS::Region
                   - --stop_instances True
-              
-            b: 
+
+            b:
               command: !Join
                 - ' '
                 - - '"C:\Program Files\Python310\python.exe"'
@@ -660,7 +674,7 @@ Resources:
               command: SCHTASKS /CREATE /SC WEEKLY /D SUN /TN "Tableau\Backup to S3" /TR "C:\tabsetup\backup.bat" /ST 23:00 /RU system
           files:
             c:\tabsetup\backup.bat:
-              content: 
+              content:
                 !Join
                 - ' '
                 - - '"C:\Program Files\Python310\python.exe"'
@@ -674,22 +688,10 @@ Resources:
                   - !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"]
         step8:  # Download and install chrome
           commands:
-            a:
-              command: !Join
-                - ' '
-                - - curl
-                  - "-o"
-                  - install-chrome.ps1
-                  - !FindInMap
-                    - DefaultConfiguration
-                    - Scripts
-                    - ChromeInstaller
-              cwd: c:\tabsetup
-              waitAfterCompletion: '0'
             b:
               cwd: c:\tabsetup
               command: powershell.exe -File install-chrome.ps1
-        
+
     CreationPolicy:
       ResourceSignal:
         Timeout: !FindInMap ["DefaultConfiguration", "InstallationConfig", "InstallationTimeout"]
@@ -713,7 +715,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !FindInMap ["DefaultConfiguration", "Aws", "InstanceName"]
-      UserData: 
+      UserData:
         'Fn::Base64': !Sub |
           <script>
           cfn-init.exe -v -s ${AWS::StackId} -r TableauServerEC2 --configsets setup --region ${AWS::Region}
