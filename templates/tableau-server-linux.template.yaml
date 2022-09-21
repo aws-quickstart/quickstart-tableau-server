@@ -491,7 +491,7 @@ Resources:
         step4:  # Install Tableau Server and restore from backups living in S3 (if available)
           commands:
             a:
-              command: !Sub /tmp/automated-installer -a ${TsmUsername} -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties ${LicenseKey} -v --accepteula --force /tmp/tableau-server.rpm  && echo "Installing Tableau Server"
+              command: !Sub /tmp/automated-installer -a ${TsmUsername} -f /tmp/config.json -r /tmp/registration.json -s /tmp/secrets.properties -k ${LicenseKey} -v --accepteula --force /tmp/tableau-server.rpm  && echo "Installing Tableau Server"
             b:
               cwd: /tmp
               command: !Join [' ', ['python3', 'backup-restore-s3.py', '--command', 'restore', '--region', !Ref AWS::Region, '--s3bucket', !Ref S3BucketName, '--s3prefix', !FindInMap ["DefaultConfiguration", "Aws", "S3BackupPrefix"] ] ]
