@@ -149,6 +149,16 @@ Resources:
   TableauS3Bucket:
     Condition: CreateS3Bucket
     Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
   TableauIAMRole:
     Type: AWS::IAM::Role
     Properties:
