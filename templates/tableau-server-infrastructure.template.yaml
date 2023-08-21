@@ -453,3 +453,5 @@ Outputs:
         - CreateS3Bucket
         - !Ref TableauS3Bucket
         - !Ref TableauS3BucketName
+  QSS3BucketRegion:
+    Value: !Ref QSS3BucketRegion
