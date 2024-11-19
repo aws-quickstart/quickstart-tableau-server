@@ -186,8 +186,8 @@ def restore(tsm, bucket_name, s3_prefix):
         #   Sort both lists based on last updated date
         def sort_key(obj):
             return obj.get("LastModified")
-        tsbaks.sort(key=sort_key)
-        settings.sort(key=sort_key)
+        tsbaks.sort(key=sort_key, reverse=True)
+        settings.sort(key=sort_key, reverse=True)
 
         #   Get an S3 resource reference
         s3_resource = boto3.resource('s3')
